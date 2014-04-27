@@ -1,0 +1,161 @@
+@import 'nib';
+@import './include/spaces.styl';
+@import './include/flex.styl';
+
+*
+  user-select: none
+  cursor: default
+  font-family: Helvetica
+
+html, body, .app-container
+  height: 100vh
+
+body
+  background-image: -webkit-radial-gradient(49% -6%, #d40002 5%, #740002 100%)
+  margin: 0
+
+hr.filmstrip
+  background: #2d2d2d url("../images/filmstrip-background.svg") repeat-x left 5px top 4px
+  height: 15px
+  margin: 0
+  border: 0
+
+.auto-scroll
+  overflow: auto
+
+.shadow-down
+  box-shadow: 0px 1px 4px 0px rgba(#000, .5)
+
+.shadow-up
+  box-shadow: 0px -1px 4px 0px rgba(#000, .5)
+
+.app-menu
+  background: #2d2d2d
+
+  .button
+    background: transparent
+    margin: 10px
+    opacity: 0.5
+    transition: all 200ms
+
+    &.selected
+      opacity: 1
+
+    img
+      cursor: pointer
+
+.center-banner
+  padding: 20px
+  text-transform: uppercase
+  font-weight: bold
+  font-size: 70px
+  color: white
+  text-shadow: 1px 3px 15px black
+  margin: auto
+
+.button
+  cursor: pointer
+
+.white-box
+  background: white
+  margin: 20px 40px
+  box-shadow: 0px 2px 4px 0px rgba(#000, 0.5)
+  padding: 20px
+
+.search
+  @extend .white-box
+
+  transition: all 200ms
+  height: 75px
+  position: relative
+  z-index: 2
+
+  .status
+    font-family: Helvetica
+    font-weight: bold
+    font-size: 24px
+    color: black
+    line-height: 29px
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  img.status
+    margin-right: 20px
+    width: 46px
+
+  .detail
+    font-family: Helvetica
+    font-size: 14px
+    color: black
+    line-height: 17px
+    margin-top: 13px
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+  .info
+    margin-top: 8px
+
+  .actions
+    margin-left: 20px
+    display: flex
+    flex-direction: column
+
+    *
+      cursor: pointer
+      flex: 1
+
+    #close
+      display: block
+      text-align: center
+
+    #view, #alternatives
+      display: none
+      align-items: flex-end
+
+    #close img
+      height: 15px
+
+    #view
+      margin-bottom: 10px
+
+      img
+        height: 16px
+
+    #alternatives img
+      height: 21px
+
+  &.active.unchanged
+    opacity: 1
+
+  &.unchanged
+    opacity: 0.7
+    height: 30px
+
+    .info
+      margin-top: 0
+
+    #view, #close, #alternatives
+      img
+        height: auto
+
+    .detail
+      display: none
+
+    .actions
+      flex-direction: row-reverse
+
+      #close, #view, #alternatives
+        display: flex
+        align-items: center
+
+      #view
+        margin: 0 20px
+
+      #close
+        flex: none
+
+  &.downloaded, &.notfound, &.uploaded, &.error
+    #view, #alternatives
+      display: flex

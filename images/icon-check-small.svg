@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="34px" height="30px" viewBox="0 0 34 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <title>icon-check-small</title>
+    <description>Created with Sketch (http://www.bohemiancoding.com/sketch)</description>
+    <defs></defs>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="SM2-Search-1" sketch:type="MSArtboardGroup" transform="translate(-72.000000, -175.000000)" fill="#0A0B09">
+            <g id="rows" sketch:type="MSLayerGroup" transform="translate(40.000000, 40.000000)">
+                <g id="search-item-copy-2" transform="translate(0.000000, 120.000000)" sketch:type="MSShapeGroup">
+                    <path d="M43.313417,44.0733929 L32.5161582,31.6087004 C31.9145967,30.9229052 31.9145967,29.8066641 32.5161582,29.1172211 L34.6972045,26.6220939 C35.301851,25.9399465 36.2766892,25.9399465 36.8782508,26.6220939 L44.4054826,35.3513912 L61.1844226,15.9266071 C61.7890691,15.237164 62.7639073,15.237164 63.3654689,15.9266071 L65.5465151,18.4180864 C66.1511616,19.1075295 66.1511616,20.2237706 65.5465151,20.9095658 L45.4944632,44.0733929 C44.8929017,44.762836 43.9180634,44.762836 43.313417,44.0733929" id="icon-check"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

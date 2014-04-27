@@ -1,0 +1,36 @@
+{
+  "name": "subtitle-master-gui",
+  "version": "0.0.0",
+  "description": "Subtitle Master GUI",
+  "main": "index.html",
+  "window": {
+    "title": "Subtitle Master",
+    "toolbar": false,
+    "frame": true,
+    "position": "mouse",
+    "min_width": 622,
+    "min_height": 200
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Wilker Lucio <wilkerlucio@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "coffee-script": "~1.7.1",
+    "coffee-loader": "~0.7.1",
+    "jsx-loader": "~0.10.0",
+    "webpack": "~1.1.8",
+    "jquery": "~2.1.0",
+    "envify": "~1.2.1",
+    "react": "~0.10.0",
+    "react-async": "~0.9.1",
+    "react-router-component": "~0.18.2",
+    "nib": "~1.0.2"
+  },
+  "dependencies": {
+    "inject-it": "~1.2.0",
+    "lodash": "~2.4.1",
+    "jquery": "~2.1.0"
+  }
+}

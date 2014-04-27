@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="50px" height="50px" viewBox="0 0 50 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <title>icon-search</title>
+    <description>Created with Sketch (http://www.bohemiancoding.com/sketch)</description>
+    <defs></defs>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="SM2-Search" sketch:type="MSArtboardGroup" transform="translate(-67.000000, -65.000000)" fill="#000000">
+            <g id="rows" sketch:type="MSLayerGroup" transform="translate(40.000000, 40.000000)">
+                <g id="search-item" sketch:type="MSShapeGroup">
+                    <path d="M76.0836081,69.665625 L66.35876,60.003125 C66.3525101,59.996875 66.3462602,59.996875 66.3400103,59.990625 C69.0962172,56.328125 70.7493164,51.796875 70.7493164,46.875 C70.7493164,34.815625 60.9338448,25 48.8746582,25 C36.8154716,25 27,34.815625 27,46.875 C27,58.934375 36.8154716,68.75 48.8746582,68.75 C53.7964563,68.75 58.3276355,67.096875 61.9869533,64.34375 C61.9932032,64.35 61.9932032,64.35625 61.9994531,64.3625 L71.6649271,74.084375 C72.2742926,74.69375 73.0742801,75 73.8742676,75 C74.6742551,75 75.4742426,74.69375 76.0836081,74.084375 C77.305464,72.8625 77.305464,70.8875 76.0836081,69.665625 L76.0836081,69.665625 Z M62.5671469,45.9221526 C59.71625,46.6235959 59.0035258,42.4398759 55.6053586,39.2007663 C51.8285566,35.5969062 47.4917571,34.8362298 48.0485729,32.3796193 C48.4590257,30.5839242 54.1767284,29.7858376 59.6812502,34.8144071 C65.185772,39.8492118 64.5557747,45.4358185 62.5671469,45.9221526 L62.5671469,45.9221526 Z" id="------icon-search"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

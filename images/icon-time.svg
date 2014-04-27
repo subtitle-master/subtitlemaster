@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="45px" height="45px" viewBox="0 0 45 45" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <title>icon-time</title>
+    <description>Created with Sketch (http://www.bohemiancoding.com/sketch)</description>
+    <defs></defs>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="SM2-Search-1" sketch:type="MSArtboardGroup" transform="translate(-68.000000, -68.000000)" fill="#0A0B09">
+            <g id="rows" sketch:type="MSLayerGroup" transform="translate(40.000000, 40.000000)">
+                <g id="search-item" sketch:type="MSShapeGroup">
+                    <path d="M61.1789411,60.1861111 C60.6329684,60.7277778 59.9162042,61 59.19944,61 C58.4826759,61 57.7659117,60.7277778 57.219939,60.1861111 L48,51.0388889 L48,38.7777778 C48,37.2416667 49.2543373,36 50.79986,36 C52.3453827,36 53.59972,37.2416667 53.59972,38.7777778 L53.59972,48.7388889 L61.1789411,56.2583333 C62.2736863,57.3444444 62.2736863,59.1 61.1789411,60.1861111 L61.1789411,60.1861111 Z M50.5,28 C38.06875,28 28,38.06875 28,50.5 C28,62.93125 38.06875,73 50.5,73 C62.93125,73 73,62.93125 73,50.5 C73,38.06875 62.93125,28 50.5,28 L50.5,28 Z" id="icon-time"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
