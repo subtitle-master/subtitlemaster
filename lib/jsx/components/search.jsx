@@ -77,16 +77,12 @@ module.exports = function (React) {
   return React.createClass({
     displayName: 'Search',
 
-    propTypes: {
-      status: React.PropTypes.oneOf(possibleStatus).isRequired
-    },
-
     iconPath: function (icon) {
       return "images/icon-" + icon + ".svg";
     },
 
     render: function () {
-      var status = this.props.status;
+      var status = this.props.data.status;
 
       var info = statusMap[status];
       var className = "search flex-row " + status;

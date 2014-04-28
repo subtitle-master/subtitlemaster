@@ -1,17 +1,16 @@
 /** @jsx React.DOM */
 
-module.exports = function (MultiSelect, React) {
-  var options = [
-    {title: 'hello', value: 'hello'},
-    {title: 'world', value: 'world'}
-  ];
+module.exports = function (MultiSelect, React, languages, _) {
+  var options = _.map(languages, function (lang) {
+    return {title: lang.name, value: lang.iso639_1}
+  });
 
   return React.createClass({
     displayName: 'Settings Page',
 
     getInitialState: function () {
       return {
-        selected: []
+        selected: ['pb', 'pt', 'en']
       }
     },
 

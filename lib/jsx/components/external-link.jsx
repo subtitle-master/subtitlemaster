@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 
-module.exports = function (React) {
+module.exports = function (React, gui) {
   return React.createClass({
     displayName: 'External Link',
 
@@ -9,7 +9,7 @@ module.exports = function (React) {
 
       var url = e.currentTarget.href;
 
-      window.open(url, '_blank');
+      gui.openExternalUrl(url);
     },
 
     render: function () {

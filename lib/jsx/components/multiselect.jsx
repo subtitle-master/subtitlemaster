@@ -87,14 +87,16 @@ module.exports = function (React, _, $, arrayMove) {
         <table className="multiselect">
           <tr>
             <td></td>
-            <td>Selected Languages</td>
+            <td>Indiomas Selecionados</td>
             <td></td>
-            <td>Available Languages</td>
+            <td>Indiomas Disponíveis</td>
           </tr>
           <tr>
             <td>
-              <button type="button" className="multiselect-moveup" onClick={this.moveUp}>&uarr;</button>
-              <button type="button" className="multiselect-movedown" onClick={this.moveDown}>&darr;</button>
+              <div className="flex-column flex-center">
+                <button type="button" className="multiselect-moveup" onClick={this.moveUp}>&uarr;</button>
+                <button type="button" className="multiselect-movedown" onClick={this.moveDown}>&darr;</button>
+              </div>
             </td>
             <td>
               <select size="5" multiple="multiple" ref="selected" className="multiselect-selected">
@@ -102,8 +104,10 @@ module.exports = function (React, _, $, arrayMove) {
               </select>
             </td>
             <td>
-              <button type="button" className="multiselect-add" onClick={this.addItems}>&larr;</button>
-              <button type="button" className="multiselect-remove" onClick={this.removeItems}>&rarr;</button>
+              <div className="flex-column flex-center">
+                <button type="button" className="multiselect-add" onClick={this.addItems}>&larr;</button>
+                <button type="button" className="multiselect-remove" onClick={this.removeItems}>&rarr;</button>
+              </div>
             </td>
             <td>
               <select id="selected" size="5" multiple="multiple" ref="available" className="multiselect-available">
