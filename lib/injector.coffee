@@ -26,8 +26,8 @@ injector.factory('SettingsPage', require('./jsx/pages/settings-page.jsx'))
 injector.factory('SubtitleMaster', require('./jsx/subtitle-master.jsx'))
 
 # these are gateways to stuff that can't be used on browser direct, so use fakes for UI testing
-injector.factory('gui', require('./browser/fake_gui.coffee'))
-injector.value('sm', require('./browser/fake_sm.coffee'))
+injector.factory('gui', require('./browser_fakes/gui.coffee'))
+injector.value('sm', require('./browser_fakes/sm.coffee'))
 
 # others
 injector.value('languages', require('subtitle-master-core/lib/languages.coffee'))
