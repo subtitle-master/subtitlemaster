@@ -117,24 +117,24 @@ h1
       cursor: pointer
       flex: 1
 
-    #close
+    .close
       display: block
       text-align: center
 
-    #view, #alternatives
+    .view, .alternatives
       display: none
       align-items: flex-end
 
-    #close img
+    .close img
       height: 15px
 
-    #view
+    .view
       margin-bottom: 10px
 
       img
         height: 16px
 
-    #alternatives img
+    .alternatives img
       height: 21px
 
   &.active.unchanged
@@ -147,7 +147,7 @@ h1
     .info
       margin-top: 0
 
-    #view, #close, #alternatives
+    .view, .close, .alternatives
       img
         height: auto
 
@@ -157,18 +157,18 @@ h1
     .actions
       flex-direction: row-reverse
 
-      #close, #view, #alternatives
+      .close, .view, .alternatives
         display: flex
         align-items: center
 
-      #view
+      .view
         margin: 0 20px
 
-      #close
+      .close
         flex: none
 
   &.downloaded, &.notfound, &.uploaded, &.error
-    #view, #alternatives
+    .view, .alternatives
       display: flex
 
 .multiselect

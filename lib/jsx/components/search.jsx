@@ -113,9 +113,9 @@ module.exports = function (React, _) {
             <div className="detail">{info.detail(data)}</div>
           </div>
           <div className="actions">
-            <div id="close"><img src="images/icon-close.svg"/></div>
-            <div id="view"><img src="images/icon-view.svg"/></div>
-            <div id="alternatives"><img src="images/icon-plus.svg"/></div>
+            <div className="close"><img src="images/icon-close.svg"/></div>
+            <div className="view"><img src="images/icon-view.svg"/></div>
+            <div className="alternatives"><img src="images/icon-plus.svg"/></div>
           </div>
         </div>
       );
