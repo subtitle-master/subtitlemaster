@@ -32,7 +32,7 @@ module.exports = function (Search, SearchController, React) {
 
     renderSearches: function () {
       return (
-        <div className="flex">
+        <div className="flex auto-scroll">
           {this.state.searches.map(function (search) {
             return <Search key={search.key} data={search} />
           })}
