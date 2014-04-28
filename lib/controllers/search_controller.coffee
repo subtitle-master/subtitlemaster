@@ -18,9 +18,13 @@ module.exports = class SearchController
 
     @sm.search(path).then(
       (status) => searchObject.status = status; @notifySearchesUpdate()
-      (err) => searchObject.status = 'error'; searchObject.error = err; @notifySearchesUpdate(); console.log(err)
+      (err) => searchObject.status = 'error'; searchObject.error = err; @notifySearchesUpdate();
       ([status, info]) => searchObject.status = status; searchObject[status] = info; @notifySearchesUpdate()
     )
+
+  remove: (key) =>
+    @searches = @_.reject(@searches, {key})
+    @notifySearchesUpdate()
 
   clear: =>
     @searches = []

@@ -1,17 +1,15 @@
-# states: ['init', 'info', 'upload', 'search', 'download', 'downloaded', 'notfound', 'unchanged', 'uploaded', 'share', 'error']
-
 AppInjector.call (Search, React, $, _) ->
   describe "Search Component", ->
     afterEach -> React.unmountComponentAtNode(document.body)
 
+    renderData = (status, data = {}) ->
+      data = _.extend(data, {status, path: '/Some/Path.mkv'})
+
+      React.renderComponent(Search({data}), document.body)
+
+      expect($('.search .info .path').html()).toEqual 'Path.mkv'
+
     describe "rendering states", ->
-      renderData = (status, data = {}) ->
-        data = _.extend(data, {status, path: '/Some/Path.mkv'})
-
-        React.renderComponent(Search({data}), document.body)
-
-        expect($('.search .info .path').html()).toEqual 'Path.mkv'
-
       testMessage = (message) ->
         expect($('.search .info .detail').text()).toEqual message
 
@@ -76,3 +74,14 @@ AppInjector.call (Search, React, $, _) ->
         renderData('error', error: 'boom!')
 
         testMessage('Erro: boom!')
+
+    describe "interactions", ->
+      it "fires the onClose event when click on the button to remove", ->
+        data = status: 'unchanged', path: '/Some/Path.mkv'
+        onClose = jasmine.createSpy()
+
+        React.renderComponent(Search({data, onClose}), document.body)
+
+        $('.close').click()
+
+        expect(onClose).toHaveBeenCalled()

@@ -18,6 +18,10 @@ module.exports = function (Search, SearchController, FileDropper, React) {
       files.forEach(SearchController.search);
     },
 
+    removeSearch: function (key) {
+      SearchController.remove(key);
+    },
+
     componentDidMount: function () {
       SearchController.addEventListener('searches-updated', this.handleSearchesUpdate);
     },
@@ -35,10 +39,12 @@ module.exports = function (Search, SearchController, FileDropper, React) {
     },
 
     renderSearches: function () {
+      var _this = this;
+
       return (
         <FileDropper onFiles={this.filesDropped} className="flex auto-scroll">
           {this.state.searches.map(function (search) {
-            return <Search key={search.key} data={search} />
+            return <Search key={search.key} data={search} onClose={_this.removeSearch.bind(_this, search.key)} />
           })}
         </FileDropper>
       );

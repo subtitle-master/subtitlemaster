@@ -1,6 +1,6 @@
-describe "Multi Select", ->
-  AppInjector.call (MultiSelect, $, _, React) ->
-    beforeEach -> $('body').html("")
+AppInjector.call (MultiSelect, $, _, React) ->
+  describe "Multi Select", ->
+    afterEach -> React.unmountComponentAtNode(document.body)
 
     optionToArray = (option) -> [option.innerHTML, option.value]
 
