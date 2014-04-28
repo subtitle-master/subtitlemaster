@@ -16,7 +16,10 @@
   },
   "author": "Wilker Lucio <wilkerlucio@gmail.com>",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
+    "inject-it": "~1.2.0",
+    "lodash": "~2.4.1",
+    "observe-it": "~1.0.0",
     "coffee-script": "~1.7.1",
     "coffee-loader": "~0.7.1",
     "jsx-loader": "~0.10.0",
@@ -27,11 +30,5 @@
     "react-async": "~0.9.1",
     "react-router-component": "~0.18.2",
     "nib": "~1.0.2"
-  },
-  "dependencies": {
-    "inject-it": "~1.2.0",
-    "lodash": "~2.4.1",
-    "jquery": "~2.1.0",
-    "observe-it": "~1.0.0"
   }
 }

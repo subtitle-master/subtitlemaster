@@ -34,7 +34,7 @@ module.exports = function (Search, SearchController, React) {
       return (
         <div className="flex">
           {this.state.searches.map(function (search) {
-            return <Search key={search} data={search} />
+            return <Search key={search.key} data={search} />
           })}
         </div>
       );

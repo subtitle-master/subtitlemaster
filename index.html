@@ -7,12 +7,6 @@
   </head>
   <body>
     <script src="sm-client.js"></script>
-    <script>
-      AppInjector.call(function (SubtitleMaster, React) {
-        window.React = React;
-
-        React.renderComponent(SubtitleMaster(), document.body);
-      });
-    </script>
+    <script src="boot.js"></script>
   </body>
 </html>

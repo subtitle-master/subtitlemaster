@@ -25,10 +25,11 @@ injector.factory('SettingsPage', require('./jsx/pages/settings-page.jsx'))
 # app root
 injector.factory('SubtitleMaster', require('./jsx/subtitle-master.jsx'))
 
-# stubbed dependencies for UI view, will be override on the build
+# these are gateways to stuff that can't be used on browser direct, so use fakes for UI testing
 injector.factory('gui', require('./browser/fake_gui.coffee'))
 injector.value('sm', require('./browser/fake_sm.coffee'))
 
+# others
 injector.value('languages', require('subtitle-master-core/lib/languages.coffee'))
 
 module.exports = injector
