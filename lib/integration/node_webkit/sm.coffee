@@ -9,4 +9,4 @@ module.exports = (smCore, W, localStorage) ->
     operation = new smCore.SearchDownload(path, ['pb', 'en'], localCache)
     operation.run()
 
-  scanPath: (path) -> smCore.VideoScan(path)
+  scanPath: (path) -> smCore.VideoScan([path])

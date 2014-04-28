@@ -36,3 +36,13 @@ module.exports = (_, W) ->
           setTimeout(runNext, _.random(100, 2000))
 
       runNext()
+
+  scanPath: (path) ->
+    W.promise (resolve, reject, notify) ->
+      notify({value: path})
+
+      # without the delay the notify is skipped
+
+      setTimeout ->
+        resolve(null)
+      , 100

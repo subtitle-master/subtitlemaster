@@ -8,6 +8,10 @@ module.exports = class SearchController
     @searches = []
 
   search: (path) =>
+    @sm.scanPath(path).then undefined, ((err) -> console.log('error', err)), ({value}) =>
+      @searchPath(value)
+
+  searchPath: (path) =>
     searchObject = {key: @keyIndex++, path, status: 'init'}
 
     @searches.push(searchObject)
