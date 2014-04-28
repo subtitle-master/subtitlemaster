@@ -1,8 +1,8 @@
 /** @jsx React.DOM */
 
-module.exports = function (MultiSelect, React, languages, _) {
+module.exports = function (MultiSelect, React, languages, _, SettingsController) {
   var options = _.map(languages, function (lang) {
-    return {title: lang.name, value: lang.iso639_1}
+    return {title: lang.name, value: lang.iso639_1};
   });
 
   return React.createClass({
@@ -10,11 +10,12 @@ module.exports = function (MultiSelect, React, languages, _) {
 
     getInitialState: function () {
       return {
-        selected: ['pb', 'pt', 'en']
+        selected: SettingsController.get('languages')
       }
     },
 
     updateSelected: function (selected) {
+      SettingsController.set('languages', selected);
       this.setState({selected: selected});
     },
 

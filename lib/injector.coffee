@@ -13,6 +13,7 @@ injector.factory('JsonStore', require('./util/json_store.coffee'))
 
 # controllers
 injector.service('SearchController', require('./controllers/search_controller.coffee'))
+injector.service('SettingsController', require('./controllers/settings_controller.coffee'))
 
 # components
 injector.factory('Search', require('./jsx/components/search.jsx'))

@@ -1,4 +1,4 @@
-module.exports = (smCore, W, localStorage) ->
+module.exports = (smCore, W, localStorage, SettingsController) ->
   key = (hash) -> "upload-cache-#{hash}"
 
   localCache =
@@ -6,7 +6,7 @@ module.exports = (smCore, W, localStorage) ->
     put: (hash) -> W localStorage[key(hash)] = true
 
   search: (path) ->
-    operation = new smCore.SearchDownload(path, ['pb', 'en'], localCache)
+    operation = new smCore.SearchDownload(path, SettingsController.get('languages'), localCache)
     operation.run()
 
   scanPath: (path) -> smCore.VideoScan([path])
