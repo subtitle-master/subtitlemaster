@@ -31,6 +31,7 @@
   "dependencies": {
     "inject-it": "~1.2.0",
     "lodash": "~2.4.1",
-    "jquery": "~2.1.0"
+    "jquery": "~2.1.0",
+    "observe-it": "~1.0.0"
   }
 }

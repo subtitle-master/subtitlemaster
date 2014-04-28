@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 
-module.exports = function (SearchPage, SettingsPage, ExternalLink, MultiPage, React, $) {
+module.exports = function (SearchPage, SettingsPage, ExternalLink, MultiPage, React) {
   return React.createClass({
     displayName: 'Subtitle Master',
 
