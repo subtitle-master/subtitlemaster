@@ -5,7 +5,7 @@
   "main": "index.html",
   "window": {
     "title": "Subtitle Master",
-    "toolbar": false,
+    "toolbar": true,
     "frame": true,
     "position": "mouse",
     "min_width": 622,
@@ -30,6 +30,7 @@
     "react-async": "~0.9.1",
     "react-router-component": "~0.18.2",
     "nib": "~1.0.2",
-    "when": "~3.1.0"
+    "when": "~3.1.0",
+    "stylus": "~0.44.0"
   }
 }

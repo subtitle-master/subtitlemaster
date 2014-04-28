@@ -14,7 +14,7 @@ module.exports = class SearchController
 
     @sm.search(path).then(
       (status) => searchObject.status = status; @notifySearchesUpdate()
-      (err) => searchObject.status = 'error'; searchObject.error = err; @notifySearchesUpdate()
+      (err) => searchObject.status = 'error'; searchObject.error = err; @notifySearchesUpdate(); console.log(err)
       ([status, info]) => searchObject.status = status; searchObject[status] = info; @notifySearchesUpdate()
     )
 

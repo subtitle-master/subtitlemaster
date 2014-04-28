@@ -22,7 +22,7 @@ module.exports = function (MultiSelect, React, languages, _) {
       return (
         <div className="flex">
           <h1>Preferências</h1>
-          <div className="white-box">
+          <div className="white-box auto-scroll">
             <MultiSelect options={options} selected={this.state.selected} onChange={this.updateSelected} />
           </div>
         </div>
