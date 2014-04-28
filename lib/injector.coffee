@@ -5,6 +5,7 @@ injector.value('React', require('react/addons'))
 injector.value('_', require('lodash'))
 injector.value('$', require('jquery'))
 injector.value('observeit', require('observe-it'))
+injector.value('W', require('when'))
 
 # local libraries
 injector.factory('arrayMove', require('./util/array_move.coffee'))
@@ -27,7 +28,7 @@ injector.factory('SubtitleMaster', require('./jsx/subtitle-master.jsx'))
 
 # these are gateways to stuff that can't be used on browser direct, so use fakes for UI testing
 injector.factory('gui', require('./browser_fakes/gui.coffee'))
-injector.value('sm', require('./browser_fakes/sm.coffee'))
+injector.factory('sm', require('./browser_fakes/sm.coffee'))
 
 # others
 injector.value('languages', require('subtitle-master-core/lib/languages.coffee'))

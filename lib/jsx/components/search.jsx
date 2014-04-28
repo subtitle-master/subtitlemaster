@@ -74,7 +74,18 @@ statusMap = {
 };
 
 module.exports = function (React, _) {
-  var possibleStatus = ['init', 'info', 'upload', 'search', 'download', 'downloaded', 'notfound', 'unchanged', 'uploaded', 'share', 'error'];
+  var possibleStatus = [
+    'init',
+    'info',
+    'upload',
+    'search',
+    'download',
+    'downloaded',
+    'notfound',
+    'unchanged',
+    'uploaded',
+    'share',
+    'error'];
 
   return React.createClass({
     displayName: 'Search',
