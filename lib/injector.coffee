@@ -19,6 +19,7 @@ injector.factory('Search', require('./jsx/components/search.jsx'))
 injector.factory('ExternalLink', require('./jsx/components/external-link.jsx'))
 injector.factory('MultiPage', require('./jsx/components/multipage.jsx'))
 injector.factory('MultiSelect', require('./jsx/components/multiselect.jsx'))
+injector.factory('FileDropper', require('./jsx/components/file_dropper.jsx'))
 
 # pages
 injector.factory('SearchPage', require('./jsx/pages/search-page.jsx'))

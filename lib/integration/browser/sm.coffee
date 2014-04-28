@@ -20,7 +20,10 @@ module.exports = (_, W) ->
     dataFor = (status) -> statusData[status]?() || null
 
     W.promise (resolve, reject, notify) ->
-      flow = _.clone(flows[path])
+      if (flows[path])
+        flow = _.clone(flows[path])
+      else
+        flow = _.clone(_.sample(flows))
 
       runNext = ->
         status = flow.shift()

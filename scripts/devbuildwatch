@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./node_modules/.bin/webpack lib/main_nw.coffee -d -w --output-path devbuild/sm2.app/Contents/Resources/app.nw

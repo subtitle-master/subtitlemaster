@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 
-module.exports = function (Search, SearchController, React) {
+module.exports = function (Search, SearchController, FileDropper, React) {
   return React.createClass({
     displayName: 'Search Page',
 
@@ -14,6 +14,10 @@ module.exports = function (Search, SearchController, React) {
       this.setState({searches: searches});
     },
 
+    filesDropped: function (files) {
+      files.forEach(SearchController.search);
+    },
+
     componentDidMount: function () {
       SearchController.addEventListener('searches-updated', this.handleSearchesUpdate);
     },
@@ -24,19 +28,19 @@ module.exports = function (Search, SearchController, React) {
 
     renderBlank: function () {
       return (
-        <div className="flex flex-row">
+        <FileDropper onFiles={this.filesDropped} className="flex flex-row">
           <div className='center-banner'>Arraste seus vídeos aqui</div>
-        </div>
+        </FileDropper>
       );
     },
 
     renderSearches: function () {
       return (
-        <div className="flex auto-scroll">
+        <FileDropper onFiles={this.filesDropped} className="flex auto-scroll">
           {this.state.searches.map(function (search) {
             return <Search key={search.key} data={search} />
           })}
-        </div>
+        </FileDropper>
       );
     },
 

@@ -6,6 +6,7 @@ module.exports = (smCore, W, localStorage) ->
     put: (hash) -> W localStorage[key(hash)] = true
 
   search: (path) ->
-    console.log 'creating search on webkit', path, smCore
     operation = new smCore.SearchDownload(path, ['pb', 'en'], localCache)
     operation.run()
+
+  scanPath: (path) -> smCore.VideoScan(path)
