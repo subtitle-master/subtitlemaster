@@ -1,4 +1,4 @@
-Video = require("subtitle-master-core/lib/video_info.coffee")
+Video = require("subtitle-master/lib/video_info.coffee")
 
 module.exports = (grunt) ->
   require("load-grunt-tasks")(grunt)
@@ -54,6 +54,8 @@ module.exports = (grunt) ->
           "index.html"
           "stylesheets/app.css"
           "images/**"
+          "node_modules/subtitle-master/**"
+          "node_modules/request/**"
         ]
         dest: "<%= prebuild_path %>"
 
@@ -77,7 +79,7 @@ module.exports = (grunt) ->
           archive: "./build/subtitle-master-<%= pkg.version %>-mac.zip"
 
         files: [
-          {cwd: "./build/releases/subtitle-master-<%= pkg.version %>/mac", src: "**", expand: true}
+          {cwd: "./build/releases/Subtitle Master/mac", src: "**", expand: true}
         ]
 
       win:
@@ -85,7 +87,7 @@ module.exports = (grunt) ->
           archive: "./build/subtitle-master-<%= pkg.version %>-win.zip"
 
         files: [
-          {cwd: "./build/releases/subtitle-master-<%= pkg.version %>/win", src: "**", expand: true}
+          {cwd: "./build/releases/Subtitle Master/win", src: "**", expand: true}
         ]
 
       linux32:
@@ -93,7 +95,7 @@ module.exports = (grunt) ->
           archive: "./build/subtitle-master-<%= pkg.version %>-linux32.zip"
 
         files: [
-          {cwd: "./build/releases/subtitle-master-<%= pkg.version %>/linux32", src: "**", expand: true}
+          {cwd: "./build/releases/Subtitle Master/linux32", src: "**", expand: true}
         ]
 
       linux64:
@@ -101,9 +103,9 @@ module.exports = (grunt) ->
           archive: "./build/subtitle-master-<%= pkg.version %>-linux64.zip"
 
         files: [
-          {cwd: "./build/releases/subtitle-master-<%= pkg.version %>/linux64", src: "**", expand: true}
+          {cwd: "./build/releases/Subtitle Master/linux64", src: "**", expand: true}
         ]
 
   grunt.registerTask "default", ["nodewebkit", "compress"]
   grunt.registerTask "prebuild", ["clean:prebuild", "shell:webpack", "json_massager:prebuild", "copy:main", "copy:src"]
-  grunt.registerTask "build", ["prebuild", "nodewebkit"]
+  grunt.registerTask "build", ["prebuild", "nodewebkit", "compress"]
