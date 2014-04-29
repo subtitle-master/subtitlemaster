@@ -17,12 +17,14 @@
   "author": "Wilker Lucio <wilkerlucio@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "subtitle-master": "2.0.0-beta1",
     "inject-it": "~1.2.0",
     "lodash": "~2.4.1",
     "observe-it": "~1.0.0",
     "coffee-script": "~1.7.1",
     "coffee-loader": "~0.7.1",
     "jsx-loader": "~0.10.0",
+    "json-loader": "~0.5.0",
     "webpack": "~1.1.8",
     "jquery": "~2.1.0",
     "envify": "~1.2.1",
@@ -34,9 +36,6 @@
     "stylus": "~0.44.0",
     "node-uuid": "~1.4.1",
     "request": "~2.34.0",
-    "json-loader": "~0.5.0"
-  },
-  "devDependencies": {
     "grunt-cli": "~0.1.13",
     "grunt": "~0.4.4",
     "grunt-node-webkit-builder": "~0.1.21",
