@@ -34,7 +34,7 @@ injector.factory('SettingsPage', require('./jsx/pages/settings-page.jsx'))
 injector.factory('SubtitleMaster', require('./jsx/subtitle-master.jsx'))
 
 # others
-injector.value('languages', require('subtitle-master-core/lib/languages.coffee'))
+injector.value('languages', require('subtitle-master/lib/languages.coffee'))
 injector.value('localStorage', window.localStorage)
 
 module.exports = injector

@@ -6,12 +6,14 @@ module.exports = (grunt) ->
   grunt.initConfig
     pkg: grunt.file.readJSON("package.json")
     prebuild_path: "prebuild"
+    build_path: "build"
+    name: "Subtitle Master"
 
     nodewebkit:
       options:
         version: '0.9.2'
-        app_name: 'Subtitle Master'
-        build_dir: './build'
+        app_name: '<%= name %>'
+        build_dir: './<%= build_path %>'
         mac_icns: './assets/subtitle_master.icns'
         credits: './assets/credits.html'
         mac: true
@@ -33,7 +35,7 @@ module.exports = (grunt) ->
           }
         ]
 
-      src: ['prebuild/**/*']
+      src: ['<%= prebuild_path %>/**/*']
 
     json_massager:
       prebuild:
@@ -45,6 +47,7 @@ module.exports = (grunt) ->
 
     clean:
       prebuild: ["<%= prebuild_path %>"]
+      build: ["<%= build_path %>/<%= name %>"]
 
     copy:
       src:
@@ -56,6 +59,7 @@ module.exports = (grunt) ->
           "images/**"
           "node_modules/subtitle-master/**"
           "node_modules/request/**"
+          "node_modules/node-uuid/**"
         ]
         dest: "<%= prebuild_path %>"
 
@@ -108,4 +112,4 @@ module.exports = (grunt) ->
 
   grunt.registerTask "default", ["nodewebkit", "compress"]
   grunt.registerTask "prebuild", ["clean:prebuild", "shell:webpack", "json_massager:prebuild", "copy:main", "copy:src"]
-  grunt.registerTask "build", ["prebuild", "nodewebkit", "compress"]
+  grunt.registerTask "build", ["clean:build", "prebuild", "nodewebkit", "compress"]
