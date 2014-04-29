@@ -2,4 +2,6 @@ sm-client.js
 sm-client.js.map
 stylesheets/**/*.css
 node_modules
+build
 devbuild
+prebuild

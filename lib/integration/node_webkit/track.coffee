@@ -1,11 +1,11 @@
-module.exports = (SettingsController, _, request, nodefn, pkg) ->
+module.exports = (SettingsController, _, request, nodefn, pkg, os) ->
   trackInfo =
     tid: 'UA-3833116-8'
     user: SettingsController.get('uuid')
 
   appInfo =
     id: 'com.subtitlemaster.nwapp'
-    installer: 'com.nwgui.mac'
+    installer: "com.nwgui.#{os.platform()}"
     name: 'SubtitleMaster'
     version: pkg.version
 
