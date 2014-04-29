@@ -1,6 +1,8 @@
 /** @jsx React.DOM */
 
-module.exports = function (SearchPage, SettingsPage, ExternalLink, MultiPage, React) {
+module.exports = function (track, SearchPage, SettingsPage, ExternalLink, MultiPage, React) {
+  track.screen('search');
+
   return React.createClass({
     displayName: 'Subtitle Master',
 
@@ -13,6 +15,9 @@ module.exports = function (SearchPage, SettingsPage, ExternalLink, MultiPage, Re
     changePage: function (page, e) {
       e.preventDefault();
 
+      if (page == this.state.selectedPage) return;
+
+      track.screen(page);
       this.setState({selectedPage: page});
     },
 

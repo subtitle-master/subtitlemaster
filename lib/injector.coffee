@@ -6,6 +6,7 @@ injector.value('_', require('lodash'))
 injector.value('$', require('jquery'))
 injector.value('observeit', require('observe-it'))
 injector.value('W', require('when'))
+injector.value('nodefn', require('when/node'))
 injector.value('uuid', require('node-uuid'))
 
 # local libraries
