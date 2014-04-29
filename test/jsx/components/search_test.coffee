@@ -1,4 +1,4 @@
-AppInjector.call (Search, React, $, _) ->
+AppInjector.call (Search, React, $, _, gui) ->
   describe "Search Component", ->
     afterEach -> React.unmountComponentAtNode(document.body)
 
@@ -85,3 +85,14 @@ AppInjector.call (Search, React, $, _) ->
         $('.close').click()
 
         expect(onClose).toHaveBeenCalled()
+
+      it "request to show item in folder from the viewPath variable", ->
+        spyOn(gui, 'showItemInFolder')
+
+        data = status: 'unchanged', path: '/Some/Path.mkv', viewPath: 'view/path.mkv'
+
+        React.renderComponent(Search({data}), document.body)
+
+        $('.actions .view').click()
+
+        expect(gui.showItemInFolder).toHaveBeenCalledWith('view/path.mkv')

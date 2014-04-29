@@ -73,20 +73,7 @@ statusMap = {
   }
 };
 
-module.exports = function (React, _) {
-  var possibleStatus = [
-    'init',
-    'info',
-    'upload',
-    'search',
-    'download',
-    'downloaded',
-    'notfound',
-    'unchanged',
-    'uploaded',
-    'share',
-    'error'];
-
+module.exports = function (React, _, gui) {
   return React.createClass({
     displayName: 'Search',
 
@@ -102,6 +89,10 @@ module.exports = function (React, _) {
 
     normalizePath: function (path) {
       return _.last(path.split('/'));
+    },
+
+    viewFile: function () {
+      gui.showItemInFolder(this.props.data.viewPath);
     },
 
     render: function () {
@@ -120,7 +111,7 @@ module.exports = function (React, _) {
           </div>
           <div className="actions">
             <div className="close" onClick={this.props.onClose}><img src="images/icon-close.svg"/></div>
-            <div className="view"><img src="images/icon-view.svg"/></div>
+            <div className="view" onClick={this.viewFile}><img src="images/icon-view.svg"/></div>
           </div>
         </div>
       );
