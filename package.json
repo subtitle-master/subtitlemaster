@@ -33,6 +33,7 @@
     "when": "~3.1.0",
     "stylus": "~0.44.0",
     "node-uuid": "~1.4.1",
-    "request": "~2.34.0"
+    "request": "~2.34.0",
+    "json-loader": "~0.5.0"
   }
 }

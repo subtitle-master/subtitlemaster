@@ -17,9 +17,19 @@ module.exports = class SearchController
     @searches.push(searchObject)
 
     @sm.search(path).then(
-      (status) => searchObject.status = status; @notifySearchesUpdate()
-      (err) => searchObject.status = 'error'; searchObject.error = err; @notifySearchesUpdate();
-      ([status, info]) => searchObject.status = status; searchObject[status] = info; @notifySearchesUpdate()
+      (status) =>
+        searchObject.status = status
+        @notifySearchesUpdate()
+        @trigger('search-completed', searchObject)
+      (err) =>
+        searchObject.status = 'error'
+        searchObject.error = err
+        @notifySearchesUpdate()
+        @trigger('search-error', searchObject)
+      ([status, info]) =>
+        searchObject.status = status
+        searchObject[status] = info
+        @notifySearchesUpdate()
     )
 
   remove: (key) =>

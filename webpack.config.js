@@ -8,7 +8,8 @@ module.exports = {
   module: {
     loaders: [
       {test: /\.coffee$/, loader: 'coffee-loader'},
-      {test: /\.jsx$/, loader: 'jsx-loader'}
+      {test: /\.jsx$/, loader: 'jsx-loader'},
+      {test: /\.json$/, loader: 'json-loader'}
     ]
   }
 };

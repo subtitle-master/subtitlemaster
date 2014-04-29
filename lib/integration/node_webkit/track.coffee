@@ -1,4 +1,4 @@
-module.exports = (SettingsController, _, request, nodefn) ->
+module.exports = (SettingsController, _, request, nodefn, pkg) ->
   trackInfo =
     tid: 'UA-3833116-8'
     user: SettingsController.get('uuid')
@@ -7,7 +7,7 @@ module.exports = (SettingsController, _, request, nodefn) ->
     id: 'com.subtitlemaster.nwapp'
     installer: 'com.nwgui.mac'
     name: 'SubtitleMaster'
-    version: '0.0.0'
+    version: pkg.version
 
   trackRequest = (type, data) ->
     data = _.defaults data,
@@ -16,26 +16,34 @@ module.exports = (SettingsController, _, request, nodefn) ->
       cid: trackInfo.user
       t: type
 
+      an: appInfo.name
+      av: appInfo.version
+      aid: appInfo.id
+      aiid: appInfo.installer
+
+      cd1: SettingsController.get('languages').join(',')
+
     requestOptions =
       url: 'http://www.google-analytics.com/collect'
       method: 'POST'
       form: data
 
-    console.log 'sending track request', requestOptions
+    console.log 'sending track request', data
 
     nodefn.call(request, requestOptions)
 
   {
     screen: (name) ->
       trackRequest('screenview',
-        an: appInfo.name
-        av: appInfo.version
-        aid: appInfo.id
-        aiid: appInfo.installer
-
         cd: name
       )
 
     search: (search) ->
-      console.log 'search event tracking', search
+      trackRequest('event',
+        ec: 'search',
+        ea: search.status
+      )
+
+    error: (err) ->
+      console.log 'tracking error', err
   }

@@ -1,7 +1,15 @@
 /** @jsx React.DOM */
 
-module.exports = function (track, SearchPage, SettingsPage, ExternalLink, MultiPage, React) {
+module.exports = function (track, SearchController, SearchPage, SettingsPage, ExternalLink, MultiPage, React) {
   track.screen('search');
+
+  SearchController.addEventListener('search-completed', function (search) {
+    track.search(search).done();
+  });
+
+  SearchController.addEventListener('search-error', function (search) {
+    track.error(search.error).done();
+  });
 
   return React.createClass({
     displayName: 'Subtitle Master',

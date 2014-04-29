@@ -1,5 +1,7 @@
 injector = require('inject-it')()
 
+injector.value('pkg', require('../package.json'))
+
 # third part libraries
 injector.value('React', require('react/addons'))
 injector.value('_', require('lodash'))
