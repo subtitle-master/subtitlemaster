@@ -1,4 +1,4 @@
-module.exports = (smCore, W, localStorage, SettingsController) ->
+module.exports = (smCore, W, localStorage, SettingsController, request, nodefn, semver, pkg) ->
   key = (hash) -> "upload-cache-#{hash}"
 
   localCache =
@@ -10,3 +10,9 @@ module.exports = (smCore, W, localStorage, SettingsController) ->
     operation.run()
 
   scanPath: (path) -> smCore.VideoScan([path])
+
+  checkForUpdates: ->
+    nodefn.call(request, pkg.latestJson).then ([res, body]) ->
+      json = JSON.parse(body)
+
+      semver.gt(json.version, pkg.version)

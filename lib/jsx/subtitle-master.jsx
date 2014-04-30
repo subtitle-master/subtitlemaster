@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 
-module.exports = function (track, SearchController, SearchPage, SettingsPage, ExternalLink, MultiPage, React) {
+module.exports = function (track, SearchController, SearchPage, SettingsPage, ExternalLink, MultiPage, Updater, React) {
   track.screen('search');
 
   SearchController.addEventListener('search-completed', function (search) {
@@ -41,6 +41,7 @@ module.exports = function (track, SearchController, SearchPage, SettingsPage, Ex
     render: function () {
       return (
         <div className="app-container flex-column">
+          <Updater />
           <hr className="filmstrip shadow-down" />
           <MultiPage className="flex flex-row auto-scroll" selected={this.state.selectedPage}>
             <SearchPage page="search" />

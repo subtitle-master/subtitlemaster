@@ -77,6 +77,9 @@ module.exports = (grunt) ->
       devbuild:
         command: "./scripts/devbuild"
 
+      devbuildwatch:
+        command: "./scripts/devbuildwatch"
+
     compress:
       mac:
         options:

@@ -46,3 +46,9 @@ module.exports = (_, W) ->
       setTimeout ->
         resolve(null)
       , 100
+
+  checkForUpdates: ->
+    W.promise (resolve) ->
+      setTimeout ->
+        resolve(!!(_.random(0, 1)))
+      , 2000

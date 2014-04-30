@@ -16,6 +16,7 @@
   },
   "author": "Wilker Lucio <wilkerlucio@gmail.com>",
   "license": "MIT",
+  "latestJson": "https://raw.githubusercontent.com/subtitle-master/subtitlemaster/latest/package.json",
   "dependencies": {
     "subtitle-master": "2.0.0-beta1",
     "inject-it": "~1.2.0",
@@ -44,6 +45,7 @@
     "grunt-contrib-copy": "~0.5.0",
     "grunt-json-massager": "~0.1.0",
     "grunt-contrib-clean": "~0.5.0",
-    "load-grunt-tasks": "~0.4.0"
+    "load-grunt-tasks": "~0.4.0",
+    "semver": "~2.2.1"
   }
 }
