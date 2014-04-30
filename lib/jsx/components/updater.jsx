@@ -13,7 +13,7 @@ module.exports = function (ExternalLink, sm, React) {
     componentDidMount: function () {
       var _this = this;
 
-      sm.checkForUpdates().done(function (hasUpdates) {
+      sm.checkForUpdates().then(function (hasUpdates) {
         _this.setState({hasUpdate: hasUpdates});
       });
     },

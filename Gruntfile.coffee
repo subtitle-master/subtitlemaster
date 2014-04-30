@@ -60,6 +60,7 @@ module.exports = (grunt) ->
           "node_modules/subtitle-master/**"
           "node_modules/request/**"
           "node_modules/node-uuid/**"
+          "node_modules/semver/**"
         ]
         dest: "<%= prebuild_path %>"
 
