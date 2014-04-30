@@ -87,9 +87,9 @@ module.exports = function (React, _, $, arrayMove) {
         <table className="multiselect">
           <tr>
             <td></td>
-            <td>Indiomas Selecionados</td>
+            <td>Idiomas Selecionados</td>
             <td></td>
-            <td>Indiomas Disponíveis</td>
+            <td>Idiomas Disponíveis</td>
           </tr>
           <tr>
             <td>
