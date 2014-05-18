@@ -58,8 +58,6 @@
              (callback cursor data)
              (recur (<! channel)))))
 
-(listen-channel nil gui/open-channel #(.log js/console "open" %2))
-
 (defn main-view [cursor _]
   (reify
     om/IWillMount

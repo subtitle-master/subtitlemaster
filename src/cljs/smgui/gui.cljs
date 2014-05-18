@@ -5,7 +5,7 @@
 
 (def open-channel (chan))
 
-(-> nwgui .-App (.on "open" #(put! open-channel %)))
+(-> nwgui .-App (.on "open" #(smgui.search/search-for %)))
 
 (defn open-external [url]
   (-> nwgui .-Shell (.openExternal url)))

@@ -7,17 +7,21 @@
 (defn define-status [icon detail]
   { :icon icon :detail detail })
 
-(def status-map { :init       (define-status "time"        #(str "Iniciando a busca..."))
-                  :info       (define-status "time"        #(str "Carregando informações do vídeo..."))
-                  :upload     (define-status "upload"      #(str "Enviando " (:upload %) " ..."))
-                  :search     (define-status "search"      #(str "Buscando legendas nos idiomas: " (:search %)))
-                  :download   (define-status "download"    #(str "Baixando legenda do servidor: " (get-in % [:download :source :name]) "..."))
-                  :downloaded (define-status "check"       #(str "Baixado do servidor " (get-in % [:download :source :name]) " (" (get-in % [:download :source :website]) ")"))
-                  :notfound   (define-status "error"       #(str "Nenhuma legenda encontrada, tente novamente mais tarde"))
-                  :unchanged  (define-status "check-small" #(str "Você já tem a legenda no seu idioma favorito"))
-                  :uploaded   (define-status "check"       #(str "Suas legendas locais para esse vídeo foram compartilhadas!"))
-                  :share      (define-status "upload"      #(str "Compartilhando as legendas desse vídeo..."))
-                  :error      (define-status "error"       #(str "Erro" (:error %)))})
+(defn- status-website-link [status]
+  (let [url (-> (:download status) .-source .website)]
+    (smgui.components/external-link url url)))
+
+(def status-map { :init       (define-status "time"        (fn [] ["Iniciando a busca..."]))
+                  :info       (define-status "time"        (fn [] ["Carregando informações do vídeo..."]))
+                  :upload     (define-status "upload"      (fn [status] ["Enviando " (:upload status) " ..."]))
+                  :search     (define-status "search"      (fn [status] [(str "Buscando legendas nos idiomas: " (:search status))]))
+                  :download   (define-status "download"    (fn [status] ["Baixando legenda do servidor: " (-> (:download status) .-source .name) "..."]))
+                  :downloaded (define-status "check"       (fn [status] ["Baixado do servidor " (-> (:download status) .-source .name) " (" (status-website-link status) ")"]))
+                  :notfound   (define-status "error"       (fn [] ["Nenhuma legenda encontrada, tente novamente mais tarde"]))
+                  :unchanged  (define-status "check-small" (fn [] ["Você já tem a legenda no seu idioma favorito"]))
+                  :uploaded   (define-status "check"       (fn [] ["Suas legendas locais para esse vídeo foram compartilhadas!"]))
+                  :share      (define-status "upload"      (fn [] ["Compartilhando as legendas desse vídeo..."]))
+                  :error      (define-status "error"       (fn [{err :error}] ["Erro" err]))})
 
 (def search-channel (chan))
 
@@ -32,13 +36,11 @@
                (close! out)))
     out))
 
-(defn search-from-path [path]
-  [path (state-download (download path (smgui.settings/languages)))])
-
-(def path-in-channel (map> search-from-path search-channel))
-
 (defn add-search [path c]
   (put! search-channel [path (state-download c)]))
+
+(defn search-for [path]
+  (add-search path (smgui.engine/download path (smgui.settings/languages))))
 
 (defn status-icon [icon]
   (dom/img #js {:src (str "images/icon-" icon ".svg") :className "status"}))
@@ -52,7 +54,7 @@
              (status-icon icon)
              (dom/div #js {:className "info flex"}
                       (dom/div #js {:className "path"} path)
-                      (dom/div #js {:className "detail"} detail))
+                      (apply dom/div #js {:className "detail"} detail))
              (dom/div #js {:className "actions"}
                       (dom/div #js {:className "close" :onClick #(smgui.core/remove-search id)} (dom/img #js {:src "images/icon-close.svg"}))
                       (dom/div #js {:className "view"} (dom/img #js {:src "images/icon-view.svg"}))))))
