@@ -1,6 +1,7 @@
 (ns smgui.search
   (:require-macros [cljs.core.async.macros :refer [go-loop]])
   (:require [om.dom :as dom :include-macros true]
+            [om.core :as om :include-macros true]
             [smgui.engine :refer [download]]
             [cljs.core.async :refer [put! chan <! >! close! map>]]))
 
@@ -67,6 +68,8 @@
   (apply dom/div #js {:className "flex auto-scroll"} (map search-item searches)))
 
 (defn render-search [searches]
-  (if (empty? searches)
-    (render-search-blank)
-    (render-search-list (vals searches))))
+  (let [view (if (empty? searches)
+               (render-search-blank)
+               (render-search-list (vals searches)))]
+    (om/build smgui.components/file-dropper searches {:state {:view view
+                                                              :onFiles #(dorun (map search-for %))}})))
