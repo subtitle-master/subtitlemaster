@@ -1,0 +1,25 @@
+{
+    "name": "subtitle-master-gui",
+    "version": "2.0.0-beta2",
+    "description": "Subtitle Master GUI",
+    "main": "index.html",
+    "window": {
+        "title": "Subtitle Master",
+        "toolbar": true,
+        "frame": true,
+        "position": "mouse",
+        "min_width": 622,
+        "min_height": 200
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Wilker Lucio <wilkerlucio@gmail.com>",
+    "license": "MIT",
+    "latestJson": "https://raw.githubusercontent.com/subtitle-master/subtitlemaster/latest/package.json",
+    "dependencies": {
+        "subtitle-master": "2.0.0-beta1",
+        "request": "~2.34.0",
+        "node-uuid": "~1.4.1"
+    }
+}
