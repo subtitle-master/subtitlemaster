@@ -10,7 +10,7 @@
   (close! channel))
 
 (defn download [path languages]
-  (let [op (sm-search. path languages)
+  (let [op (sm-search. path (apply array languages))
         promise (.run op)
         c (chan)]
     (.then promise
