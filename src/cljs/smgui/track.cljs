@@ -13,7 +13,7 @@
   (merge {:v    1
           :t    type
           :tid  "UA-3833116-8"
-          :cid  (uuid/v4)
+          :cid  (smgui.settings/uuid)
           :aid  "com.subtitlemaster.nwapp"
           :aiid (str "com.nwgui." platform-name)
           :an   "SubtitleMaster"

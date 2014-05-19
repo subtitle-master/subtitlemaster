@@ -18,6 +18,7 @@
       (save defaults))))
 
 (defn languages [] (-> (read) :languages))
+(defn uuid [] (-> (read) :uuid))
 
 (defn- extract-language [lang]
   {:locale (.-locale lang)

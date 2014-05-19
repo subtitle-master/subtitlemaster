@@ -6,6 +6,7 @@
             [smgui.search :refer [render-search search-channel]]
             [smgui.settings :as settings]
             [smgui.gui :as gui]
+            [smgui.track :as track]
             [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [clojure.data :as data]
             [clojure.string :as string]
@@ -35,6 +36,7 @@
          (render-not-found)))
 
 (defn change-page [cursor new-page]
+  (track/screen (name new-page))
   (om/update! cursor [:page] new-page))
 
 (defn page-link [page cursor view]
@@ -62,6 +64,7 @@
   (reify
     om/IWillMount
     (will-mount [_]
+      (track/screen (-> cursor :page name))
       (listen-channel cursor search-channel add-search))
 
     om/IRender
