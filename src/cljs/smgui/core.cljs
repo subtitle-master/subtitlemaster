@@ -1,9 +1,8 @@
 (ns smgui.core
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]]
-                   [smgui.components :refer [pd]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [om.core :as om]
             [om.dom :as dom]
-            [smgui.components :refer [external-link]]
+            [smgui.components :refer [external-link pd]]
             [smgui.search :refer [render-search search-channel]]
             [smgui.settings :as settings]
             [smgui.gui :as gui]
@@ -35,12 +34,12 @@
          :settings (settings/render-page cursor)
          (render-not-found)))
 
-(defn change-page [cursor new-page &]
+(defn change-page [cursor new-page]
   (om/update! cursor [:page] new-page))
 
 (defn page-link [page cursor view]
   (let [class (if (= (:page cursor) page) "button selected" "button")]
-    (dom/a #js {:href "#" :className class :onClick (pd (change-page cursor page))} view)))
+    (dom/a #js {:href "#" :className class :onClick (pd #(change-page cursor page))} view)))
 
 (defn add-search [cursor [path search]]
   (go
