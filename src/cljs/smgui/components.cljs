@@ -40,6 +40,8 @@
             classes (class-set {"dragging" over})]
         (dom/div #js {:className   (str "flex flex-row " classes)
                       :onDragEnter #(update-over true)
+                      :onDragOver  #(update-over true)
                       :onDragLeave #(update-over false)
+                      :onDragEnd   #(update-over false)
                       :onDrop      (pd #(onFiles (read-file-paths %)))}
                  view)))))
