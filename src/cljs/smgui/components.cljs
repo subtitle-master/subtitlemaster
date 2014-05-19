@@ -1,18 +1,13 @@
 (ns smgui.components
+  (:require-macros [smgui.components :refer [pd]])
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
             [smgui.ttiual :refer [class-set]]
             [smgui.gui :as gui]
             [cljs.core.async :refer [>!]]))
 
-(defn pd [f]
-  "Prevent default event handler"
-  (fn [e]
-    (.preventDefault e)
-    (f e)))
-
 (defn external-link [url view]
-  (dom/a #js {:href "#" :className "button" :onClick (pd #(gui/open-external url))} view))
+  (dom/a #js {:href "#" :className "button" :onClick (pd gui/open-external url)} view))
 
 (defn input-value-seq [input]
   (-> (.$ js/window input) .val (or []) array-seq (or [])))
@@ -36,10 +31,13 @@
 
     om/IRenderState
     (render-state [_ {:keys [over view onFiles] :as state}]
-      (let [update-over #(pd (om/set-state! owner :over %))
-            classes (class-set {"dragging" over})]
+      (let [update-over (fn [b _] om/set-state! owner :over b)
+            classes (class-set {"dragging" over})
+            triggerFiles #(onFiles (read-file-paths %))]
         (dom/div #js {:className   (str "flex flex-row " classes)
-                      :onDragEnter #(update-over true)
-                      :onDragLeave #(update-over false)
-                      :onDrop      (pd #(onFiles (read-file-paths %)))}
+                      :onDragEnter (pd (update-over true))
+                      :onDragOver  (pd (update-over true))
+                      :onDragLeave (pd (update-over false))
+                      :onDragEnd   (pd (update-over false))
+                      :onDrop      (pd (update-over false) triggerFiles)}
                  view)))))
