@@ -36,12 +36,12 @@
 
     om/IRenderState
     (render-state [_ {:keys [over view onFiles] :as state}]
-      (let [update-over #(pd (om/set-state! owner :over %))
+      (let [update-over #(om/set-state! owner :over %)
             classes (class-set {"dragging" over})]
         (dom/div #js {:className   (str "flex flex-row " classes)
-                      :onDragEnter #(update-over true)
-                      :onDragOver  #(update-over true)
-                      :onDragLeave #(update-over false)
-                      :onDragEnd   #(update-over false)
-                      :onDrop      (pd #(onFiles (read-file-paths %)))}
+                      :onDragEnter (pd #(update-over true))
+                      :onDragOver  (pd #(update-over true))
+                      :onDragLeave (pd #(update-over false))
+                      :onDragEnd   (pd #(update-over false))
+                      :onDrop      (pd #(do (update-over false) (onFiles (read-file-paths %))))}
                  view)))))
