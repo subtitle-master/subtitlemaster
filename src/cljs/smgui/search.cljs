@@ -2,8 +2,8 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop]])
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
-            [smgui.engine :refer [download]]
-            [cljs.core.async :refer [put! chan <! >! close! map>]]))
+            [smgui.engine :refer [download scan]]
+            [cljs.core.async :refer [put! chan <! >! close!]]))
 
 (defn define-status [icon detail]
   { :icon icon :detail detail })
@@ -40,8 +40,14 @@
 (defn add-search [path c]
   (put! search-channel [path (state-download c)]))
 
-(defn search-for [path]
+(defn search-for-path [path]
   (add-search path (smgui.engine/download path (smgui.settings/languages))))
+
+(defn search-for [path]
+  (let [c (scan path)]
+    (go-loop [fpath (<! c)]
+             (search-for-path fpath)
+             (recur (<! c)))))
 
 (defn status-icon [icon]
   (dom/img #js {:src (str "images/icon-" icon ".svg") :className "status"}))

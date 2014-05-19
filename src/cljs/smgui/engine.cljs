@@ -4,6 +4,7 @@
 
 (def subtitle-master (.require js/window "subtitle-master"))
 (def sm-search (.-SearchDownload subtitle-master))
+(def sm-scan (.-VideoScan subtitle-master))
 
 (defn put-and-close! [channel message]
   (put! channel message)
@@ -17,4 +18,13 @@
            #(put-and-close! c [% nil])
            #(put-and-close! c ["error" %])
            #(put! c (array-seq %)))
+    c))
+
+(defn scan [path]
+  (let [promise (sm-scan #js [path])
+        c (chan)]
+    (.then promise
+           nil
+           #(print "Error on scan" %)
+           #(put! c (.-value %)))
     c))
