@@ -3,6 +3,7 @@
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
             [smgui.engine :refer [download scan]]
+            [smgui.core :as app]
             [cljs.core.async :refer [put! chan <! >! close!]]))
 
 (defn define-status [icon detail]
@@ -24,8 +25,6 @@
                   :share      (define-status "upload"      (fn [] ["Compartilhando as legendas desse vídeo..."]))
                   :error      (define-status "error"       (fn [{err :error}] ["Erro" err]))})
 
-(def search-channel (chan))
-
 (defn state-download [in]
   (let [out (chan)]
     (go-loop [state {:status :init}]
@@ -38,7 +37,7 @@
     out))
 
 (defn add-search [path c]
-  (put! search-channel [path (state-download c)]))
+  (app/call :add-search {:path path :channel (state-download c)}))
 
 (defn search-for-path [path]
   (add-search path (smgui.engine/download path (smgui.settings/languages))))
@@ -63,7 +62,7 @@
                       (dom/div #js {:className "path"} path)
                       (apply dom/div #js {:className "detail"} detail))
              (dom/div #js {:className "actions"}
-                      (dom/div #js {:className "close" :onClick #(smgui.core/remove-search id)} (dom/img #js {:src "images/icon-close.svg"}))
+                      (dom/div #js {:className "close" :onClick #(app/call :remove-search {:id id})} (dom/img #js {:src "images/icon-close.svg"}))
                       (dom/div #js {:className "view"} (dom/img #js {:src "images/icon-view.svg"}))))))
 
 (defn render-search-blank []

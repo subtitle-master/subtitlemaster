@@ -1,6 +1,7 @@
 (ns smgui.settings
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
+            [cljs.reader]
             [smgui.uuid :as uuid]))
 
 (def defaults
