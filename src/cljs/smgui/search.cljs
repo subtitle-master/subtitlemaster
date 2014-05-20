@@ -3,6 +3,7 @@
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
             [smgui.engine :refer [download scan]]
+            [smgui.gui :as gui]
             [smgui.core :as app]
             [cljs.core.async :refer [put! chan <! >! close!]]))
 
@@ -56,7 +57,7 @@
       (.basename path)))
 
 (defn search-item [search]
-  (let [{:keys [status path id]} search
+  (let [{:keys [status path id viewPath]} search
         status-tr (get status-map status)
         icon (:icon status-tr)
         detail ((:detail status-tr) search)]
@@ -67,7 +68,7 @@
                       (apply dom/div #js {:className "detail"} detail))
              (dom/div #js {:className "actions"}
                       (dom/div #js {:className "close" :onClick #(app/call :remove-search {:id id})} (dom/img #js {:src "images/icon-close.svg"}))
-                      (dom/div #js {:className "view"} (dom/img #js {:src "images/icon-view.svg"}))))))
+                      (dom/div #js {:className "view" :onClick #(gui/show-file viewPath)} (dom/img #js {:src "images/icon-view.svg"}))))))
 
 (defn render-search-blank []
   (dom/div #js {:className "flex flex-row"}

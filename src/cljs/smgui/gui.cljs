@@ -9,3 +9,6 @@
 
 (defn open-external [url]
   (-> nwgui .-Shell (.openExternal url)))
+
+(defn show-file [path]
+  (-> nwgui .-Shell (.showItemInFolder path)))
