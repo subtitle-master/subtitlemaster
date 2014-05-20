@@ -5,9 +5,9 @@
 (def subtitle-master (.require js/window "subtitle-master"))
 (def sm-search (.-SearchDownload subtitle-master))
 (def sm-scan (.-VideoScan subtitle-master))
-(def Promise (.require js/window "promise"))
 
-(defn promise [value] (.resolve Promise value))
+(defn promise [value]
+  #js {:then (fn [callback] (callback value))})
 
 (defn cache-key [hash] (str "upload-cache-" hash))
 
