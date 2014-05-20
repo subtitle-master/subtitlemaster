@@ -2,7 +2,8 @@
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
             [cljs.reader]
-            [smgui.uuid :as uuid]))
+            [smgui.uuid :as uuid]
+            [smgui.ttiual :refer [in?]]))
 
 (def defaults
   {:languages ["pb" "pt" "en"]
@@ -38,10 +39,6 @@
 
 (defn language-from-iso639_1 [iso639_1]
   (first (filter #(= iso639_1 (:iso639_1 %)) languages-map)))
-
-(defn in?
-  [seq elm]
-  (some #(= elm %) seq))
 
 (defn add-items [cursor values]
   (om/transact! cursor #(vec (concat % values))))
