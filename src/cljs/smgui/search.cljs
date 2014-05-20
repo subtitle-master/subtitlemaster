@@ -51,6 +51,10 @@
 (defn status-icon [icon]
   (dom/img #js {:src (str "images/icon-" icon ".svg") :className "status"}))
 
+(defn basename [path]
+  (-> (.require js/window "path")
+      (.basename path)))
+
 (defn search-item [search]
   (let [{:keys [status path id]} search
         status-tr (get status-map status)
@@ -59,7 +63,7 @@
     (dom/div #js {:className (str "search flex-row " (name status))}
              (status-icon icon)
              (dom/div #js {:className "info flex"}
-                      (dom/div #js {:className "path"} path)
+                      (dom/div #js {:className "path"} (basename path))
                       (apply dom/div #js {:className "detail"} detail))
              (dom/div #js {:className "actions"}
                       (dom/div #js {:className "close" :onClick #(app/call :remove-search {:id id})} (dom/img #js {:src "images/icon-close.svg"}))
