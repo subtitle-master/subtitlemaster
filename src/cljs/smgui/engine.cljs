@@ -5,13 +5,28 @@
 (def subtitle-master (.require js/window "subtitle-master"))
 (def sm-search (.-SearchDownload subtitle-master))
 (def sm-scan (.-VideoScan subtitle-master))
+(def Promise (.require js/window "promise"))
+
+(defn promise [value] (.resolve Promise value))
+
+(defn cache-key [hash] (str "upload-cache-" hash))
+
+(defn cache-read [hash]
+  (aget (-> js/window .-localStorage) (cache-key hash)))
+
+(defn cache-write [hash]
+  (aset (-> js/window .-localStorage) (cache-key hash) true))
+
+(def local-cache
+  #js {:check (fn [hash] (promise (cache-read hash)))
+       :put (fn [hash] (promise (cache-write hash)))})
 
 (defn put-and-close! [channel message]
   (put! channel message)
   (close! channel))
 
 (defn download [path languages]
-  (let [op (sm-search. path (apply array languages))
+  (let [op (sm-search. path (apply array languages) local-cache)
         promise (.run op)
         c (chan)]
     (.then promise
