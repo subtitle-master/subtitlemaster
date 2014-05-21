@@ -1,6 +1,7 @@
 (ns smgui.engine
   (:require-macros [cljs.core.async.macros :refer [go-loop]])
-  (:require [cljs.core.async :refer [chan close! put!]]))
+  (:require [cljs.core.async :refer [chan close! put!]]
+            [smgui.track :as track]))
 
 (def subtitle-master (.require js/window "subtitle-master"))
 (def sm-search (.-SearchDownload subtitle-master))
@@ -31,8 +32,12 @@
         promise (.run op)
         c (chan)]
     (.then promise
-           #(put-and-close! c [% nil])
-           #(put-and-close! c ["error" %])
+           #(do
+             (put-and-close! c [% nil])
+             (track/search %))
+           #(do
+             (put-and-close! c ["error" (.-message %)])
+             (track/search "error"))
            #(put! c (array-seq %)))
     c))
 
@@ -54,7 +59,11 @@
         promise (.run op)
         c (chan)]
     (.then promise
-           #(put-and-close! c [:ok (->> % array-seq (map read-alternative))])
+           #(do
+             (put-and-close! c [:ok (->> %
+                                         array-seq
+                                         (map read-alternative))])
+             (track/search "alternatives"))
            #(put-and-close! c [:error %]))
     c))
 
