@@ -3,6 +3,7 @@
   "version": "2.0.0-beta2",
   "description": "Subtitle Master GUI",
   "main": "index.html",
+  "node-main": "node-main.js",
   "window": {
     "title": "Subtitle Master",
     "toolbar": true,
