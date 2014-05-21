@@ -38,6 +38,13 @@
           (swap! app-state update-in [:searches] #(assoc % id (merge state {:path path :id id})))
           (recur (<! channel)))))))
 
+(defmethod flux-handler :search-alternatives [{:keys [id channel]}]
+  (swap! app-state update-in [:searches id] assoc :alternatives :loading)
+  (go (swap! app-state update-in [:searches id] assoc :alternatives (<! channel))))
+
+(defmethod flux-handler :alternatives-close [{:keys [id]}]
+  (swap! app-state update-in [:searches id] assoc :alternatives nil))
+
 (defmethod flux-handler :remove-search [{:keys [id]}]
   (swap! app-state update-in [:searches] dissoc id))
 

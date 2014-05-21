@@ -2,9 +2,12 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop]])
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
-            [smgui.engine :refer [download scan]]
+            [smgui.engine :refer [download scan search-alternatives]]
             [smgui.gui :as gui]
             [smgui.core :as app]
+            [smgui.fs :as fs]
+            [smgui.settings :as settings]
+            [smgui.ttiual :refer [class-set]]
             [cljs.core.async :refer [put! chan <! >! close!]]))
 
 (defn define-status [icon detail]
@@ -56,19 +59,55 @@
   (-> (.require js/window "path")
       (.basename path)))
 
+(defn alternative-item-view [{:keys [path language source target-path]} id]
+  (dom/li #js {:className "flex-row"}
+    (dom/a #js {:href     path
+                :download "subtitle"
+                :className "flex"}
+               (str language " - " source))
+    (dom/button #js {:onClick #(do
+                                (fs/copy path target-path)
+                                (app/call :alternatives-close {:id id}))} "Selecionar")))
+
+(defn alternative-loading []
+  (dom/div #js {:className "loader10"}))
+
+(defn alternative-response [[type data] id]
+  (case type
+    :ok (if (empty? data)
+          (dom/p nil "Nenhuma legenda alternativa encontrada")
+          (apply dom/ul nil (map #(alternative-item-view % id) data)))
+    :error (dom/div "Erro: " (.-message data))))
+
+(defn alternatives-view [a id]
+  (let [classes (class-set {"active" (not (nil? a))})]
+    (dom/div #js {:className (str "alternatives-box " classes)}
+      (dom/div nil
+        (case a
+          nil nil
+          :loading (alternative-loading)
+          (alternative-response a id))))))
+
 (defn search-item [search]
-  (let [{:keys [status path id viewPath]} search
+  (let [{:keys [status path id viewPath alternatives]} search
         status-tr (get status-map status)
         icon (:icon status-tr)
         detail ((:detail status-tr) search)]
-    (dom/div #js {:className (str "search flex-row " (name status))}
+    (dom/div #js {:style #js {:clear "both"}}
+       (dom/div #js {:className (str "search flex-row " (name status))}
              (status-icon icon)
              (dom/div #js {:className "info flex"}
                       (dom/div #js {:className "path"} (basename path))
                       (apply dom/div #js {:className "detail"} detail))
              (dom/div #js {:className "actions"}
-                      (dom/div #js {:className "close" :onClick #(app/call :remove-search {:id id})} (dom/img #js {:src "images/icon-close.svg"}))
-                      (dom/div #js {:className "view" :onClick #(gui/show-file viewPath)} (dom/img #js {:src "images/icon-view.svg"}))))))
+                      (dom/div #js {:className "close"
+                                    :onClick #(app/call :remove-search {:id id})} (dom/img #js {:src "images/icon-close.svg"}))
+                      (dom/div #js {:className "view"
+                                    :onClick #(gui/show-file viewPath)} (dom/img #js {:src "images/icon-view.svg"}))
+                      (dom/div #js {:className "alternatives"
+                                    :onClick #(app/call :search-alternatives {:id id
+                                                                              :channel (search-alternatives path (settings/languages))})} (dom/img #js {:src "images/icon-plus.svg"}))))
+       (alternatives-view alternatives id))))
 
 (defn render-search-blank []
   (dom/div #js {:className "flex flex-row"}

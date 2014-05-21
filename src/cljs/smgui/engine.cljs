@@ -5,6 +5,7 @@
 (def subtitle-master (.require js/window "subtitle-master"))
 (def sm-search (.-SearchDownload subtitle-master))
 (def sm-scan (.-VideoScan subtitle-master))
+(def sm-alternatives (.-AlternativeSearch subtitle-master))
 
 (defn promise [value]
   #js {:then (fn [callback] (callback value))})
@@ -33,6 +34,28 @@
            #(put-and-close! c [% nil])
            #(put-and-close! c ["error" %])
            #(put! c (array-seq %)))
+    c))
+
+(defn read-alternative [obj]
+  (let [path (.-path obj)
+        source-path (.-sourcePath obj)
+        target-path (.-targetPath obj)
+        subtitle (.-subtitle obj)
+        lang (.language subtitle)
+        source (-> subtitle .-source .name)]
+    {:path path
+     :language lang
+     :source source
+     :source-path source-path
+     :target-path target-path}))
+
+(defn search-alternatives [path languages]
+  (let [op (sm-alternatives. path (apply array languages))
+        promise (.run op)
+        c (chan)]
+    (.then promise
+           #(put-and-close! c [:ok (->> % array-seq (map read-alternative))])
+           #(put-and-close! c [:error %]))
     c))
 
 (defn scan [path]
