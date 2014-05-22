@@ -1,7 +1,7 @@
 (ns smgui.components
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
-            [smgui.ttiual :refer [class-set]]
+            [smgui.util :refer [class-set]]
             [smgui.gui :as gui]
             [cljs.core.async :refer [>!]]))
 

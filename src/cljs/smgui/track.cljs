@@ -1,7 +1,6 @@
 (ns smgui.track
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [chan put!]]
-            [smgui.uuid :as uuid]
             [clojure.string :as string]))
 
 (def request-lib (.require js/window "request"))

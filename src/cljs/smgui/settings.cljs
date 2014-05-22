@@ -2,12 +2,11 @@
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
             [cljs.reader]
-            [smgui.uuid :as uuid]
-            [smgui.ttiual :refer [in?]]))
+            [smgui.util :as util :refer [in?]]))
 
 (def defaults
   {:languages ["pb" "pt" "en"]
-   :uuid (uuid/v4)})
+   :uuid (util/uuid-v4)})
 
 (defn save [new-settings]
   (set! (-> js/window .-localStorage .-settings) (pr-str new-settings))

@@ -1,7 +1,7 @@
-(ns smgui.ttiual-spec
+(ns smgui.util_spec
   (:require-macros [speclj.core :refer [describe it should should-not should=]])
   (:require [speclj.core]
-            [smgui.ttiual :refer [in? not-in? class-set]]))
+            [smgui.util :refer [in? not-in? class-set]]))
 
 (describe "in?"
           (it "checks if element is included on sequence"

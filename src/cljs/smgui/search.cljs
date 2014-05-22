@@ -5,9 +5,8 @@
             [smgui.engine :refer [download scan search-alternatives]]
             [smgui.gui :as gui]
             [smgui.core :as app]
-            [smgui.fs :as fs]
             [smgui.settings :as settings]
-            [smgui.ttiual :refer [class-set]]
+            [smgui.util :refer [class-set copy-file]]
             [cljs.core.async :refer [put! chan <! >! close!]]))
 
 (defn define-status [icon detail]
@@ -66,7 +65,7 @@
                 :className "flex"}
                (str language " - " source))
     (dom/button #js {:onClick #(do
-                                (fs/copy path target-path)
+                                (copy-file path target-path)
                                 (app/call :alternatives-close {:id id}))} "Selecionar")))
 
 (defn alternative-loading []
