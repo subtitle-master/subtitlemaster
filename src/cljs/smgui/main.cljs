@@ -13,10 +13,6 @@
             [clojure.string :as string]
             [weasel.repl :as ws-repl]))
 
-(ws-repl/connect "ws://localhost:9001")
-
-(enable-console-print!)
-
 (defn render-not-found []
   (dom/div nil "Página não encontrada"))
 
@@ -56,7 +52,9 @@
   (reset! app-state state)
   (om/root main-view app-state {:target (.-body js/document)}))
 
-(om/root main-view app-state {:target (.-body js/document)})
-
-(doseq [path gui/app-args]
-  (search-for-path path))
+(defn init []
+  (ws-repl/connect "ws://localhost:9001")
+  (enable-console-print!)
+  (om/root main-view app-state {:target (.-body js/document)})
+  (doseq [path gui/app-args]
+    (search-for-path path)))
