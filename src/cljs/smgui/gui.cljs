@@ -12,3 +12,5 @@
 
 (defn show-file [path]
   (-> nwgui .-Shell (.showItemInFolder path)))
+
+(def app-args (-> nwgui .-App .-argv array-seq))

@@ -3,7 +3,7 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [smgui.components :refer [external-link pd]]
-            [smgui.search :refer [render-search]]
+            [smgui.search :refer [render-search search-for-path]]
             [smgui.settings :as settings]
             [smgui.gui :as gui]
             [smgui.track :as track]
@@ -57,3 +57,6 @@
   (om/root main-view app-state {:target (.-body js/document)}))
 
 (om/root main-view app-state {:target (.-body js/document)})
+
+(doseq [path gui/app-args]
+  (search-for-path path))
