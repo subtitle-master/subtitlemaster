@@ -1,7 +1,7 @@
 (ns smgui.gui
   (:require [cljs.core.async :refer [chan put!]]))
 
-(def nwgui (.require js/window "nw.gui"))
+(def nwgui (js/require "nw.gui"))
 
 (def open-channel (chan))
 

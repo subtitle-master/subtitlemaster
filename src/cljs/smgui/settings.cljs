@@ -27,8 +27,8 @@
    :iso639_2b (.-iso639_2b lang)
    :name (.-name lang)})
 
-(.require js/window "subtitle-master") ; this ensures CoffeeScript is activated
-(def languages-map (->> (.require js/window "subtitle-master/lib/languages.coffee")
+(js/require "subtitle-master") ; this ensures CoffeeScript is activated
+(def languages-map (->> (js/require "subtitle-master/lib/languages.coffee")
                     (array-seq)
                     (map extract-language)
                     (sort-by :name)))

@@ -55,7 +55,7 @@
   (dom/img #js {:src (str "images/icon-" icon ".svg") :className "status"}))
 
 (defn basename [path]
-  (-> (.require js/window "path")
+  (-> (js/require "path")
       (.basename path)))
 
 (defn alternative-item-view [{:keys [path language source target-path]} id]

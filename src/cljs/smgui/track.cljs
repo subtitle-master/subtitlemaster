@@ -3,10 +3,10 @@
   (:require [cljs.core.async :refer [chan put!]]
             [clojure.string :as string]))
 
-(def request-lib (.require js/window "request"))
+(def request-lib (js/require "request"))
 
-(def app-version (-> (.require js/window "./package.json") .-version))
-(def platform-name (-> (.require js/window "os") .platform))
+(def app-version (-> (js/require "./package.json") .-version))
+(def platform-name (-> (js/require "os") .platform))
 
 (defn track-info [type data]
   (merge {:v    1

@@ -3,7 +3,7 @@
   (:require [cljs.core.async :refer [chan close! put!]]
             [smgui.track :as track]))
 
-(def subtitle-master (.require js/window "subtitle-master"))
+(def subtitle-master (js/require "subtitle-master"))
 (def sm-search (.-SearchDownload subtitle-master))
 (def sm-scan (.-VideoScan subtitle-master))
 (def sm-alternatives (.-AlternativeSearch subtitle-master))
