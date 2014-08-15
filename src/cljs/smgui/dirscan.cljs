@@ -20,23 +20,23 @@
 (defn node->chan [f & args]
   (let [c (chan)
         callback (fn [err res]
-                    (if-not err
-                      (put! c res)
-                      (put! c (make-js-error err)))
-                    (close! c))
+                   (if-not err
+                     (put! c res)
+                     (put! c (make-js-error err)))
+                   (close! c))
         args (conj (vec args) callback)]
     (apply f args)
     c))
 
 (defn is-dir? [path]
   (go-try
-    (let [stat (<? (node->chan (.-lstat fs) path))]
-      (.isDirectory stat))))
+   (let [stat (<? (node->chan (.-lstat fs) path))]
+     (.isDirectory stat))))
 
 (defn is-file? [path]
   (go-try
-    (let [stat (<? (node->chan (.-lstat fs) path))]
-      (.isFile stat))))
+   (let [stat (<? (node->chan (.-lstat fs) path))]
+     (.isFile stat))))
 
 (defn match-extensions? [path extensions]
   (extensions (-> (.extname nodepath path)
@@ -45,44 +45,44 @@
 (defn readdir [path]
   (let [fullpath (partial str path dir-separator)]
     (go-try
-      (->> (<? (node->chan (.-readdir fs) path))
-           array-seq
-           (map fullpath)))))
+     (->> (<? (node->chan (.-readdir fs) path))
+          array-seq
+          (map fullpath)))))
+
+(defn scanpaths
+  ([paths] (scanpaths paths (chan)))
+  ([input-paths out]
+     (go
+       (let [paths (atom input-paths)]
+         (while @paths
+           (try
+             (let [path (peek @paths)]
+               (swap! paths next)
+               (>! out path)
+               (if (<? (is-dir? path)) (swap! paths into (<? (readdir path)))))
+             (catch js/Error e
+               (.error js/console "Node Err:" e))))
+         (close! out)))
+     out))
 
 (defn scandir
   ([path] (scandir path (chan)))
-  ([path out]
-     (go
-       (try
-         (let [paths (atom [path])]
-           (while @paths
-             (try
-               (let [path (peek @paths)]
-                 (swap! paths next)
-                 (let [files (<? (readdir path))]
-                   (doseq [f files]
-                     (>! out f)
-                     (if (<? (is-dir? f)) (swap! paths conj f)))))
-               (catch js/Error e
-                 (.error js/console "Node Err:" e))))
-           (close! out))
-         ))
-     out))
+  ([path out] (scanpaths [path] out)))
 
 (defn has-video-extension? [path] (match-extensions? path #{"mkv" "avi"}))
 
 (defn show-lookup [path]
-  (->> (scandir path)
+  (->> (scandir [path])
        (r/filter is-file?)
        (r/filter has-video-extension?)))
 
 #_ (go
-  (try
-    (log (<? (is-dir? test-path)))
-    (catch js/Error e
-      (.error js/console "Node:" e))))
+     (try
+       (log (<? (is-dir? test-path)))
+       (catch js/Error e
+         (.error js/console "Node:" e))))
 (go
   (log (<! (dochan [file (show-lookup test-path)]
-               (log file)))))
+                   (log file)))))
 
 #_ (go (log (<! (is-dir? test-path))))
