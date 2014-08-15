@@ -11,6 +11,10 @@
   (.apply (.-log js/console) js/console (clj->js params))
     (last params))
 
+(defn throw-err [e]
+  (when (instance? js/Error e) (throw e))
+  e)
+
 (defn log
   ([in] (log nil in))
   ([prefix in]

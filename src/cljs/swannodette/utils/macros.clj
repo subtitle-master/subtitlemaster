@@ -9,3 +9,12 @@
              ~@body
              (recur))
            :done)))))
+
+(defmacro <? [ch]
+  `(swannodette.utils.reactive/throw-err (cljs.core.async/<! ~ch)))
+
+(defmacro go-try [& body]
+  `(cljs.core.async.macros/go
+     (try
+       ~@body
+       (catch js/Error e e))))
