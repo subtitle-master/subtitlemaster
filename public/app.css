@@ -206,6 +206,14 @@
   display: box;
   display: flex;
 }
+.inline-flex {
+  display: -webkit-inline-box;
+  display: -moz-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-box;
+  display: inline-flex;
+}
 .flex-column {
   display: -webkit-box;
   display: -moz-box;
