@@ -12,14 +12,15 @@
   :source-paths ["src/clj" "src/cljs"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2202"]
+                 [org.clojure/clojurescript "0.0-2268"]
                  [org.clojure/core.async "0.1.301.0-deb34a-alpha"]
                  [om "0.6.2"]
                  [speclj "3.0.2"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
             [speclj "2.5.0"]
-            [jarohen/simple-brepl "0.1.0"]]
+            [jarohen/simple-brepl "0.1.0"]
+            [cider/cider-nrepl "0.7.0"]]
 
   :test-paths ["spec"]
 
