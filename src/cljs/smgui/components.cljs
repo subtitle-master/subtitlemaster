@@ -5,17 +5,23 @@
             [smgui.gui :as gui]
             [cljs.core.async :refer [>!]]))
 
-(defn pd [f]
-  "Prevent default event handler"
-  (fn [e]
-    (.preventDefault e)
-    (f e)))
+(defn pd
+  ([]
+    (pd identity))
+  ([f]
+    (fn [e]
+      (.preventDefault e)
+      (f e))))
 
 (defn external-link [url view]
   (dom/a #js {:href "#" :className "button" :onClick (pd #(gui/open-external url))} view))
 
 (defn input-value-seq [input]
-  (-> (.$ js/window input) .val (or []) array-seq (or [])))
+  (-> (.$ js/window input)
+      .val
+      (or [])
+      array-seq
+      (or [])))
 
 ; global cancel default drop behavior
 (set! (.-ondragover js/window) #(.preventDefault %))
