@@ -13,7 +13,7 @@
 (defmacro <? [ch]
   `(swannodette.utils.reactive/throw-err (cljs.core.async/<! ~ch)))
 
-(defmacro go-try [& body]
+(defmacro go-catch [& body]
   `(cljs.core.async.macros/go
      (try
        ~@body

@@ -1,6 +1,6 @@
 (ns smgui.dirscan
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]
-                   [swannodette.utils.macros :refer [dochan <? go-try]])
+                   [swannodette.utils.macros :refer [dochan <? go-catch]])
   (:require [cljs.core.async :refer [chan <! >! put! close!]]
             [swannodette.utils.reactive :as r]))
 
@@ -29,12 +29,12 @@
     c))
 
 (defn is-dir? [path]
-  (go-try
+  (go-catch
    (let [stat (<? (node->chan (.-lstat fs) path))]
      (.isDirectory stat))))
 
 (defn is-file? [path]
-  (go-try
+  (go-catch
    (let [stat (<? (node->chan (.-lstat fs) path))]
      (.isFile stat))))
 
@@ -44,7 +44,7 @@
 
 (defn readdir [path]
   (let [fullpath (partial str path dir-separator)]
-    (go-try
+    (go-catch
      (->> (<? (node->chan (.-readdir fs) path))
           array-seq
           (map fullpath)))))
