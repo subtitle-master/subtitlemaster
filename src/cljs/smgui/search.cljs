@@ -8,6 +8,7 @@
             [smgui.core :as app :refer [flux-handler]]
             [smgui.settings :as settings]
             [smgui.util :refer [class-set copy-file]]
+            [smgui.dirscan :as dir]
             [cljs.core.async :refer [put! chan <! >! close! pipe]]
             [swannodette.utils.reactive :as r]))
 
@@ -121,10 +122,11 @@
                                                               :channel c}})))
 
 (defmethod flux-handler :add-search [{:keys [path]}]
-  (go
-    (let [id (rand)
-          channel (download-chan path)]
-      (loop [state {:status :init}]
-        (when state
-          (swap! app/app-state update-in [:searches] #(assoc % id (merge state {:path path :id id})))
-          (recur (<! channel)))))))
+  (dochan [channel (->> (dir/show-lookup path)
+                        (r/map download-chan))]
+    (go
+      (let [id (rand)]
+        (loop [state {:status :init}]
+          (when state
+            (swap! app/app-state update-in [:searches] #(assoc % id (merge state {:path path :id id})))
+            (recur (<! channel))))))))
