@@ -3,11 +3,11 @@
   (:require [om.core :as om]
             [om.dom :as dom]
             [smgui.components :refer [external-link pd]]
-            [smgui.search :refer [render-search search-for-path]]
+            [smgui.search :refer [render-search]]
             [smgui.settings :as settings]
             [smgui.gui :as gui]
             [smgui.track :as track]
-            [smgui.core :refer [app-state]]
+            [smgui.core :refer [app-state flux-channel]]
             [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [clojure.data :as data]
             [clojure.string :as string]
@@ -63,4 +63,4 @@
   (enable-console-print!)
   (om/root main-view app-state {:target (.-body js/document)})
   (doseq [path gui/app-args]
-    (search-for-path path)))
+    (put! flux-channel {:cmd :add-search :path path})))
