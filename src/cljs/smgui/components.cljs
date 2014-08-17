@@ -45,7 +45,7 @@
     (render-state [_ {:keys [over view channel] :as state}]
       (let [update-over #(om/set-state! owner :over %)
             classes (class-set {"dragging" over})
-            on-files #(pipe (r/spool %) channel)]
+            on-files #(pipe (r/spool %) channel false)]
         (dom/div #js {:className   (str "flex flex-row " classes)
                       :onDragEnter (pd #(update-over true))
                       :onDragOver  (pd #(update-over true))
