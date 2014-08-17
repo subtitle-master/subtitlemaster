@@ -3,7 +3,8 @@
             [om.core :as om :include-macros true]
             [smgui.util :refer [class-set]]
             [smgui.gui :as gui]
-            [cljs.core.async :refer [>!]]))
+            [cljs.core.async :refer [>! pipe]]
+            [swannodette.utils.reactive :as r]))
 
 (defn pd
   ([]
@@ -41,13 +42,14 @@
     (init-state [_] {:over false :onFiles (fn [_])})
 
     om/IRenderState
-    (render-state [_ {:keys [over view onFiles] :as state}]
+    (render-state [_ {:keys [over view channel] :as state}]
       (let [update-over #(om/set-state! owner :over %)
-            classes (class-set {"dragging" over})]
+            classes (class-set {"dragging" over})
+            on-files #(pipe (r/spool %) channel)]
         (dom/div #js {:className   (str "flex flex-row " classes)
                       :onDragEnter (pd #(update-over true))
                       :onDragOver  (pd #(update-over true))
                       :onDragLeave (pd #(update-over false))
                       :onDragEnd   (pd #(update-over false))
-                      :onDrop      (pd #(do (update-over false) (onFiles (read-file-paths %))))}
+                      :onDrop      (pd #(do (update-over false) (on-files (read-file-paths %))))}
                  view)))))

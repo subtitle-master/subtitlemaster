@@ -1,13 +1,15 @@
 (ns smgui.search
-  (:require-macros [cljs.core.async.macros :refer [go-loop]])
+  (:require-macros [cljs.core.async.macros :refer [go-loop go]]
+                   [swannodette.utils.macros :refer [dochan <? go-catch]])
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
             [smgui.engine :refer [download scan search-alternatives]]
             [smgui.gui :as gui]
-            [smgui.core :as app]
+            [smgui.core :as app :refer [flux-handler]]
             [smgui.settings :as settings]
             [smgui.util :refer [class-set copy-file]]
-            [cljs.core.async :refer [put! chan <! >! close!]]))
+            [cljs.core.async :refer [put! chan <! >! close! pipe]]
+            [swannodette.utils.reactive :as r]))
 
 (defn define-status [icon detail]
   { :icon icon :detail detail })
@@ -39,17 +41,8 @@
                (close! out)))
     out))
 
-(defn add-search [path c]
-  (app/call :add-search {:path path :channel (state-download c)}))
-
-(defn search-for-path [path]
-  (add-search path (smgui.engine/download path (smgui.settings/languages))))
-
-(defn search-for [path]
-  (let [c (scan path)]
-    (go-loop [fpath (<! c)]
-             (search-for-path fpath)
-             (recur (<! c)))))
+(defn download-path [path] (download path (smgui.settings/languages)))
+(defn download-chan [path] (state-download (download-path path)))
 
 (defn status-icon [icon]
   (dom/img #js {:src (str "images/icon-" icon ".svg") :className "status"}))
@@ -116,8 +109,22 @@
   (apply dom/div #js {:className "flex auto-scroll"} (map search-item searches)))
 
 (defn render-search [searches]
-  (let [view (if (empty? searches)
+  (let [c    (chan)
+        view (if (empty? searches)
                (render-search-blank)
                (render-search-list (vals searches)))]
+    (pipe (r/map (fn [path] {:cmd :add-search
+                             :path path})
+                 c)
+          app/flux-channel false)
     (om/build smgui.components/file-dropper searches {:state {:view view
-                                                              :onFiles #(dorun (map search-for %))}})))
+                                                              :channel c}})))
+
+(defmethod flux-handler :add-search [{:keys [path]}]
+  (go
+    (let [id (rand)
+          channel (download-chan path)]
+      (loop [state {:status :init}]
+        (when state
+          (swap! app/app-state update-in [:searches] #(assoc % id (merge state {:path path :id id})))
+          (recur (<! channel)))))))

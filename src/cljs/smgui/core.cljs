@@ -30,14 +30,6 @@
   (track/screen (name page))
   (swap! app-state assoc :page page))
 
-(defmethod flux-handler :add-search [{:keys [path channel]}]
-  (go
-    (let [id (rand)]
-      (loop [state {:status :init}]
-        (when state
-          (swap! app-state update-in [:searches] #(assoc % id (merge state {:path path :id id})))
-          (recur (<! channel)))))))
-
 (defmethod flux-handler :search-alternatives [{:keys [id channel]}]
   (swap! app-state update-in [:searches id] assoc :alternatives :loading)
   (go (swap! app-state update-in [:searches id] assoc :alternatives (<! channel))))
