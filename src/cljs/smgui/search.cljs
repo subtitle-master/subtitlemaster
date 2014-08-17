@@ -5,7 +5,7 @@
             [om.core :as om :include-macros true]
             [smgui.engine :refer [download scan search-alternatives]]
             [smgui.gui :as gui]
-            [smgui.core :as app :refer [flux-handler]]
+            [smgui.core :as app :refer [flux-handler app-state]]
             [smgui.settings :as settings]
             [smgui.util :refer [class-set copy-file]]
             [smgui.dirscan :as dir]
@@ -121,6 +121,7 @@
     (om/build smgui.components/file-dropper searches {:state {:view view
                                                               :channel c}})))
 
+; register application handlers
 (defmethod flux-handler :add-search [{source-path :path}]
   (dochan [{:keys [path channel]} (->> (dir/show-lookup source-path)
                                        (r/map #(hash-map :path % :channel (download-chan %))))]
@@ -128,5 +129,15 @@
       (let [id (rand)]
         (loop [state {:status :init}]
           (when state
-            (swap! app/app-state update-in [:searches] #(assoc % id (merge state {:path path :id id})))
+            (swap! app-state update-in [:searches] #(assoc % id (merge state {:path path :id id})))
             (recur (<! channel))))))))
+
+(defmethod flux-handler :search-alternatives [{:keys [id channel]}]
+  (swap! app-state update-in [:searches id] assoc :alternatives :loading)
+  (go (swap! app-state update-in [:searches id] assoc :alternatives (<! channel))))
+
+(defmethod flux-handler :alternatives-close [{:keys [id]}]
+  (swap! app-state update-in [:searches id] assoc :alternatives nil))
+
+(defmethod flux-handler :remove-search [{:keys [id]}]
+  (swap! app-state update-in [:searches] dissoc id))

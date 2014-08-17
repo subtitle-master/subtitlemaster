@@ -30,16 +30,6 @@
   (track/screen (name page))
   (swap! app-state assoc :page page))
 
-(defmethod flux-handler :search-alternatives [{:keys [id channel]}]
-  (swap! app-state update-in [:searches id] assoc :alternatives :loading)
-  (go (swap! app-state update-in [:searches id] assoc :alternatives (<! channel))))
-
-(defmethod flux-handler :alternatives-close [{:keys [id]}]
-  (swap! app-state update-in [:searches id] assoc :alternatives nil))
-
-(defmethod flux-handler :remove-search [{:keys [id]}]
-  (swap! app-state update-in [:searches] dissoc id))
-
 (defn call [cmd map]
   (put! flux-channel (assoc map :cmd cmd)))
 
