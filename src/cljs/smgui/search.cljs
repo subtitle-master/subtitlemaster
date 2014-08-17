@@ -42,8 +42,8 @@
                (close! out)))
     out))
 
-(defn download-path [path] (download path (smgui.settings/languages)))
-(defn download-chan [path] (state-download (download-path path)))
+(defn download-chan [path]
+  (state-download (download path (smgui.settings/languages))))
 
 (defn status-icon [icon]
   (dom/img #js {:src (str "images/icon-" icon ".svg") :className "status"}))
@@ -121,9 +121,9 @@
     (om/build smgui.components/file-dropper searches {:state {:view view
                                                               :channel c}})))
 
-(defmethod flux-handler :add-search [{:keys [path]}]
-  (dochan [channel (->> (dir/show-lookup path)
-                        (r/map download-chan))]
+(defmethod flux-handler :add-search [{source-path :path}]
+  (dochan [{:keys [path channel]} (->> (dir/show-lookup source-path)
+                                       (r/map #(hash-map :path % :channel (download-chan %))))]
     (go
       (let [id (rand)]
         (loop [state {:status :init}]
