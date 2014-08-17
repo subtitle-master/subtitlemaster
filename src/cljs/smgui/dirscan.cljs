@@ -53,7 +53,7 @@
   ([paths] (scanpaths paths (chan)))
   ([input-paths out]
      (go
-       (let [paths (atom input-paths)]
+       (let [paths (atom (vec input-paths))]
          (while @paths
            (try
              (let [path (peek @paths)]
@@ -72,7 +72,7 @@
 (defn has-video-extension? [path] (match-extensions? path #{"mkv" "avi"}))
 
 (defn show-lookup [path]
-  (->> (scandir [path])
+  (->> (scandir path)
        (r/filter is-file?)
        (r/filter has-video-extension?)))
 
@@ -81,7 +81,7 @@
        (log (<? (is-dir? test-path)))
        (catch js/Error e
          (.error js/console "Node:" e))))
-(go
+#_ (go
   (log (<! (dochan [file (show-lookup test-path)]
                    (log file)))))
 
