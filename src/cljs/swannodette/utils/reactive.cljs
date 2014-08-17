@@ -51,7 +51,8 @@
     (let [out (chan)]
       (go (loop []
             (if-let [x (<! in)]
-              (do (>! out (<! (if f (f x) x)))
+              (do
+                (dochan [v (if f (f x) x)] (>! out v))
                 (recur))
               (close! out))))
       out)))
