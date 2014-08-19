@@ -5,6 +5,7 @@
             [smgui.components :refer [external-link pd]]
             [smgui.search :refer [render-search]]
             [smgui.settings :as settings]
+            [smgui.organize :refer [render-organize]]
             [smgui.gui :as gui]
             [smgui.track :as track]
             [smgui.core :refer [app-state flux-channel]]
@@ -18,7 +19,8 @@
 
 (defn render-page [cursor]
   (case (:page cursor)
-    :search (render-search (get cursor :searches))
+    :search (render-search (-> cursor :searches))
+    :organize (render-organize cursor)
     :settings (settings/render-page cursor)
     (render-not-found)))
 
@@ -29,12 +31,6 @@
 (defn page-link [page cursor view]
   (let [class (if (= (:page cursor) page) "button selected" "button")]
     (dom/a #js {:href "#" :className class :onClick (pd #(change-page cursor page))} view)))
-
-(defn updater [cursor _]
-  (reify
-    om/IRender
-    (render [_]
-      )))
 
 (defn main-view [cursor _]
   (reify
@@ -50,6 +46,7 @@
         (dom/hr #js {:className "filmstrip shadow-up"})
         (dom/div #js {:className "app-menu flex-row"}
           (page-link :search cursor (dom/img #js {:src "images/icons/magnify.png"}))
+          (page-link :organize cursor (dom/img #js {:src "images/icons/grid-1.png"}))
           (dom/div #js {:className "flex"})
           (external-link "https://www.facebook.com/subtitlemaster" (dom/img #js {:src "images/icons/facebook.png"}))
           (page-link :settings cursor (dom/img #js {:src "images/icons/gear.png"})))))))

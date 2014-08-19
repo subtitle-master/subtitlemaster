@@ -14,6 +14,8 @@
 (def app-state
   (atom {:page :search
          :searches {}
+         :organizer {:matched []
+                     :searching false}
          :settings (settings/read)}))
 
 ; save options when it changes

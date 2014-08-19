@@ -39,7 +39,7 @@
 (defn file-dropper [_ owner]
   (reify
     om/IInitState
-    (init-state [_] {:over false :onFiles (fn [_])})
+    (init-state [_] {:over false})
 
     om/IRenderState
     (render-state [_ {:keys [over view channel] :as state}]

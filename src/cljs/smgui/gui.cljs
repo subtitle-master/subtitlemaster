@@ -3,7 +3,11 @@
 
 (def nwgui (js/require "nw.gui"))
 
-(def open-channel (chan))
+(defn open-channel
+  ([] (open-channel (chan)))
+  ([out] (-> nwgui
+             .-App
+             (.on "open" #(put! out %)))))
 
 (-> nwgui .-App (.on "open" #(put! smgui.core/flux-channel {:cmd :add-search :path %})))
 

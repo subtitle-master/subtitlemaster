@@ -6,7 +6,19 @@
 
 (def defaults
   {:languages ["pb" "pt" "en"]
-   :uuid (util/uuid-v4)})
+   :uuid (util/uuid-v4)
+   :organizer {:source ""
+               :target ""}})
+
+(defprotocol IMergeSettings
+  (-merge-settings [a b]))
+
+(extend-protocol IMergeSettings
+  PersistentArrayMap
+  (-merge-settings [a b] (merge-with -merge-settings a b))
+
+  default
+  (-merge-settings [_ b] b))
 
 (defn save [new-settings]
   (set! (-> js/window .-localStorage .-settings) (pr-str new-settings))
@@ -15,7 +27,9 @@
 (defn read []
   (let [settings (-> js/window .-localStorage .-settings)]
     (if settings
-      (cljs.reader/read-string settings)
+      (merge-with -merge-settings
+                  defaults
+                  (cljs.reader/read-string settings))
       (save defaults))))
 
 (defn languages [] (-> (read) :languages))
@@ -29,9 +43,9 @@
 
 (js/require "subtitle-master") ; this ensures CoffeeScript is activated
 (def languages-map (->> (js/require "subtitle-master/lib/languages.coffee")
-                    (array-seq)
-                    (map extract-language)
-                    (sort-by :name)))
+                        (array-seq)
+                        (map extract-language)
+                        (sort-by :name)))
 
 (defn- option-from-location [{:keys [iso639_1 name]}]
   (dom/option #js {:value iso639_1 :key iso639_1} name))
@@ -54,7 +68,7 @@
 (defn index-of [s, needle]
   (->> (map-indexed vector s)
        (some (fn [[k v]] (and (= needle v)
-                            k)))))
+                              k)))))
 
 (defn- swap-indexes [seq a b]
   (-> seq

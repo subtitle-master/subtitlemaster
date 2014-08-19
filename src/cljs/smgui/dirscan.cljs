@@ -28,29 +28,32 @@
     (apply f args)
     c))
 
+(defn error? [x] (instance? js/Error x))
+(def non-error? (complement error?))
+
 (defn is-dir? [path]
   (go-catch
-   (let [stat (<? (node->chan (.-lstat fs) path))]
-     (.isDirectory stat))))
+    (let [stat (<? (node->chan (.-lstat fs) path))]
+      (.isDirectory stat))))
 
 (defn is-file? [path]
   (go-catch
-   (let [stat (<? (node->chan (.-lstat fs) path))]
-     (.isFile stat))))
+    (let [stat (<? (node->chan (.-lstat fs) path))]
+      (.isFile stat))))
 
 (defn match-extensions? [path extensions]
   (extensions (-> (.extname nodepath path)
                   (subs 1))))
 
-(defn readdir [path]
+(defn read-dir [path]
   (let [fullpath (partial str path dir-separator)]
     (go-catch
      (->> (<? (node->chan (.-readdir fs) path))
           array-seq
           (map fullpath)))))
 
-(defn scanpaths
-  ([paths] (scanpaths paths (chan)))
+(defn scan-paths
+  ([paths] (scan-paths paths (chan)))
   ([input-paths out]
      (go
        (let [paths (atom (vec input-paths))]
@@ -59,30 +62,12 @@
              (let [path (peek @paths)]
                (swap! paths next)
                (>! out path)
-               (if (<? (is-dir? path)) (swap! paths into (<? (readdir path)))))
+               (if (<? (is-dir? path)) (swap! paths into (<? (read-dir path)))))
              (catch js/Error e
-               (.error js/console "Node Err:" e))))
+               (>! out e))))
          (close! out)))
      out))
 
 (defn scandir
   ([path] (scandir path (chan)))
-  ([path out] (scanpaths [path] out)))
-
-(defn has-video-extension? [path] (match-extensions? path #{"mkv" "avi"}))
-
-(defn show-lookup [path]
-  (->> (scandir path)
-       (r/filter is-file?)
-       (r/filter has-video-extension?)))
-
-#_ (go
-     (try
-       (log (<? (is-dir? test-path)))
-       (catch js/Error e
-         (.error js/console "Node:" e))))
-#_ (go
-  (log (<! (dochan [file (show-lookup test-path)]
-                   (log file)))))
-
-#_ (go (log (<! (is-dir? test-path))))
+  ([path out] (scan-paths [path] out)))
