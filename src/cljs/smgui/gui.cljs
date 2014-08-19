@@ -5,7 +5,7 @@
 
 (def open-channel (chan))
 
-(-> nwgui .-App (.on "open" #(smgui.search/search-for %)))
+(-> nwgui .-App (.on "open" #(put! smgui.core/flux-channel {:cmd :add-search :path %})))
 
 (defn open-external [url]
   (-> nwgui .-Shell (.openExternal url)))
