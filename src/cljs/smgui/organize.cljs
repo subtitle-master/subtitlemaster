@@ -1,5 +1,5 @@
 (ns smgui.organize
-  (:require-macros [swannodette.utils.macros :refer [dochan]]
+  (:require-macros [swannodette.utils.macros :refer [dochan <?]]
                    [cljs.core.async.macros :refer [go]])
   (:require [om.dom :as dom]
             [om.core :as om]
@@ -15,6 +15,8 @@
 
 (defn basename-without-extension [path]
   (.basename nwpath path (.extname nwpath path)))
+
+(def path-sep (.-sep nwpath))
 
 (def video-extensions
   #{"3g2" "3gp" "3gp2" "3gpp" "60d" "ajp" "asf" "asx" "avchd" "avi"
@@ -43,20 +45,24 @@
      :season season
      :episode episode}))
 
-(defn episode-target [{:keys [name season path]} target]
-  (str target "/" name "/Season " season "/" (basename path)))
+(defn str-pre-case [s str]
+  (or
+   (first (filter #(= (.toLowerCase %) (.toLowerCase str)) s))
+   str))
 
-(episode-target {:path "blabla.mkv"
-                 :name "bla"
-                 :season "02"}
-                "/target")
+(defn with-target [{:keys [name season path] :as info} target]
+  (let [target-part (str name "/Season " season "/" (basename path))]
+    (merge info {:target (str target "/" target-part)
+                 :target-part target-part})))
 
-(defn show-lookup [path]
-  (->> (dir/scandir path)
-       (r/remove sample?)
-       (r/filter has-video-extension?)
-       (r/filter dir/is-file?)
-       (r/mapfilter episode-info)))
+(defn show-lookup
+  ([path] (show-lookup path []))
+  ([path names]
+     (->> (dir/scandir path)
+          (r/remove sample?)
+          (r/filter has-video-extension?)
+          (r/mapfilter episode-info)
+          (r/map #(update-in % [:name] (partial str-pre-case names))))))
 
 (defn directory-picker [cursor owner]
   (reify
@@ -78,13 +84,18 @@
       (om/update! cursor [:searching] true)
       (om/update! cursor [:matched] [])
       (go
-        (<! (dochan [path (show-lookup source)]
-              (om/transact! cursor [:matched] #(conj % path))))
+        (try
+          (let [names (map basename (<? (dir/read-dir target)))]
+            (<! (dochan [info (show-lookup source names)]
+                  (om/transact! cursor [:matched] #(conj % (with-target info target))))))
+          (catch js/Error e
+            (.log js/console "Error" e)))
         (om/update! cursor [:searching] false)))))
 
-(defn scan-result [{:keys [path name season]}]
+(defn scan-result [{:keys [path name season target target-part]}]
   (dom/div nil
-    (basename path)
+    (dom/div nil target-part)
+    (dom/div nil target)
     (dom/button #js {:onClick #(do (.preventDefault %)
                                    (gui/show-file path))
                      :href "#"}
