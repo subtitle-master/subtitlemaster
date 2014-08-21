@@ -37,13 +37,6 @@
             (close! out))))
     out))
 
-(defn multi-chan [v]
-  (let [c1 (chan)
-        c2 (chan)]
-    (put! c1 v)
-    (put! c2 c1)
-    c2))
-
 (defn map [f in]
   (let [out (chan)]
     (go (loop []
