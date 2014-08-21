@@ -100,6 +100,17 @@
                      :href "#"}
                 "show")))
 
+(defn move [{:keys [path target] :as item}]
+  (go
+    (.log js/console "moving" (clj->js item))))
+
+(defn move-episodes [cursor]
+  (dochan [item (r/spool @cursor)]
+    (try
+      (<? (move item))
+      (catch js/Error e
+        (.log js/console "Error moving" (clj->js item) "err" e)))))
+
 (defn render-organize [cursor]
   (let [settings (-> cursor :settings :organizer)
         {:keys [searching matched] :as organizer} (-> cursor :organizer)
@@ -114,4 +125,7 @@
       (apply dom/div #js {:className "white-box"}
         (if searching
           "Searching...")
+        (if (and (not searching)
+                 (seq matched))
+          (dom/button #js {:onClick #(move-episodes matched)} "MOVE!"))
         (map scan-result matched)))))

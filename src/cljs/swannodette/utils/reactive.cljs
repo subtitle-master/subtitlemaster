@@ -1,10 +1,10 @@
 (ns swannodette.utils.reactive
-  (:refer-clojure :exclude [map mapcat filter remove distinct concat take-while])
+  (:refer-clojure :exclude [map mapcat filter remove distinct concat take-while drop-while complement])
   (:require [goog.net.Jsonp]
             [goog.Uri]
             [cljs.core.async :refer [>! <! chan put! close! timeout alts!]])
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
-                   [swannodette.utils.macros :refer [dochan]])
+                   [swannodette.utils.macros :refer [dochan go-catch <?]])
   (:import goog.events.EventType))
 
 (defn blog [& params]
@@ -177,6 +177,23 @@
             (close! out))))
     out))
 
+(defn drop-while
+  ([sentinel in] (drop-while sentinel in (chan)))
+  ([sentinel in out]
+     (go (loop [discard true]
+           (if-let [v (<! in)]
+             (if discard
+               (if (<! (first-val (sentinel v)))
+                 (recur true)
+                 (do
+                   (>! out v)
+                   (recur false)))
+               (do
+                 (>! out v)
+                 (recur false)))
+             (close! out))))
+     out))
+
 (defn siphon
   ([in] (siphon in []))
   ([in coll]
@@ -297,3 +314,8 @@
               (recur))
           (close! out))))
     out))
+
+(defn complement [f]
+  (fn [& args]
+    (go-catch
+      (boolean (not (<? (apply f args)))))))
