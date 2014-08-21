@@ -25,6 +25,25 @@
         (>! out value))
       out)))
 
+(defn first-val [c]
+  (let [out (chan)]
+    (go (loop [v c]
+          (if v
+            (if (satisfies? cljs.core.async.impl.protocols/ReadPort v)
+              (recur (<! v))
+              (do
+                (>! out v)
+                (close! out)))
+            (close! out))))
+    out))
+
+(defn multi-chan [v]
+  (let [c1 (chan)
+        c2 (chan)]
+    (put! c1 v)
+    (put! c2 c1)
+    c2))
+
 (defn map [f in]
   (let [out (chan)]
     (go (loop []
@@ -76,7 +95,7 @@
   (let [out (chan)]
     (go (loop []
           (if-let [x (<! in)]
-            (do (when (pred x) (>! out x))
+            (do (when (<! (first-val (pred x))) (>! out x))
               (recur))
             (close! out))))
     out))
