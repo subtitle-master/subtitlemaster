@@ -1,4 +1,4 @@
-(ns smgui.dirscan
+(ns smgui.fs
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]
                    [swannodette.utils.macros :refer [dochan <? go-catch]])
   (:require [cljs.core.async :refer [chan <! >! put! close!]]
@@ -7,7 +7,6 @@
 (def nodepath (js/require "path"))
 (def dir-separator (.-sep nodepath))
 (def fs (js/require "fs"))
-(def test-path "/Volumes/WilkerWD/Downloads")
 
 (defn log [& params]
   (.apply (.-log js/console) js/console (clj->js params))

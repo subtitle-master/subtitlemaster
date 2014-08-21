@@ -3,7 +3,7 @@
                    [cljs.core.async.macros :refer [go]])
   (:require [om.dom :as dom]
             [om.core :as om]
-            [smgui.dirscan :as dir]
+            [smgui.fs :as fs]
             [smgui.gui :as gui]
             [cljs.core.async :refer [<! put! chan timeout]]
             [swannodette.utils.reactive :as r]))
@@ -15,8 +15,6 @@
 
 (defn basename-without-extension [path]
   (.basename nwpath path (.extname nwpath path)))
-
-(def path-sep (.-sep nwpath))
 
 (def video-extensions
   #{"3g2" "3gp" "3gp2" "3gpp" "60d" "ajp" "asf" "asx" "avchd" "avi"
@@ -30,7 +28,7 @@
 
 (defn event->value [e] (-> e .-target .-value))
 
-(defn has-video-extension? [path] (dir/match-extensions? path video-extensions))
+(defn has-video-extension? [path] (fs/match-extensions? path video-extensions))
 
 (defn sample? [path] (boolean (re-find #"sample" path)))
 
@@ -58,9 +56,10 @@
 (defn show-lookup
   ([path] (show-lookup path []))
   ([path names]
-     (->> (dir/scandir path)
+     (->> (fs/scandir path)
           (r/remove sample?)
           (r/filter has-video-extension?)
+          (r/filter fs/is-file?)
           (r/mapfilter episode-info)
           (r/map #(update-in % [:name] (partial str-pre-case names))))))
 
@@ -85,7 +84,7 @@
       (om/update! cursor [:matched] [])
       (go
         (try
-          (let [names (map basename (<? (dir/read-dir target)))]
+          (let [names (map basename (<? (fs/read-dir target)))]
             (<! (dochan [info (show-lookup source names)]
                   (om/transact! cursor [:matched] #(conj % (with-target info target))))))
           (catch js/Error e
