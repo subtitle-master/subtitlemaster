@@ -1,8 +1,9 @@
 (ns smgui.organize
-  (:require-macros [swannodette.utils.macros :refer [dochan <?]]
+  (:require-macros [swannodette.utils.macros :refer [dochan <? go-catch]]
                    [cljs.core.async.macros :refer [go]])
   (:require [om.dom :as dom]
             [om.core :as om]
+            [smgui.path :as path]
             [smgui.fs :as fs]
             [smgui.gui :as gui]
             [cljs.core.async :refer [<! put! chan timeout]]
@@ -101,8 +102,11 @@
                 "show")))
 
 (defn move [{:keys [path target] :as item}]
-  (go
-    (.log js/console "moving" (clj->js item))))
+  (go-catch
+    (let [d (path/dirname target)]
+      (<? (fs/mkdir-p d))
+      (<? (fs/rename path target))
+      :done)))
 
 (defn move-episodes [cursor]
   (dochan [item (r/spool @cursor)]

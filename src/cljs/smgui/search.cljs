@@ -121,9 +121,16 @@
     (om/build smgui.components/file-dropper searches {:state {:view view
                                                               :channel c}})))
 
+(defn show-lookup
+  ([path] (show-lookup path []))
+  ([path names]
+     (->> (fs/scandir path)
+          (r/filter smgui.organize/has-video-extension?)
+          (r/filter fs/is-file?))))
+
 ; register application handlers
 (defmethod flux-handler :add-search [{source-path :path}]
-  (dochan [{:keys [path channel]} (->> (fs/show-lookup source-path)
+  (dochan [{:keys [path channel]} (->> (show-lookup source-path)
                                        (r/map #(hash-map :path % :channel (download-chan %))))]
     (go
       (let [id (rand)]

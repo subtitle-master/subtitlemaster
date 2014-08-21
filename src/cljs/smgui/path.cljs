@@ -5,14 +5,10 @@
 
 (def sep (.-sep nodepath))
 
-(defn extname [path]
-  (.extname nodepath path))
-
-(defn basename [path]
-  (.basename nodepath path))
-
-(defn basename-without-extension [path]
-  (.basename nodepath path (extname path)))
+(defn dirname [path] (.dirname nodepath path))
+(defn extname [path] (.extname nodepath path))
+(defn basename [path] (.basename nodepath path))
+(defn basename-without-extension [path] (.basename nodepath path (extname path)))
 
 (defn path-iterator
   ([path] (path-iterator "" (remove str/blank? (str/split path sep))))
