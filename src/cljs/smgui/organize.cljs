@@ -3,6 +3,7 @@
                    [cljs.core.async.macros :refer [go]])
   (:require [om.dom :as dom]
             [om.core :as om]
+            [smgui.core :refer [flux-channel]]
             [smgui.path :as path]
             [smgui.fs :as fs]
             [smgui.gui :as gui]
@@ -68,14 +69,18 @@
   (reify
     om/IDidMount
     (did-mount [this]
-      (-> this .-owner .-refs .-input .getDOMNode (.setAttribute "nwdirectory" "nwdirectory")))
+      (-> owner .-refs .-input .getDOMNode (.setAttribute "nwdirectory" "nwdirectory")))
 
     om/IRenderState
     (render-state [this {k :path}]
       (dom/div nil
-        (dom/div nil (get cursor k))
+        (dom/div #js {:style #js {:cursor "pointer"}
+                      :onClick #(-> owner .-refs .-input .getDOMNode .click)}
+          (or (get cursor k)
+              "Pick a directory"))
         (dom/input #js {:type "file"
                         :ref "input"
+                        :style #js {:display "none"}
                         :onChange #(om/update! cursor k (event->value %))})))))
 
 (defn scan [{:keys [source target]} cursor]
@@ -106,14 +111,19 @@
     (let [d (path/dirname target)]
       (<? (fs/mkdir-p d))
       (<? (fs/rename path target))
+      (>! flux-channel {:cmd :add-search
+                        :path target})
       :done)))
 
 (defn move-episodes [cursor]
-  (dochan [item (r/spool @cursor)]
-    (try
-      (<? (move item))
-      (catch js/Error e
-        (.log js/console "Error moving" (clj->js item) "err" e)))))
+  (go
+    (>! flux-channel {:cmd :change-page :page :search})
+    (<! (dochan [item (r/spool @cursor)]
+           (try
+             (<? (move item))
+             (catch js/Error e
+               (.log js/console "Error moving" (clj->js item) "err" e)))))
+    (om/update! cursor [])))
 
 (defn render-organize [cursor]
   (let [settings (-> cursor :settings :organizer)
@@ -122,7 +132,9 @@
     (dom/div #js {:className "flex auto-scroll"}
       (dom/div #js {:className "white-box"}
         "Video Organizer"
+        (dom/div nil (dom/strong nil "Source"))
         (om/build directory-picker settings {:state {:path :source}})
+        (dom/div nil (dom/strong nil "Target"))
         (om/build directory-picker settings {:state {:path :target}})
         (dom/button #js {:onClick run-scan
                          :disabled searching} "Scan"))
