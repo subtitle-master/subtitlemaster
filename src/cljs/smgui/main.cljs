@@ -32,6 +32,8 @@
   (let [class (if (= (:page cursor) page) "button selected" "button")]
     (dom/a #js {:href "#" :className class :onClick (pd #(change-page cursor page))} view)))
 
+(defn icon [name] (dom/img #js {:src (str "images/icons/" name ".png")}))
+
 (defn main-view [cursor _]
   (reify
     om/IWillMount
@@ -45,11 +47,11 @@
         (render-page cursor)
         (dom/hr #js {:className "filmstrip shadow-up"})
         (dom/div #js {:className "app-menu flex-row"}
-          (page-link :search cursor (dom/img #js {:src "images/icons/magnify.png"}))
-          (page-link :organize cursor (dom/img #js {:src "images/icons/grid-1.png"}))
+          (page-link :search cursor (icon "magnify"))
+          (page-link :organize cursor (icon "grid-1"))
           (dom/div #js {:className "flex"})
-          (external-link "https://www.facebook.com/subtitlemaster" (dom/img #js {:src "images/icons/facebook.png"}))
-          (page-link :settings cursor (dom/img #js {:src "images/icons/gear.png"})))))))
+          (external-link "https://www.facebook.com/subtitlemaster" (icon "facebook"))
+          (page-link :settings cursor (icon "gear")))))))
 
 (defn reset-app-to [state]
   (reset! app-state state)
