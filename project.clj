@@ -20,9 +20,18 @@
   :plugins [[lein-cljsbuild "1.0.3"]
             [speclj "2.5.0"]
             [jarohen/simple-brepl "0.1.0"]
-            [cider/cider-nrepl "0.7.0"]]
+            [cider/cider-nrepl "0.7.0"]
+            [lein-node-webkit-build "0.1.0-SNAPSHOT"]]
 
   :test-paths ["spec"]
+
+  :node-webkit-build {:root                      "public"
+                      :name                      "Subtitle Master"
+                      :platforms                 #{:osx :win}
+                      :osx                       {:icon "/Users/wilkerlucio/Dropbox/Design/subtitle master/subtitle_master.icns"}
+                      :nw-version                "0.10.3"
+                      :disable-developer-toolbar true
+                      :use-lein-project-version  true}
 
   :cljsbuild ~(let [run-specs ["bin/speclj" "target/tests.js"]]
               { :builds { :test { :source-paths ["src/cljs" "spec/cljs"]
