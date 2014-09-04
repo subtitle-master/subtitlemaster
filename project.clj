@@ -34,17 +34,15 @@
                       :use-lein-project-version  true}
 
   :cljsbuild ~(let [run-specs ["bin/speclj" "target/tests.js"]]
-              { :builds { :test { :source-paths ["src/cljs" "spec/cljs"]
-                                  :compiler {:output-to "target/tests.js"
-                                             :pretty-print true}
-                                  :notify-command run-specs}
-
-                          :dev { :source-paths ["src/cljs"]
+              { :builds { :dev { :source-paths ["src/cljs"]
                                  :compiler { :output-to "public/js/smgui.js"
                                              :optimizations :whitespace
                                              :pretty-print true}}
 
                           :release { :source-paths ["src/cljs"]
                                      :compiler { :output-to "public/js/smgui.js"
-                                                 :optimizations :advanced}}}
+                                                 :output-dir "public/js"
+                                                 :optimizations :advanced
+                                                 :pretty-print false
+                                                 :source-map "public/js/smgui.js.map"}}}
                 :test-commands {"test" run-specs}}))
