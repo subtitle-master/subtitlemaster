@@ -21,7 +21,7 @@
             [speclj "2.5.0"]
             [jarohen/simple-brepl "0.1.0"]
             [cider/cider-nrepl "0.7.0"]
-            [lein-node-webkit-build "0.1.0-SNAPSHOT"]]
+            [lein-node-webkit-build "0.1.0"]]
 
   :test-paths ["spec"]
 
@@ -42,5 +42,9 @@
                           :dev { :source-paths ["src/cljs"]
                                  :compiler { :output-to "public/js/smgui.js"
                                              :optimizations :whitespace
-                                             :pretty-print true}}}
+                                             :pretty-print true}}
+
+                          :release { :source-paths ["src/cljs"]
+                                     :compiler { :output-to "public/js/smgui.js"
+                                                 :optimizations :advanced}}}
                 :test-commands {"test" run-specs}}))

@@ -148,3 +148,7 @@
 
 (defmethod flux-handler :remove-search [{:keys [id]}]
   (swap! app-state update-in [:searches] dissoc id))
+
+; handle files drop on dock for macox
+
+

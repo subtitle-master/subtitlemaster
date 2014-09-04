@@ -22,20 +22,21 @@
     <orderEntry type="library" name="Leiningen: clojure-complete:0.2.3" level="project" />
     <orderEntry type="library" name="Leiningen: om:0.6.2" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/clojure:1.6.0" level="project" />
-    <orderEntry type="library" name="Leiningen: org.clojure/clojurescript:0.0-2202" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/clojurescript:0.0-2268" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/core.async:0.1.301.0-deb34a-alpha" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/tools.nrepl:0.2.3" level="project" />
     <orderEntry type="library" name="Leiningen: speclj:3.0.2" level="project" />
     <orderEntry type="library" name="Leiningen: com.facebook/react:0.9.0.1" level="project" />
-    <orderEntry type="library" name="Leiningen: com.google.javascript/closure-compiler:v20131014" level="project" />
+    <orderEntry type="library" name="Leiningen: com.google.javascript/closure-compiler:v20140625" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/data.json:0.2.3" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/google-closure-library:0.0-20140226-71326067" level="project" />
-    <orderEntry type="library" name="Leiningen: org.clojure/tools.reader:0.8.3" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/tools.reader:0.8.4" level="project" />
     <orderEntry type="library" name="Leiningen: org.mozilla/rhino:1.7R4" level="project" />
-    <orderEntry type="library" name="Leiningen: args4j:2.0.16" level="project" />
+    <orderEntry type="library" name="Leiningen: args4j:2.0.26" level="project" />
     <orderEntry type="library" name="Leiningen: com.google.code.findbugs/jsr305:1.3.9" level="project" />
-    <orderEntry type="library" name="Leiningen: com.google.guava/guava:15.0" level="project" />
-    <orderEntry type="library" name="Leiningen: com.google.protobuf/protobuf-java:2.4.1" level="project" />
+    <orderEntry type="library" name="Leiningen: com.google.guava/guava:17.0" level="project" />
+    <orderEntry type="library" name="Leiningen: com.google.javascript/closure-compiler-externs:v20140625" level="project" />
+    <orderEntry type="library" name="Leiningen: com.google.protobuf/protobuf-java:2.5.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.json/json:20090211" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/google-closure-library-third-party:0.0-20140226-71326067" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/tools.analyzer.jvm:0.1.0-beta12" level="project" />
