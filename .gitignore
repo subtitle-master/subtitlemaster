@@ -19,3 +19,4 @@ pom.xml
 .crossover-cljs
 .repl
 .nrepl-port
+smgui.iml
