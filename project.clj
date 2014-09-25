@@ -28,7 +28,7 @@
   :node-webkit-build {:root                      "public"
                       :name                      "Subtitle Master"
                       :platforms                 #{:osx :win}
-                      :osx                       {:icon "/Users/wilkerlucio/Dropbox/Design/subtitle master/subtitle_master.icns"}
+                      :osx                       {:icon "resources/subtitle_master.icns"}
                       :nw-version                "0.10.3"
                       :disable-developer-toolbar true
                       :use-lein-project-version  true}
