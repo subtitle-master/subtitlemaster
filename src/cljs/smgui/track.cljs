@@ -1,7 +1,8 @@
 (ns smgui.track
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [chan put! <!]]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [smgui.settings]))
 
 (declare make-js-map)
 

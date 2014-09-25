@@ -10,7 +10,6 @@
   (let [mb (Menu. #js {:type "menubar"})
         win (.get Window)]
     (.createMacBuiltin mb "Subtitle Master")
-    (.log js/console "here")
     (set! (.-menu win) mb)))
 
 (setup-mac-menu)
@@ -21,8 +20,8 @@
              .-App
              (.on "open" #(put! out %)))))
 
-(-> nwgui .-App (.on "open" #(do (put! smgui.core/flux-channel {:cmd :add-search :path %})
-                                 (put! smgui.core/flux-channel {:cmd :change-page :page :search}))))
+(defn listen-open [cb]
+  (-> nwgui .-App (.on "open" cb)))
 
 (defn open-external [url]
   (-> nwgui .-Shell (.openExternal url)))

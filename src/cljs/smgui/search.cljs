@@ -9,6 +9,7 @@
             [smgui.settings :as settings]
             [smgui.util :refer [class-set copy-file]]
             [smgui.fs :as fs]
+            [smgui.organize]
             [cljs.core.async :refer [put! chan <! >! close! pipe]]
             [swannodette.utils.reactive :as r]))
 

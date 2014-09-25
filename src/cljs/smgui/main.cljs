@@ -60,6 +60,8 @@
 (defn init []
   (ws-repl/connect "ws://localhost:9001")
   (enable-console-print!)
+  (gui/listen-open #(do (put! flux-channel {:cmd :add-search :path %})
+                        (put! flux-channel {:cmd :change-page :page :search})))
   (om/root main-view app-state {:target (.-body js/document)})
   (doseq [path gui/app-args]
     (put! flux-channel {:cmd :add-search :path path})))

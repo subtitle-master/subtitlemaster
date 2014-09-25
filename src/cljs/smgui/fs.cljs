@@ -13,7 +13,9 @@
 
 (defn make-js-error [node-err]
   (log "node err" node-err)
-  (js/Error. (.-message node-err)))
+  (if (instance? js/Error node-err)
+    node-err
+    (js/Error. (.-message node-err))))
 
 (defn node->chan [f & args]
   (let [c (chan)
