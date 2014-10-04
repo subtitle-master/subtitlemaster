@@ -12,18 +12,15 @@
   :source-paths ["src/clj" "src/cljs"]
 
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2268"]
-                 [org.clojure/core.async "0.1.301.0-deb34a-alpha"]
-                 [om "0.6.2"]
-                 [speclj "3.0.2"]]
+                 [org.clojure/clojurescript "0.0-2342"]
+                 [org.clojure/core.async "0.1.338.0-5c5012-alpha"]
+                 [om "0.7.3"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
-            [speclj "2.5.0"]
-            [jarohen/simple-brepl "0.1.0"]
-            [cider/cider-nrepl "0.7.0"]
-            [lein-node-webkit-build "0.1.0"]]
+            [lein-node-webkit-build "0.1.2-SNAPSHOT"]
+            [jarohen/simple-brepl "0.1.0"]]
 
-  :test-paths ["spec"]
+  :test-paths ["test/cljs"]
 
   :node-webkit-build {:root                      "public"
                       :name                      "Subtitle Master"
@@ -33,16 +30,7 @@
                       :disable-developer-toolbar true
                       :use-lein-project-version  true}
 
-  :cljsbuild ~(let [run-specs ["bin/speclj" "target/tests.js"]]
-              { :builds { :dev { :source-paths ["src/cljs"]
+  :cljsbuild  { :builds { :dev { :source-paths ["src/cljs"]
                                  :compiler { :output-to "public/js/smgui.js"
                                              :optimizations :whitespace
-                                             :pretty-print true}}
-
-                          :release { :source-paths ["src/cljs"]
-                                     :compiler { :output-to "public/js/smgui.js"
-                                                 :output-dir "public/js"
-                                                 :optimizations :advanced
-                                                 :pretty-print false
-                                                 :source-map "public/js/smgui.js.map"}}}
-                :test-commands {"test" run-specs}}))
+                                             :pretty-print true}}}})
