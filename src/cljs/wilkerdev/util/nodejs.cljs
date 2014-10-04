@@ -1,6 +1,10 @@
 (ns wilkerdev.util.nodejs
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
-  (:require [cljs.core.async :refer [chan put! close!]]))
+  (:require [cljs.core.async :refer [chan put! close!]]
+            [wilkerdev.util.reactive]))
+
+(def fs (js/require "fs"))
+(def node-request (js/require "request"))
 
 (defn make-js-error [node-err]
   (.log js/console "node err" node-err)
@@ -24,11 +28,13 @@
     (go-catch
       (<? (apply node->chan f args)))))
 
-(def fs (js/require "fs"))
-
 (def rename (node-lift (.-rename fs)))
 (def mkdir (node-lift (.-mkdir fs)))
 (def lstat (node-lift (.-lstat fs)))
 (def mkdir (node-lift (.-mkdir fs)))
 (def fopen (node-lift (.-open fs)))
 (def fread (node-lift (.-read fs)))
+
+(defn http [options]
+  (go-catch
+    (<? (node->chan node-request (clj->js options)))))

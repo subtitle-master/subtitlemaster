@@ -1,0 +1,16 @@
+{
+  "name": "subtitle-master",
+  "version": "2.0.0-beta2",
+  "description": "Subtitle Master",
+  "maintainers": [
+    {
+      "name": "Wilker Lucio",
+      "email": "wilkerlucio@gmail.com"
+    }
+  ],
+  "author": "Wilker Lucio",
+  "license": "MIT",
+  "dependencies": {
+    "request": "~2.44.0"
+  }
+}

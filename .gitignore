@@ -6,6 +6,7 @@
 /checkouts
 /dev-resources/public/js/*
 /out
+/node_modules
 /public/js
 /public/node_modules/
 pom.xml

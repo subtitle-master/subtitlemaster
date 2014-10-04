@@ -1,6 +1,6 @@
 (ns sm.core
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
-  (:require [wilkerdev.util.nodejs :refer [lstat fopen fread]]))
+  (:require [wilkerdev.util.nodejs :refer [lstat fopen fread http]]))
 
 (def crypto (js/require "crypto"))
 
@@ -20,3 +20,12 @@
       (let [sum (.createHash crypto "md5")]
         (.update sum buffer)
         (.digest sum "hex")))))
+
+(defn subdb-search-languages [hash]
+  (go-catch
+    (let [params {:uri     (str "http://sandbox.thesubdb.com/?action=search&hash=" hash)
+                  :headers {"User-Agent" "SubDB/1.0 (Subtitle Master/2.0.1; http://subtitlemaster.com)"}}]
+      (-> (<? (http params))
+          .-body
+          (.split ",")
+          set))))
