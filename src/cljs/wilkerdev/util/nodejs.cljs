@@ -5,6 +5,7 @@
 
 (def fs (js/require "fs"))
 (def node-request (js/require "request"))
+(def crypto (js/require "crypto"))
 
 (defn make-js-error [node-err]
   (.log js/console "node err" node-err)
@@ -31,10 +32,15 @@
 (def rename (node-lift (.-rename fs)))
 (def mkdir (node-lift (.-mkdir fs)))
 (def lstat (node-lift (.-lstat fs)))
-(def mkdir (node-lift (.-mkdir fs)))
 (def fopen (node-lift (.-open fs)))
 (def fread (node-lift (.-read fs)))
+(def read-file (node-lift (.-readFile fs)))
 
 (defn http [options]
   (go-catch
     (<? (node->chan node-request (clj->js options)))))
+
+(defn md5-hex [buffer]
+  (let [sum (.createHash crypto "md5")]
+    (.update sum buffer)
+    (.digest sum "hex")))
