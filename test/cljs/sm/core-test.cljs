@@ -43,7 +43,7 @@
       (assert (= :duplicated response)))))
 
 (test "open subtitles hash"
-  (let [[hash size :as pair] (<? (sm/opensub-hash "test/fixtures/breakdance.avi"))]
+  (let [[hash size] (<? (sm/opensub-hash "test/fixtures/breakdance.avi"))]
     (assert (= "8e245d9679d31e12" hash))
     (assert (= 12909756 size))))
 
