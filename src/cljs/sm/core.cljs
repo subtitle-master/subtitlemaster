@@ -46,3 +46,19 @@
            status (.-statusCode response)]
        (if (= 200 status)
          (.-body response))))))
+
+(defn subdb-upload [hash stream]
+  (go-catch
+    (let [uri (str *subdb-endpoint* "?action=upload")
+          params {:uri     uri
+                  :headers {"User-Agent" subdb-ua}}
+          build-form (fn [f]
+                       (.append f "hash" hash)
+                       (.append f "file" stream #js {:contentType "application/octet-stream"}))
+          response (<? (node/http-post-form params build-form))]
+      (case (.-statusCode response)
+        201 :uploaded
+        403 :duplicated
+        415 :invalid
+        400 :malformed
+        :unknown))))

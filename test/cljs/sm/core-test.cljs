@@ -27,11 +27,16 @@
 (test "download subtitle from subdb"
   (binding [sm/*subdb-endpoint* subdb-sandbox]
     (let [contents (<? (node/read-file "test/fixtures/subdb-download.srt" #js {:encoding "utf8"}))
-          response  (<? (sm/subdb-download subdb-test-hash "en"))]
+          response (<? (sm/subdb-download subdb-test-hash "en"))]
       (assert (= contents response)))))
 
 (test "download invalid"
   (binding [sm/*subdb-endpoint* subdb-sandbox]
-    (let [contents (<? (node/read-file "test/fixtures/subdb-download.srt" #js {:encoding "utf8"}))
-          response  (<? (sm/subdb-download subdb-test-hash "en"))]
-      (assert (= contents response)))))
+    (let [response (<? (sm/subdb-download "blabla" "en"))]
+      (assert (nil? response)))))
+
+(test "upload subtitle"
+  (binding [sm/*subdb-endpoint* subdb-sandbox]
+    (let [stream (node/create-read-stream "test/fixtures/subdb-download.srt")
+          response (<? (sm/subdb-upload subdb-test-hash stream))]
+      (assert (= :duplicated response)))))
