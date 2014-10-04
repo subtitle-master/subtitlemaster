@@ -11,6 +11,7 @@
   "author": "Wilker Lucio",
   "license": "MIT",
   "dependencies": {
-    "request": "~2.44.0"
+    "request": "~2.44.0",
+    "long": "~2.1.0"
   }
 }

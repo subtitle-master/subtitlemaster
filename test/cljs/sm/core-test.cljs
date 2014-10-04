@@ -40,3 +40,12 @@
     (let [stream (node/create-read-stream "test/fixtures/subdb-download.srt")
           response (<? (sm/subdb-upload subdb-test-hash stream))]
       (assert (= :duplicated response)))))
+
+(test "open subtitles hash"
+  (let [[hash size :as pair] (<? (sm/opensub-hash "test/fixtures/breakdance.avi"))]
+    (assert (= "8e245d9679d31e12" hash))
+    (assert (= 12909756 size))))
+
+(test "open subtitles search")
+
+(test "open subtitles download")

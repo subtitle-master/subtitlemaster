@@ -2,10 +2,14 @@
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
   (:require [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]))
 
+(def Long (js/require "long"))
+
 (def ^:dynamic *subdb-endpoint* "http://api.thesubdb.com/")
 
 (defn map->query [m]
-  (.toString (.createFromMap goog.Uri.QueryData (clj->js m))))
+  (->> (clj->js m)
+       (.createFromMap goog.Uri.QueryData)
+       (.toString)))
 
 (def subdb-ua "SubDB/1.0 (Subtitle Master/2.0.1; http://subtitlemaster.com)")
 
@@ -67,3 +71,29 @@
         415 :invalid
         400 :malformed
         :unknown))))
+
+(defn opensub-hash [path]
+  (let [chunk-size (* 64 1024)
+        read-section (fn [file offset]
+                       (go-catch
+                         (let [buffer (js/Buffer chunk-size)
+                               _ (<? (fread file buffer 0 chunk-size offset))]
+                           (loop [i 0
+                                  sum (Long. 0 0 true)]
+                             (when (< i (.-length buffer))
+                               (let [low (.readUInt32LE buffer i)
+                                     high (.readUInt32LE buffer (+ i 4))]
+                                 (recur (+ i 8)
+                                        (.add sum (Long. low high)))))
+                             sum))))]
+    (go-catch
+      (let [size (.-size (<? (lstat path)))
+            end-start (- size chunk-size)
+            _ (assert (>= end-start 0) (str "File size must be at least " chunk-size " bytes"))
+            file (<? (fopen path "r"))
+            head (<? (read-section file 0))
+            tail (<? (read-section file end-start))
+            sum (-> head
+                    (.add tail)
+                    (.add (Long. size)))]
+        [(.toString sum 16) size]))))
