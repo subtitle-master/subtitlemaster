@@ -4,6 +4,9 @@
 
 (def ^:dynamic *subdb-endpoint* "http://api.thesubdb.com/")
 
+(defn map->query [m]
+  (.toString (.createFromMap goog.Uri.QueryData (clj->js m))))
+
 (def subdb-ua "SubDB/1.0 (Subtitle Master/2.0.1; http://subtitlemaster.com)")
 
 (defn subdb-hash [path]
@@ -20,11 +23,17 @@
 
       (node/md5-hex buffer))))
 
+(defn subdb-query
+  ([action] (subdb-query action {}))
+  ([action options]
+   (let [query (map->query (merge {:action action} options))
+         uri (str *subdb-endpoint* "?" query)]
+     {:uri     uri
+      :headers {"User-Agent" subdb-ua}})))
+
 (defn subdb-search-languages [hash]
   (go-catch
-    (let [uri (str *subdb-endpoint* "?action=search&hash=" hash "&versions")
-          params {:uri     uri
-                  :headers {"User-Agent" subdb-ua}}
+    (let [params (subdb-query "search" {:hash hash :versions ""})
           response (<? (http params))
           status (.-statusCode response)
           parse-language (fn [l] (let [[lang count] (.split l ":")]
@@ -39,9 +48,7 @@
   ([hash language] (subdb-download hash language 0))
   ([hash language version]
    (go-catch
-     (let [uri (str *subdb-endpoint* "?action=download&hash=" hash "&version=" version "&language=" language)
-           params {:uri     uri
-                   :headers {"User-Agent" subdb-ua}}
+     (let [params (subdb-query "download" {:hash hash :version version :language language})
            response (<? (http params))
            status (.-statusCode response)]
        (if (= 200 status)
@@ -49,9 +56,7 @@
 
 (defn subdb-upload [hash stream]
   (go-catch
-    (let [uri (str *subdb-endpoint* "?action=upload")
-          params {:uri     uri
-                  :headers {"User-Agent" subdb-ua}}
+    (let [params (subdb-query "upload")
           build-form (fn [f]
                        (.append f "hash" hash)
                        (.append f "file" stream #js {:contentType "application/octet-stream"}))
