@@ -1,6 +1,7 @@
 (ns sm.core
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
-  (:require [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]))
+  (:require [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]
+            [wilkerdev.util :as util]))
 
 (def Long (js/require "long"))
 
@@ -109,3 +110,12 @@
       (if (= status "200 OK")
         (.-token res)
         (throw (js/Error. "Can't login on OpenSubtitles"))))))
+
+(defn opensub-search [conn auth query]
+  (go-catch
+    (let [res (<? (node/xmlrpc-call conn "SearchSubtitles" auth query))
+          status (.-status res)]
+      (if (= status "200 OK")
+        (if-let [data (.-data res)]
+          (->> (array-seq data)
+               (map util/js->map)))))))

@@ -14,7 +14,8 @@
   :dependencies [[org.clojure/clojure "1.7.0-alpha2"]
                  [org.clojure/clojurescript "0.0-2342"]
                  [org.clojure/core.async "0.1.338.0-5c5012-alpha"]
-                 [om "0.7.3"]]
+                 [om "0.7.3"]
+                 [camel-snake-kebab "0.2.4"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
             [lein-node-webkit-build "0.1.2-SNAPSHOT"]

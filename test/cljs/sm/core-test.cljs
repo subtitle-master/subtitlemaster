@@ -1,7 +1,8 @@
 (ns sm.core-test
   (:require-macros [wilkerdev.util.macros :refer [<? test]])
   (:require [sm.core :as sm]
-            [wilkerdev.util.nodejs :as node]))
+            [wilkerdev.util.nodejs :as node]
+            [wilkerdev.util :as util]))
 
 (def subdb-sandbox "http://sandbox.thesubdb.com/")
 (def subdb-test-hash "edc1981d6459c6111fe36205b4aff6c2")
@@ -46,9 +47,15 @@
     (assert (= "8e245d9679d31e12" hash))
     (assert (= 12909756 size))))
 
-(test "open subtitles auth"
+(def osres (atom nil))
+
+(test "open subtitles search"
   (let [conn (sm/opensub-client)
-        token (<? (sm/opensub-auth conn))]
-    (assert token)))
+        token (<? (sm/opensub-auth conn))
+        query [{:sublanguageid "pob,eng"
+                :moviehash     "cf2490e0d1ecddb6"
+                :moviebytesize 833134592}]
+        res (<? (sm/opensub-search conn token query))]
+    (assert (> (count res) 0))))
 
 (test "open subtitles download")
