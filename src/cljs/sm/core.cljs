@@ -5,13 +5,15 @@
 (def Long (js/require "long"))
 
 (def ^:dynamic *subdb-endpoint* "http://api.thesubdb.com/")
+(def ^:dynamic *subdb-ua* "SubDB/1.0 (Subtitle Master/2.0.1; http://subtitlemaster.com)")
+
+(def ^:dynamic *opensub-endpoint* "api.opensubtitles.org")
+(def ^:dynamic *opensub-ua* "Subtitle Master v2.0.1.dev")
 
 (defn map->query [m]
   (->> (clj->js m)
        (.createFromMap goog.Uri.QueryData)
        (.toString)))
-
-(def subdb-ua "SubDB/1.0 (Subtitle Master/2.0.1; http://subtitlemaster.com)")
 
 (defn subdb-hash [path]
   (go-catch
@@ -33,7 +35,7 @@
    (let [query (map->query (merge {:action action} options))
          uri (str *subdb-endpoint* "?" query)]
      {:uri     uri
-      :headers {"User-Agent" subdb-ua}})))
+      :headers {"User-Agent" *subdb-ua*}})))
 
 (defn subdb-search-languages [hash]
   (go-catch
@@ -93,9 +95,17 @@
           end-start (- size chunk-size)
           _ (assert (>= end-start 0) (str "File size must be at least " chunk-size " bytes"))
           file (<? (fopen path "r"))
-          head (<? (opensub-hash-section file 0))
-          tail (<? (opensub-hash-section file end-start))
-          sum (-> head
-                  (.add tail)
+          sum (-> (<? (opensub-hash-section file 0))
+                  (.add (<? (opensub-hash-section file end-start)))
                   (.add (Long. size)))]
       [(.toString sum 16) size])))
+
+(defn opensub-client [] (node/xmlrpc-client {:host *opensub-endpoint* :path "/xml-rpc"}))
+
+(defn opensub-auth [conn]
+  (go-catch
+    (let [res (<? (node/xmlrpc-call conn "LogIn" "" "" "en" *opensub-ua*))
+          status (.-status res)]
+      (if (= status "200 OK")
+        (.-token res)
+        (throw (js/Error. "Can't login on OpenSubtitles"))))))

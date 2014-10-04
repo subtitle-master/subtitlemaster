@@ -46,6 +46,9 @@
     (assert (= "8e245d9679d31e12" hash))
     (assert (= 12909756 size))))
 
-(test "open subtitles search")
+(test "open subtitles auth"
+  (let [conn (sm/opensub-client)
+        token (<? (sm/opensub-auth conn))]
+    (assert token)))
 
 (test "open subtitles download")

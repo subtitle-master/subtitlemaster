@@ -6,6 +6,7 @@
 (def fs (js/require "fs"))
 (def node-request (js/require "request"))
 (def crypto (js/require "crypto"))
+(def xmlrpc (js/require "xmlrpc"))
 
 (defn make-js-error [node-err]
   (.log js/console "node err" node-err)
@@ -13,14 +14,16 @@
     node-err
     (js/Error. (.-message node-err))))
 
+(defn node-callback [c]
+  (fn [err res]
+    (if-not err
+      (put! c (or res :done))
+      (put! c (make-js-error err)))
+    (close! c)))
+
 (defn node->chan* [f & args]
   (let [c (chan 1)
-        callback (fn [err res]
-                   (if-not err
-                     (put! c (or res :done))
-                     (put! c (make-js-error err)))
-                   (close! c))
-        args (conj (vec args) callback)
+        args (conj (vec args) (node-callback c))
         res (apply f args)]
     [c res]))
 
@@ -55,3 +58,11 @@
   (let [sum (.createHash crypto "md5")]
     (.update sum buffer)
     (.digest sum "hex")))
+
+(defn xmlrpc-client [options]
+  (.createClient xmlrpc (clj->js options)))
+
+(defn xmlrpc-call [client method & args]
+  (let [c (chan 1)]
+    (.methodCall client method (clj->js args) (node-callback c))
+    c))
