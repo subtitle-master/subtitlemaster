@@ -56,7 +56,7 @@
           (->> (array-seq data)
                (map util/js->map)))))))
 
-(defn download-stream [entry]
+(defn download [entry]
   (let [url (:sub-download-link entry)]
     (-> (node/http-stream {:uri url})
         (.pipe (.createGunzip node/zlib)))))
@@ -64,7 +64,7 @@
 (defrecord OpenSubtitlesSubtitle [info]
   Subtitle
   (download-stream [_]
-    (download-stream info))
+    (download info))
   (subtitle-language [_]
     (lang/iso-iso639-2b->6391 (:sub-language-id info))))
 

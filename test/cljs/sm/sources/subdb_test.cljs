@@ -28,13 +28,13 @@
 (test "download subtitle from subdb"
   (binding [subdb/*subdb-endpoint* helper/subdb-sandbox]
     (let [contents (<? (node/read-file "test/fixtures/subdb-download.srt" #js {:encoding "utf8"}))
-          stream (subdb/download-stream helper/subdb-test-hash "en")
+          stream (subdb/download helper/subdb-test-hash "en")
           response (<? (node/stream->str stream))]
       (assert (= contents response)))))
 
 (test "download invalid"
   (binding [subdb/*subdb-endpoint* helper/subdb-sandbox]
-    (let [stream (subdb/download-stream "blabla" "en")
+    (let [stream (subdb/download "blabla" "en")
           response (<? (async/reduce str "" (node/stream->chan stream)))]
       (assert (= "" response)))))
 
@@ -58,7 +58,7 @@
                                             (assert (= hash helper/subdb-test-hash))
                                             (go [{:language "es" :count 2}
                                                  {:language "pt" :count 1}]))
-                subdb/download-stream (fn [hash lang version]
+                subdb/download (fn [hash lang version]
                                            (assert (= hash helper/subdb-test-hash))
                                            (assert (= lang "pt"))
                                            (assert (= version 0))

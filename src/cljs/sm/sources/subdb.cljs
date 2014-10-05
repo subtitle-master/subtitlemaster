@@ -43,8 +43,8 @@
                                 (.split ",")))
         []))))
 
-(defn download-stream
-  ([hash language] (download-stream hash language 0))
+(defn download
+  ([hash language] (download hash language 0))
   ([hash language version]
    (let [params (query "download" {:hash hash :version version :language language})]
      (node/http-stream params))))
@@ -72,7 +72,7 @@
 (defrecord SubDBSubtitle [hash language version]
   Subtitle
   (download-stream [_]
-    (download-stream hash language version))
+    (download hash language version))
   (subtitle-language [_] language))
 
 (defrecord SubDBSource []

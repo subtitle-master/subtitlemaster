@@ -23,7 +23,7 @@
 
 (test "open subtitles download"
   (let [entry {:sub-download-link "http://dl.opensubtitles.org/en/download/filead/1118.gz"}
-        stream (os/download-stream entry)
+        stream (os/download entry)
         response (<? (async/reduce str "" (node/stream->chan stream)))]
     (assert (> (count response) 3000))))
 
@@ -42,7 +42,7 @@
                                                        :moviehash     "abc"
                                                        :moviebytesize 123}]))
                                     (go [{:sub-download-link "download-url"}]))
-                os/download-stream (fn [info]
+                os/download (fn [info]
                                              (assert (= info {:sub-download-link "download-url"}))
                                              "content")]
     (let [host (<? (os/source))
