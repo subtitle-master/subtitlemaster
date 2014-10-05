@@ -109,6 +109,10 @@
           res (<? (sm/search-subtitles host "sample-path" ["en" "pt"]))]
       (assert (= "content" (sm/download-stream (first res)))))))
 
+(test "open subtitles subtitle language"
+  (let [subtitle (sm/->OpenSubtitlesSubtitle {:sub-language-id "eng"})]
+    (assert (= "en" (sm/subtitle-language subtitle)))))
+
 (test "reading subtitle info"
   (let [info (<? (sm/subtitle-info "test/fixtures/clip1.mkv"))]
     (assert (= info {:path      "test/fixtures/clip1.mkv"

@@ -138,7 +138,7 @@
   Subtitle
   (download-stream [_]
     (subdb-download-stream hash language version))
-  (subtitle-language [_] nil))
+  (subtitle-language [_] language))
 
 (defn subdb-expand-result [hash {:keys [count language]}]
   (->> (range count)
@@ -164,7 +164,8 @@
   Subtitle
   (download-stream [_]
     (opensub-download-stream info))
-  (subtitle-language [_] nil))
+  (subtitle-language [_]
+    (lang/iso-iso639-2b->6391 (:sub-language-id info))))
 
 (defrecord OpenSubtitlesSource [client auth]
   SearchProvider
@@ -218,7 +219,7 @@
 
 (defn search-download
   ([query] (search-download query (chan)))
-  ([{:keys [path] :as query} c]
+  ([{:keys [path sources] :as query} c]
    (go
      (try
        (>! c [:init])

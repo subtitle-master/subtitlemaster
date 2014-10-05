@@ -57,3 +57,6 @@
 
 (defn iso-6391->iso639-2b [lang]
   (convert lang :iso639_1 :iso639_2b))
+
+(defn iso-iso639-2b->6391 [lang]
+  (convert lang :iso639_2b :iso639_1))
