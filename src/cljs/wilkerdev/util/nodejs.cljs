@@ -1,6 +1,6 @@
 (ns wilkerdev.util.nodejs
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
-  (:require [cljs.core.async :refer [chan put! close!]]
+  (:require [cljs.core.async :refer [chan put! close!] :as async]
             [wilkerdev.util.reactive]))
 
 (def fs (js/require "fs"))
@@ -48,6 +48,9 @@
   (go-catch
     (<? (node->chan node-request (clj->js options)))))
 
+(defn http-stream [options]
+  (node-request (clj->js options)))
+
 (defn http-post-form [options builder]
   (let [[c req] (node->chan* node-request (clj->js (merge options {:method "POST"
                                                                    :postambleCRLF true})))]
@@ -66,3 +69,10 @@
   (let [c (chan 1)]
     (.methodCall client method (clj->js args) (node-callback c))
     c))
+
+(defn stream->chan
+  ([stream] (stream->chan stream (chan 1)))
+  ([stream c]
+   (.on stream "data" #(put! c %))
+   (.on stream "end" #(close! c))
+   c))

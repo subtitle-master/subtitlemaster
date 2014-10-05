@@ -1,6 +1,7 @@
 (ns sm.core-test
   (:require-macros [wilkerdev.util.macros :refer [<? test]])
   (:require [sm.core :as sm]
+            [cljs.core.async :as async]
             [wilkerdev.util.nodejs :as node]
             [wilkerdev.util :as util]))
 
@@ -58,4 +59,7 @@
         res (<? (sm/opensub-search conn token query))]
     (assert (> (count res) 0))))
 
-(test "open subtitles download")
+(test "open subtitles download"
+  (let [entry {:sub-download-link "http://dl.opensubtitles.org/en/download/filead/1118.gz"}
+        stream (sm/opensub-download-stream entry)]
+    (assert (> (count (<? (async/reduce str "" (node/stream->chan stream)))) 3000))))

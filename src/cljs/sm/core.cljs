@@ -58,6 +58,7 @@
      (let [params (subdb-query "download" {:hash hash :version version :language language})
            response (<? (http params))
            status (.-statusCode response)]
+       #_ (node/http-stream params)
        (if (= 200 status)
          (.-body response))))))
 
@@ -119,3 +120,10 @@
         (if-let [data (.-data res)]
           (->> (array-seq data)
                (map util/js->map)))))))
+
+(def zlib (js/require "zlib"))
+
+(defn opensub-download-stream [entry]
+  (let [url (:sub-download-link entry)]
+    (-> (node/http-stream {:uri url})
+        (.pipe (.createGunzip zlib)))))
