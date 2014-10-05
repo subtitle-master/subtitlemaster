@@ -42,8 +42,8 @@
     (str basename ".srt")
     (str basename "." lang ".srt")))
 
-(defn search-download
-  ([query] (search-download query (chan)))
+(defn process
+  ([query] (process query (chan)))
   ([{:keys [path] :as query} c]
    (go
      (try

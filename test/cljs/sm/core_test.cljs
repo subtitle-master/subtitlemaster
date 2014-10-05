@@ -44,7 +44,7 @@
   (let [query {:sources   []
                :path      "test/fixtures/famous.mkv"
                :languages ["pt"]}]
-    (let [res (<? (helper/reduce-cat (sm/search-download query)))]
+    (let [res (<? (helper/reduce-cat (sm/process query)))]
       (assert (= res [[:init]
                       [:info {:path      "test/fixtures/famous.mkv"
                               :basepath  "test/fixtures/famous"
@@ -56,7 +56,7 @@
   (let [query {:sources   [(helper/fake-provider [])]
                :path      "test/fixtures/famous.mkv"
                :languages ["pb"]}]
-    (let [res (-> (<? (helper/reduce-cat (sm/search-download query)))
+    (let [res (-> (<? (helper/reduce-cat (sm/process query)))
                   (update-in [3 1] dissoc :sources))]
       (assert (= res
                  [[:init]
@@ -75,7 +75,7 @@
       (let [query {:sources   [(helper/fake-provider [(helper/fake-subtitle :stream "pb")])]
                    :path      "test/fixtures/famous.mkv"
                    :languages ["pb"]}]
-        (let [res (-> (<? (helper/reduce-cat (sm/search-download query)))
+        (let [res (-> (<? (helper/reduce-cat (sm/process query)))
                       (update-in [3 1] dissoc :sources)
                       (update-in [4 1] dissoc :source :subtitle))]
           (assert (= res
