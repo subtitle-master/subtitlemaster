@@ -5,9 +5,19 @@
 
 (def fs (js/require "fs"))
 (def node-request (js/require "request"))
+(def node-path (js/require "path"))
 (def crypto (js/require "crypto"))
 (def xmlrpc (js/require "xmlrpc"))
 (def zlib (js/require "zlib"))
+
+(def sep (.-sep node-path))
+
+(defn dirname [path] (.dirname node-path path))
+(defn extname [path] (.extname node-path path))
+(defn basename [path] (.basename node-path path))
+(defn basename-without-extension [path] (.basename node-path path (extname path)))
+
+(defn path-join [& paths] (apply (.-join node-path) paths))
 
 (defn make-js-error [node-err]
   (.log js/console "node err" node-err)
@@ -47,6 +57,7 @@
 (def read-dir (node-lift (.-readdir fs) array-seq))
 
 (defn create-read-stream [path] (.createReadStream fs path))
+(defn create-write-stream [path] (.createWriteStream fs path))
 
 (defn http [options]
   (go-catch
@@ -56,8 +67,9 @@
   (node-request (clj->js options)))
 
 (defn http-post-form [options builder]
-  (let [[c req] (node->chan* node-request (clj->js (merge options {:method        "POST"
-                                                                   :postambleCRLF true})))]
+  (let [options (clj->js (merge options {:method        "POST"
+                                         :postambleCRLF true}))
+        [c req] (node->chan* node-request options)]
     (builder (.form req))
     c))
 
@@ -89,20 +101,9 @@
    c))
 
 (defn save-stream-to [stream path]
-  (let [target (.createWriteStream fs path)
+  (let [target (create-write-stream path)
         c (stream-complete->chan stream)]
     (.pipe stream target)
     c))
 
 (defn stream->str [stream] (async/reduce str "" (stream->chan stream)))
-
-(def nodepath (js/require "path"))
-
-(def sep (.-sep nodepath))
-
-(defn dirname [path] (.dirname nodepath path))
-(defn extname [path] (.extname nodepath path))
-(defn basename [path] (.basename nodepath path))
-(defn basename-without-extension [path] (.basename nodepath path (extname path)))
-
-(defn path-join [& paths] (apply (.-join nodepath) paths))
