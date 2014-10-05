@@ -29,4 +29,4 @@
        ~@body
        (.log js/console "Passed:" ~title)
        (catch js/Error e#
-         (.log js/console "Failed:" ~title ":" e#)))))
+         (.log js/console "Failed:" ~title ":" (.-stack e#))))))
