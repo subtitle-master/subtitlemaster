@@ -45,10 +45,11 @@
       (if (= 200 status)
         (map parse-language (-> response
                                 .-body
-                                (.split ",")))))))
+                                (.split ",")))
+        []))))
 
-(defn subdb-download
-  ([hash language] (subdb-download hash language 0))
+(defn subdb-download-stream
+  ([hash language] (subdb-download-stream hash language 0))
   ([hash language version]
    (let [params (subdb-query "download" {:hash hash :version version :language language})]
      (node/http-stream params))))
@@ -133,7 +134,7 @@
 (defrecord SubDBSubtitle [hash language version]
   Downloadable
   (download-stream [_]
-    (subdb-download hash language version)))
+    (subdb-download-stream hash language version)))
 
 (defn subdb-expand-result [hash {:keys [count language]}]
   (->> (range count)
@@ -176,3 +177,14 @@
     (let [client (opensub-client)
           auth (<? (opensub-auth client))]
       (->OpenSubtitlesSource client auth))))
+
+(defn sources []
+  (go-catch
+    [(subdb-source) (<? (opensub-source))]))
+
+(defn find-first [sources path languages]
+  (go-catch
+    (loop [sources sources]
+      (if-let [source (first sources)]
+        (let [[res] (<? (search-subtitles source path languages))]
+          (or res (recur (rest sources))))))))

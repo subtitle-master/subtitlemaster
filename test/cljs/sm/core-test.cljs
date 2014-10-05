@@ -25,18 +25,18 @@
 (test "search subdb for invalid hash"
   (binding [sm/*subdb-endpoint* subdb-sandbox]
     (let [response (<? (sm/subdb-search-languages "blabla"))]
-      (assert (nil? response)))))
+      (assert (= [] response)))))
 
 (test "download subtitle from subdb"
   (binding [sm/*subdb-endpoint* subdb-sandbox]
     (let [contents (<? (node/read-file "test/fixtures/subdb-download.srt" #js {:encoding "utf8"}))
-          stream (sm/subdb-download subdb-test-hash "en")
+          stream (sm/subdb-download-stream subdb-test-hash "en")
           response (<? (async/reduce str "" (node/stream->chan stream)))]
       (assert (= contents response)))))
 
 (test "download invalid"
   (binding [sm/*subdb-endpoint* subdb-sandbox]
-    (let [stream (sm/subdb-download "blabla" "en")
+    (let [stream (sm/subdb-download-stream "blabla" "en")
           response (<? (async/reduce str "" (node/stream->chan stream)))]
       (assert (= "" response)))))
 
@@ -82,7 +82,7 @@
                                             (assert (= hash subdb-test-hash))
                                             (go [{:language "es" :count 2}
                                                  {:language "pt" :count 1}]))
-                sm/subdb-download (fn [hash lang version]
+                sm/subdb-download-stream (fn [hash lang version]
                                     (assert (= hash subdb-test-hash))
                                     (assert (= lang "pt"))
                                     (assert (= version 0))
@@ -112,3 +112,22 @@
     (let [host (<? (sm/opensub-source))
           res (<? (sm/search-subtitles host "sample-path" ["en" "pt"]))]
       (assert (= "content" (sm/download-stream (first res)))))))
+
+(defn fake-provider [res]
+  (reify
+    sm/SearchProvider
+    (search-subtitles [_ path languages]
+      (assert (= path "video/path.mkv"))
+      (assert (= languages ["pt"]))
+      (go res))))
+
+(defn failing-provider []
+  (reify
+    sm/SearchProvider
+    (search-subtitles [_ _ _]
+      (assert false "this should not have been called"))))
+
+(test "finding a single item"
+  (let [sources [(fake-provider []) (fake-provider [:subtitle]) (failing-provider)]
+        sub (<? (sm/find-first sources "video/path.mkv" ["pt"]))]
+    (assert (= :subtitle sub))))

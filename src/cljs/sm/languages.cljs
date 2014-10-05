@@ -50,8 +50,10 @@
     {:iso639_1 "th" :iso639_2b "tha" :locale "th"    :name "Thai"}
     {:iso639_1 "tr" :iso639_2b "tur" :locale "tr"    :name "Turkish"}
     {:iso639_1 "uk" :iso639_2b "ukr" :locale "uk"    :name "Ukrainian"}
-    {:iso639_1 "vi" :iso639_2b "vie" :locale "vi"    :name "Vietnamese"}
-    ])
+    {:iso639_1 "vi" :iso639_2b "vie" :locale "vi"    :name "Vietnamese"}])
+
+(defn convert [lang in out]
+  (out (first (filter #(= lang (in %)) languages))))
 
 (defn iso-6391->iso639-2b [lang]
-  (:iso639_2b (first (filter #(= lang (:iso639_1 %)) languages))))
+  (convert lang :iso639_1 :iso639_2b))
