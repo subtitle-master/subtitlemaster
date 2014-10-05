@@ -7,6 +7,7 @@
 (def node-request (js/require "request"))
 (def crypto (js/require "crypto"))
 (def xmlrpc (js/require "xmlrpc"))
+(def zlib (js/require "zlib"))
 
 (defn make-js-error [node-err]
   (.log js/console "node err" node-err)

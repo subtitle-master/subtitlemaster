@@ -11,11 +11,6 @@
 (def ^:dynamic *opensub-endpoint* "api.opensubtitles.org")
 (def ^:dynamic *opensub-ua* "Subtitle Master v2.0.1.dev")
 
-(defn map->query [m]
-  (->> (clj->js m)
-       (.createFromMap goog.Uri.QueryData)
-       (.toString)))
-
 (defn subdb-hash [path]
   (go-catch
     (let [chunk-size (* 64 1024)
@@ -33,7 +28,7 @@
 (defn subdb-query
   ([action] (subdb-query action {}))
   ([action options]
-   (let [query (map->query (merge {:action action} options))
+   (let [query (util/map->query (merge {:action action} options))
          uri (str *subdb-endpoint* "?" query)]
      {:uri     uri
       :headers {"User-Agent" *subdb-ua*}})))
@@ -121,9 +116,7 @@
           (->> (array-seq data)
                (map util/js->map)))))))
 
-(def zlib (js/require "zlib"))
-
 (defn opensub-download-stream [entry]
   (let [url (:sub-download-link entry)]
     (-> (node/http-stream {:uri url})
-        (.pipe (.createGunzip zlib)))))
+        (.pipe (.createGunzip node/zlib)))))

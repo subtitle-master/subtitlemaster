@@ -6,3 +6,8 @@
        (map #(vector % (aget obj %)))
        (map #(update-in % [0] (comp keyword csk/->kebab-case)))
        (into {})))
+
+(defn map->query [m]
+  (->> (clj->js m)
+       (.createFromMap goog.Uri.QueryData)
+       (.toString)))
