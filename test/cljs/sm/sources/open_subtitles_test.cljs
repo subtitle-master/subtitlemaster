@@ -8,44 +8,44 @@
             [sm.test_helper :as helper]))
 
 (test "open subtitles hash"
-  (let [[hash size] (<? (os/opensub-hash "test/fixtures/breakdance.avi"))]
+  (let [[hash size] (<? (os/hash-file "test/fixtures/breakdance.avi"))]
     (assert (= "8e245d9679d31e12" hash))
     (assert (= 12909756 size))))
 
 (test "open subtitles search"
-  (let [conn (os/opensub-client)
-        token (<? (os/opensub-auth conn))
+  (let [conn (os/client)
+        token (<? (os/auth conn))
         query [{:sublanguageid "pob,eng"
                 :moviehash     "cf2490e0d1ecddb6"
                 :moviebytesize 833134592}]
-        res (<? (os/opensub-search conn token query))]
+        res (<? (os/search conn token query))]
     (assert (> (count res) 0))))
 
 (test "open subtitles download"
   (let [entry {:sub-download-link "http://dl.opensubtitles.org/en/download/filead/1118.gz"}
-        stream (os/opensub-download-stream entry)
+        stream (os/download-stream entry)
         response (<? (async/reduce str "" (node/stream->chan stream)))]
     (assert (> (count response) 3000))))
 
 (test "open subtitles integration stack"
-  (with-redefs [os/opensub-hash (fn [path]
+  (with-redefs [os/hash-file (fn [path]
                                   (assert (= path "sample-path"))
                                   (go ["abc" 123]))
-                os/opensub-client (constantly :client)
-                os/opensub-auth (fn [client]
+                os/client (constantly :client)
+                os/auth (fn [client]
                                   (assert (= :client client))
                                   (go :auth))
-                os/opensub-search (fn [client auth query]
+                os/search (fn [client auth query]
                                     (assert (= client :client))
                                     (assert (= auth :auth))
                                     (assert (= query [{:sublanguageid "eng,por"
                                                        :moviehash     "abc"
                                                        :moviebytesize 123}]))
                                     (go [{:sub-download-link "download-url"}]))
-                os/opensub-download-stream (fn [info]
+                os/download-stream (fn [info]
                                              (assert (= info {:sub-download-link "download-url"}))
                                              "content")]
-    (let [host (<? (os/opensub-source))
+    (let [host (<? (os/source))
           res (<? (sm/search-subtitles host "sample-path" ["en" "pt"]))]
       (assert (= "content" (sm/download-stream (first res)))))))
 

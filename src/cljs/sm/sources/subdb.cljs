@@ -7,7 +7,7 @@
 (def ^:dynamic *subdb-endpoint* "http://api.thesubdb.com/")
 (def ^:dynamic *subdb-ua* "SubDB/1.0 (Subtitle Master/2.0.1; http://subtitlemaster.com)")
 
-(defn subdb-hash [path]
+(defn hash-file [path]
   (go-catch
     (let [chunk-size (* 64 1024)
           size (.-size (<? (lstat path)))
@@ -21,17 +21,17 @@
 
       (node/md5-hex buffer))))
 
-(defn subdb-query
-  ([action] (subdb-query action {}))
+(defn query
+  ([action] (query action {}))
   ([action options]
    (let [query (util/map->query (merge {:action action} options))
          uri (str *subdb-endpoint* "?" query)]
      {:uri     uri
       :headers {"User-Agent" *subdb-ua*}})))
 
-(defn subdb-search-languages [hash]
+(defn search-languages [hash]
   (go-catch
-    (let [params (subdb-query "search" {:hash hash :versions ""})
+    (let [params (query "search" {:hash hash :versions ""})
           response (<? (http params))
           status (.-statusCode response)
           parse-language (fn [l] (let [[lang count] (.split l ":")]
@@ -43,15 +43,15 @@
                                 (.split ",")))
         []))))
 
-(defn subdb-download-stream
-  ([hash language] (subdb-download-stream hash language 0))
+(defn download-stream
+  ([hash language] (download-stream hash language 0))
   ([hash language version]
-   (let [params (subdb-query "download" {:hash hash :version version :language language})]
+   (let [params (query "download" {:hash hash :version version :language language})]
      (node/http-stream params))))
 
-(defn subdb-upload [hash stream]
+(defn upload [hash stream]
   (go-catch
-    (let [params (subdb-query "upload")
+    (let [params (query "upload")
           build-form (fn [f]
                        (.append f "hash" hash)
                        (.append f "file" stream #js {:contentType "application/octet-stream"}))
@@ -63,7 +63,7 @@
         400 :malformed
         :unknown))))
 
-(defn subdb-expand-result [hash {:keys [count language]}]
+(defn expand-result [hash {:keys [count language]}]
   (->> (range count)
        (map #(hash-map :language language
                        :hash hash
@@ -72,7 +72,7 @@
 (defrecord SubDBSubtitle [hash language version]
   Subtitle
   (download-stream [_]
-    (subdb-download-stream hash language version))
+    (download-stream hash language version))
   (subtitle-language [_] language))
 
 (defrecord SubDBSource []
@@ -81,10 +81,10 @@
     (go-catch
       (let [languages (mapv (fn [x] (.replace x "pb" "pt")) languages)
             lang-set (set languages)
-            hash (<? (subdb-hash path))
-            results (<? (subdb-search-languages hash))]
+            hash (<? (hash-file path))
+            results (<? (search-languages hash))]
         (->> (filter #(lang-set (:language %)) results)
-             (mapcat (partial subdb-expand-result hash))
+             (mapcat (partial expand-result hash))
              (map map->SubDBSubtitle))))))
 
-(defn subdb-source [] (->SubDBSource))
+(defn source [] (->SubDBSource))

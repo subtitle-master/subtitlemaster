@@ -11,7 +11,7 @@
 (def ^:dynamic *opensub-endpoint* "api.opensubtitles.org")
 (def ^:dynamic *opensub-ua* "Subtitle Master v2.0.1.dev")
 
-(defn opensub-hash-section [fd offset]
+(defn hash-file-section [fd offset]
   (go-catch
     (let [chunk-size (* 64 1024)
           buffer (js/Buffer chunk-size)
@@ -25,21 +25,21 @@
                    (.add sum (Long. low high)))))
         sum))))
 
-(defn opensub-hash [path]
+(defn hash-file [path]
   (go-catch
     (let [chunk-size (* 64 1024)
           size (.-size (<? (lstat path)))
           end-start (- size chunk-size)
           _ (assert (>= end-start 0) (str "File size must be at least " chunk-size " bytes"))
           file (<? (fopen path "r"))
-          sum (-> (<? (opensub-hash-section file 0))
-                  (.add (<? (opensub-hash-section file end-start)))
+          sum (-> (<? (hash-file-section file 0))
+                  (.add (<? (hash-file-section file end-start)))
                   (.add (Long. size)))]
       [(.toString sum 16) size])))
 
-(defn opensub-client [] (node/xmlrpc-client {:host *opensub-endpoint* :path "/xml-rpc"}))
+(defn client [] (node/xmlrpc-client {:host *opensub-endpoint* :path "/xml-rpc"}))
 
-(defn opensub-auth [conn]
+(defn auth [conn]
   (go-catch
     (let [res (<? (node/xmlrpc-call conn "LogIn" "" "" "en" *opensub-ua*))
           status (.-status res)]
@@ -47,7 +47,7 @@
         (.-token res)
         (throw (js/Error. "Can't login on OpenSubtitles"))))))
 
-(defn opensub-search [conn auth query]
+(defn search [conn auth query]
   (go-catch
     (let [res (<? (node/xmlrpc-call conn "SearchSubtitles" auth query))
           status (.-status res)]
@@ -56,7 +56,7 @@
           (->> (array-seq data)
                (map util/js->map)))))))
 
-(defn opensub-download-stream [entry]
+(defn download-stream [entry]
   (let [url (:sub-download-link entry)]
     (-> (node/http-stream {:uri url})
         (.pipe (.createGunzip node/zlib)))))
@@ -64,7 +64,7 @@
 (defrecord OpenSubtitlesSubtitle [info]
   Subtitle
   (download-stream [_]
-    (opensub-download-stream info))
+    (download-stream info))
   (subtitle-language [_]
     (lang/iso-iso639-2b->6391 (:sub-language-id info))))
 
@@ -72,15 +72,15 @@
   SearchProvider
   (search-subtitles [_ path languages]
     (go-catch
-      (let [[hash size] (<? (opensub-hash path))
+      (let [[hash size] (<? (hash-file path))
             query [{:sublanguageid (str/join "," (map lang/iso-6391->iso639-2b languages))
                     :moviehash     hash
                     :moviebytesize size}]
-            results (<? (opensub-search client auth query))]
+            results (<? (search client auth query))]
         (map ->OpenSubtitlesSubtitle results)))))
 
-(defn opensub-source []
+(defn source []
   (go-catch
-    (let [client (opensub-client)
-          auth (<? (opensub-auth client))]
+    (let [client (client)
+          auth (<? (auth client))]
       (->OpenSubtitlesSource client auth))))

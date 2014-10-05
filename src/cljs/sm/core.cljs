@@ -11,7 +11,7 @@
 
 (defn sources []
   (go-catch
-    [(subdb/subdb-source) (<? (os/opensub-source))]))
+    [(subdb/source) (<? (os/source))]))
 
 (defn subtitle-name-pattern [path]
   (let [basename (node/basename-without-extension path)
