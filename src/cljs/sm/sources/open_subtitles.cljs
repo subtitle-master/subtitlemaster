@@ -75,9 +75,9 @@
       (let [[hash size] (<? (hash-file path))
             query [{:sublanguageid (str/join "," (map lang/iso-6391->iso639-2b languages))
                     :moviehash     hash
-                    :moviebytesize size}]
-            results (<? (search client auth query))]
-        (map ->OpenSubtitlesSubtitle results)))))
+                    :moviebytesize size}]]
+        (->> (<? (search client auth query))
+             (map ->OpenSubtitlesSubtitle))))))
 
 (defn source []
   (go-catch
