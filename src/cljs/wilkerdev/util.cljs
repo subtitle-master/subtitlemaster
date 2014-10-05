@@ -11,3 +11,6 @@
   (->> (clj->js m)
        (.createFromMap goog.Uri.QueryData)
        (.toString)))
+
+(defn quote-regexp [string]
+  (.replace string (js/RegExp "[-\\^$*+?.()|[\\]{}]" "g") "\\$&"))

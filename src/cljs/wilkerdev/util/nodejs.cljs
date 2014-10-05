@@ -31,10 +31,12 @@
 (defn node->chan [& args]
   (nth (apply node->chan* args) 0))
 
-(defn node-lift [f]
-  (fn [& args]
-    (go-catch
-      (<? (apply node->chan f args)))))
+(defn node-lift
+  ([f] (node-lift f identity))
+  ([f transformer]
+   (fn [& args]
+     (go-catch
+       (transformer (<? (apply node->chan f args)))))))
 
 (def rename (node-lift (.-rename fs)))
 (def mkdir (node-lift (.-mkdir fs)))
@@ -42,6 +44,7 @@
 (def fopen (node-lift (.-open fs)))
 (def fread (node-lift (.-read fs)))
 (def read-file (node-lift (.-readFile fs)))
+(def read-dir (node-lift (.-readdir fs) array-seq))
 
 (defn create-read-stream [path] (.createReadStream fs path))
 
@@ -53,7 +56,7 @@
   (node-request (clj->js options)))
 
 (defn http-post-form [options builder]
-  (let [[c req] (node->chan* node-request (clj->js (merge options {:method "POST"
+  (let [[c req] (node->chan* node-request (clj->js (merge options {:method        "POST"
                                                                    :postambleCRLF true})))]
     (builder (.form req))
     c))
@@ -71,9 +74,35 @@
     (.methodCall client method (clj->js args) (node-callback c))
     c))
 
+(defn stream-complete->chan
+  ([stream] (stream-complete->chan stream (chan)))
+  ([stream c]
+   (.on stream "error" #(do (put! c (make-js-error %)) (close! c)))
+   (.on stream "end" #(close! c))
+   c))
+
 (defn stream->chan
   ([stream] (stream->chan stream (chan 1)))
   ([stream c]
+   (stream-complete->chan stream c)
    (.on stream "data" #(put! c %))
-   (.on stream "end" #(close! c))
    c))
+
+(defn save-stream-to [stream path]
+  (let [target (.createWriteStream fs path)
+        c (stream-complete->chan stream)]
+    (.pipe stream target)
+    c))
+
+(defn stream->str [stream] (async/reduce str "" (stream->chan stream)))
+
+(def nodepath (js/require "path"))
+
+(def sep (.-sep nodepath))
+
+(defn dirname [path] (.dirname nodepath path))
+(defn extname [path] (.extname nodepath path))
+(defn basename [path] (.basename nodepath path))
+(defn basename-without-extension [path] (.basename nodepath path (extname path)))
+
+(defn path-join [& paths] (apply (.-join nodepath) paths))
