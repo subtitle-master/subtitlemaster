@@ -29,7 +29,8 @@
 (test "download subtitle from subdb"
   (binding [sm/*subdb-endpoint* subdb-sandbox]
     (let [contents (<? (node/read-file "test/fixtures/subdb-download.srt" #js {:encoding "utf8"}))
-          response (<? (sm/subdb-download subdb-test-hash "en"))]
+          stream (sm/subdb-download subdb-test-hash "en")
+          response (<? (async/reduce str "" (node/stream->chan stream)))]
       (assert (= contents response)))))
 
 (test "download invalid"
@@ -61,5 +62,6 @@
 
 (test "open subtitles download"
   (let [entry {:sub-download-link "http://dl.opensubtitles.org/en/download/filead/1118.gz"}
-        stream (sm/opensub-download-stream entry)]
-    (assert (> (count (<? (async/reduce str "" (node/stream->chan stream)))) 3000))))
+        stream (sm/opensub-download-stream entry)
+        response (<? (async/reduce str "" (node/stream->chan stream)))]
+    (assert (> (count response) 3000))))

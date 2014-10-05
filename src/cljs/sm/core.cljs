@@ -49,13 +49,8 @@
 (defn subdb-download
   ([hash language] (subdb-download hash language 0))
   ([hash language version]
-   (go-catch
-     (let [params (subdb-query "download" {:hash hash :version version :language language})
-           response (<? (http params))
-           status (.-statusCode response)]
-       #_ (node/http-stream params)
-       (if (= 200 status)
-         (.-body response))))))
+   (let [params (subdb-query "download" {:hash hash :version version :language language})]
+     (node/http-stream params))))
 
 (defn subdb-upload [hash stream]
   (go-catch
