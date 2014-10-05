@@ -1,5 +1,6 @@
 (ns sm.core-test
-  (:require-macros [wilkerdev.util.macros :refer [<? test]])
+  (:require-macros [wilkerdev.util.macros :refer [<? test]]
+                   [cljs.core.async.macros :refer [go]])
   (:require [sm.core :as sm]
             [cljs.core.async :as async]
             [wilkerdev.util.nodejs :as node]
@@ -35,8 +36,9 @@
 
 (test "download invalid"
   (binding [sm/*subdb-endpoint* subdb-sandbox]
-    (let [response (<? (sm/subdb-download "blabla" "en"))]
-      (assert (nil? response)))))
+    (let [stream (sm/subdb-download "blabla" "en")
+          response (<? (async/reduce str "" (node/stream->chan stream)))]
+      (assert (= "" response)))))
 
 (test "upload subtitle"
   (binding [sm/*subdb-endpoint* subdb-sandbox]
@@ -65,3 +67,48 @@
         stream (sm/opensub-download-stream entry)
         response (<? (async/reduce str "" (node/stream->chan stream)))]
     (assert (> (count response) 3000))))
+
+(test "subdb expand results"
+  (let [result {:language "pt" :count 2}
+        expected [{:language "pt" :hash "123" :version 0}
+                  {:language "pt" :hash "123" :version 1}]]
+    (assert (= (sm/subdb-expand-result "123" result) expected))))
+
+(test "subdb integration stack"
+  (with-redefs [sm/subdb-hash (fn [path]
+                                (assert (= path "sample-path"))
+                                (go subdb-test-hash))
+                sm/subdb-search-languages (fn [hash]
+                                            (assert (= hash subdb-test-hash))
+                                            (go [{:language "es" :count 2}
+                                                 {:language "pt" :count 1}]))
+                sm/subdb-download (fn [hash lang version]
+                                    (assert (= hash subdb-test-hash))
+                                    (assert (= lang "pt"))
+                                    (assert (= version 0))
+                                    "content")]
+    (let [host (sm/->SubDBSource)
+          res (<? (sm/search-subtitles host "sample-path" ["en" "pb"]))]
+      (assert (= "content" (sm/download-stream (first res)))))))
+
+(test "open subtitles integration stack"
+  (with-redefs [sm/opensub-hash (fn [path]
+                                  (assert (= path "sample-path"))
+                                  (go ["abc" 123]))
+                sm/opensub-client (constantly :client)
+                sm/opensub-auth (fn [client]
+                                  (assert (= :client client))
+                                  (go :auth))
+                sm/opensub-search (fn [client auth query]
+                                    (assert (= client :client))
+                                    (assert (= auth :auth))
+                                    (assert (= query [{:sublanguageid "eng,por"
+                                                       :moviehash     "abc"
+                                                       :moviebytesize 123}]))
+                                    (go [{:sub-download-link "download-url"}]))
+                sm/opensub-download-stream (fn [info]
+                                             (assert (= info {:sub-download-link "download-url"}))
+                                             "content")]
+    (let [host (<? (sm/opensub-source))
+          res (<? (sm/search-subtitles host "sample-path" ["en" "pt"]))]
+      (assert (= "content" (sm/download-stream (first res)))))))

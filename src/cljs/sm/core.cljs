@@ -1,15 +1,16 @@
 (ns sm.core
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
   (:require [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]
-            [wilkerdev.util :as util]))
+            [wilkerdev.util :as util]
+            [sm.languages :as lang]
+            [clojure.string :as str]))
 
 (def Long (js/require "long"))
 
+; low level SubDB API
+
 (def ^:dynamic *subdb-endpoint* "http://api.thesubdb.com/")
 (def ^:dynamic *subdb-ua* "SubDB/1.0 (Subtitle Master/2.0.1; http://subtitlemaster.com)")
-
-(def ^:dynamic *opensub-endpoint* "api.opensubtitles.org")
-(def ^:dynamic *opensub-ua* "Subtitle Master v2.0.1.dev")
 
 (defn subdb-hash [path]
   (go-catch
@@ -66,6 +67,11 @@
         400 :malformed
         :unknown))))
 
+; low level Open Subtitles
+
+(def ^:dynamic *opensub-endpoint* "api.opensubtitles.org")
+(def ^:dynamic *opensub-ua* "Subtitle Master v2.0.1.dev")
+
 (defn opensub-hash-section [fd offset]
   (go-catch
     (let [chunk-size (* 64 1024)
@@ -115,3 +121,58 @@
   (let [url (:sub-download-link entry)]
     (-> (node/http-stream {:uri url})
         (.pipe (.createGunzip node/zlib)))))
+
+; abstractions and integration
+
+(defprotocol SearchProvider
+  (search-subtitles [_ path languages]))
+
+(defprotocol Downloadable
+  (download-stream [_]))
+
+(defrecord SubDBSubtitle [hash language version]
+  Downloadable
+  (download-stream [_]
+    (subdb-download hash language version)))
+
+(defn subdb-expand-result [hash {:keys [count language]}]
+  (->> (range count)
+       (map #(hash-map :language language
+                       :hash hash
+                       :version %))))
+
+(defrecord SubDBSource []
+  SearchProvider
+  (search-subtitles [_ path languages]
+    (go-catch
+      (let [languages (mapv (fn [x] (.replace x "pb" "pt")) languages)
+            lang-set (set languages)
+            hash (<? (subdb-hash path))
+            results (<? (subdb-search-languages hash))]
+        (->> (filter #(lang-set (:language %)) results)
+             (mapcat (partial subdb-expand-result hash))
+             (map map->SubDBSubtitle))))))
+
+(defn subdb-source [] (->SubDBSource))
+
+(defrecord OpenSubtitlesSubtitle [info]
+  Downloadable
+  (download-stream [_]
+    (opensub-download-stream info)))
+
+(defrecord OpenSubtitlesSource [client auth]
+  SearchProvider
+  (search-subtitles [_ path languages]
+    (go-catch
+      (let [[hash size] (<? (opensub-hash path))
+            query [{:sublanguageid (str/join "," (map lang/iso-6391->iso639-2b languages))
+                    :moviehash     hash
+                    :moviebytesize size}]
+            results (<? (opensub-search client auth query))]
+        (map ->OpenSubtitlesSubtitle results)))))
+
+(defn opensub-source []
+  (go-catch
+    (let [client (opensub-client)
+          auth (<? (opensub-auth client))]
+      (->OpenSubtitlesSource client auth))))
