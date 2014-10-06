@@ -2,10 +2,11 @@
   (:require-macros [wilkerdev.util.macros :refer [<? test dochan]]
                    [cljs.core.async.macros :refer [go]])
   (:require [sm.core :as sm]
+            [sm.protocols :as prot]
             [cljs.core.async :refer [<!] :as async]
             [wilkerdev.util.nodejs :as node]
             [wilkerdev.util :as util]
-            [sm.test_helper :as helper]))
+            [sm.test-helper :as helper]))
 
 (test "reading subtitle info"
   (let [info (<? (sm/subtitle-info "test/fixtures/clip1.mkv"))]
@@ -20,6 +21,9 @@
     (assert (= info {:path      "test/fixtures/famous.mkv"
                      :basepath  "test/fixtures/famous"
                      :subtitles #{"en" "pt"}}))))
+
+(test "simple md5 hash"
+  (assert (= (<? (node/md5-file "test/fixtures/dexter.mp4")) "5bb798f7d3ed095492dca31bcf0155fd")))
 
 (test "subtitle language path"
   (assert (= "path.srt" (sm/subtitle-target-path "path" :plain)))
@@ -40,11 +44,17 @@
                                 :languages ["pb"]}))]
     (assert (= nil sub))))
 
-(test "search download operation - unchanged"
+(test "in memory cache"
+  (let [cache (sm/in-memory-cache)]
+    (assert (false? (prot/cache-exists? cache "abc")))
+    (prot/cache-store! cache "abc")
+    (assert (true? (prot/cache-exists? cache "abc")))))
+
+(test "process - unchanged"
   (let [query {:sources   []
                :path      "test/fixtures/famous.mkv"
                :languages ["pt"]}]
-    (let [res (<? (helper/reduce-cat (sm/process query)))]
+    (let [res (<? (async/into [] (sm/process query)))]
       (assert (= res [[:init]
                       [:info {:path      "test/fixtures/famous.mkv"
                               :basepath  "test/fixtures/famous"
@@ -52,11 +62,28 @@
                       [:view-path "test/fixtures/famous.mkv"]
                       [:unchanged]])))))
 
-(test "search download operation - not found"
+(test "process - upload"
+  (let [cache (atom {})
+        query {:sources   [(helper/upload-provider :uploaded "provider")]
+               :path      "test/fixtures/breakdance.avi"
+               :languages ["en"]
+               :cache     (sm/in-memory-cache cache)}]
+    (let [res (<? (async/into [] (sm/process query)))]
+      (assert (= @cache {"559075d64f311fba4abc08a43b1eff7e-711ea91b78058e01151e79f783dc6955-provider" true}))
+      (assert (= res [[:init]
+                      [:info {:path      "test/fixtures/breakdance.avi"
+                              :basepath  "test/fixtures/breakdance"
+                              :subtitles #{"en"}}]
+                      [:view-path "test/fixtures/breakdance.avi"]
+                      [:upload "test/fixtures/breakdance.en.srt"]
+                      [:uploaded :uploaded]
+                      [:unchanged]])))))
+
+(test "process - not found"
   (let [query {:sources   [(helper/fake-provider [])]
                :path      "test/fixtures/famous.mkv"
                :languages ["pb"]}]
-    (let [res (-> (<? (helper/reduce-cat (sm/process query)))
+    (let [res (-> (<? (async/into [] (sm/process query)))
                   (update-in [3 1] dissoc :sources))]
       (assert (= res
                  [[:init]
@@ -67,7 +94,7 @@
                   [:search {:path "test/fixtures/famous.mkv" :languages ["pb"]}]
                   [:not-found]])))))
 
-(test "search download operation - downloaded"
+(test "process - downloaded"
   (let [called (atom false)]
     (with-redefs [node/save-stream-to (fn [& args]
                                         (reset! called args)
@@ -75,7 +102,7 @@
       (let [query {:sources   [(helper/fake-provider [(helper/fake-subtitle :stream "pb")])]
                    :path      "test/fixtures/famous.mkv"
                    :languages ["pb"]}]
-        (let [res (-> (<? (helper/reduce-cat (sm/process query)))
+        (let [res (-> (<? (async/into [] (sm/process query)))
                       (update-in [3 1] dissoc :sources)
                       (update-in [4 1] dissoc :source :subtitle))]
           (assert (= res

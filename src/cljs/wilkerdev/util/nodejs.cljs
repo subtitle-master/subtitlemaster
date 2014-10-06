@@ -78,6 +78,12 @@
     (.update sum buffer)
     (.digest sum "hex")))
 
+(defn md5-file [path]
+  (go-catch
+    (let [md5 (.createHash crypto "md5")]
+      (.update md5 (<? (read-file path)))
+      (.digest md5 "hex"))))
+
 (defn xmlrpc-client [options]
   (.createClient xmlrpc (clj->js options)))
 

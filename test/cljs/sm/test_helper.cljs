@@ -1,6 +1,6 @@
-(ns sm.test_helper
+(ns sm.test-helper
   (:require-macros [cljs.core.async.macros :refer [go]])
-  (:require [sm.core :as sm]
+  (:require [sm.protocols :as sm]
             [cljs.core.async :as async]))
 
 (def subdb-sandbox "http://sandbox.thesubdb.com/")
@@ -25,4 +25,8 @@
     (download-stream [_] result)
     (subtitle-language [_] lang)))
 
-(defn reduce-cat [c] (async/reduce conj [] c))
+(defn upload-provider [status name]
+  (reify
+    sm/UploadProvider
+    (upload-subtitle [_ _ _] (go status))
+    (provider-name [_] name)))

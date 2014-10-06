@@ -1,6 +1,6 @@
 (ns sm.sources.subdb
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
-  (:require [sm.protocols :refer [SearchProvider Subtitle]]
+  (:require [sm.protocols :refer [SearchProvider UploadProvider Subtitle]]
             [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]
             [wilkerdev.util :as util]))
 
@@ -85,6 +85,14 @@
             results (<? (search-languages hash))]
         (->> (filter #(lang-set (:language %)) results)
              (mapcat (partial expand-result hash))
-             (map map->SubDBSubtitle))))))
+             (map map->SubDBSubtitle)))))
+
+  UploadProvider
+  (provider-name [_] "SubDB")
+  (upload-subtitle [_ path sub-path]
+    (go-catch
+      (let [hash (<? (hash-file path))
+            read-stream (node/create-read-stream sub-path)]
+        (<? (upload hash read-stream))))))
 
 (defn source [] (->SubDBSource))
