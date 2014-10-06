@@ -312,3 +312,18 @@
   (fn [& args]
     (go-catch
       (boolean (not (<? (apply f args)))))))
+
+(defn memoize-async [f]
+  (let [mem (atom {})]
+    (fn [& args]
+      (let [v (get @mem args :undefined)]
+        (if (= v :undefined)
+          (let [c (apply f args)]
+            (swap! mem assoc args {:source c})
+            (go
+              (let [res (<! c)]
+                (swap! mem assoc-in [args :value] res)
+                res)))
+          (go
+            (<! (:source v))
+            (:value (get @mem args))))))))
