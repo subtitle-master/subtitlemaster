@@ -5,7 +5,7 @@
             [sm.protocols :as sm]
             [cljs.core.async :as async]
             [wilkerdev.util.nodejs :as node]
-            [sm.test_helper :as helper]))
+            [sm.test-helper :as helper]))
 
 (test "encode subdb hash"
   (let [hash (<? (subdb/hash-file "test/fixtures/sample1.file"))]

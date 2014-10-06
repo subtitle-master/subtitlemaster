@@ -3,6 +3,7 @@
                    [cljs.core.async.macros :refer [go]])
   (:require [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]
             [wilkerdev.util :as util]
+            [wilkerdev.util.reactive :as r]
             [cljs.core.async :refer [<! >! chan close!] :as async]
             [sm.languages :as lang]
             [sm.protocols :as sm]
@@ -57,33 +58,35 @@
      :or {cache (in-memory-cache)}
      :as query} c]
    (go
-     (try
-       (>! c [:init])
-       (let [{:keys [subtitles basepath] :as info} (<? (subtitle-info path))
-             query (update-in query [:languages] #(take-while (complement subtitles) %))]
-         (>! c [:info info])
-         (>! c [:view-path path])
-         (let [file-hash (<? (subdb/hash-file path))]
-           (doseq [source (filter sm/upload-provider? sources)
-                   lang subtitles
-                   :let [sub-path (subtitle-target-path basepath lang)
-                         sub-hash (<? (node/md5-file sub-path))
-                         cache-key (str/join "-" [file-hash sub-hash (sm/provider-name source)])]]
-             (when-not (sm/cache-exists? cache cache-key)
-               (>! c [:upload sub-path])
-               (>! c [:uploaded (<? (sm/upload-subtitle source path sub-path))])
-               (sm/cache-store! cache cache-key))))
-         (if (seq (:languages query))
-           (do
-             (>! c [:search query])
-             (if-let [{:keys [subtitle] :as result} (<? (find-first query))]
-               (let [target-path (subtitle-target-path basepath (sm/subtitle-language subtitle))]
-                 (>! c [:download (assoc result :target target-path)])
-                 (<? (node/save-stream-to (sm/download-stream subtitle) target-path))
-                 (>! c [:downloaded]))
-               (>! c [:not-found])))
-           (>! c [:unchanged])))
-       (catch js/Error e (>! c [:error e]))
-       (finally (close! c)))
+     (let [file-hasher (r/memoize-async subdb/hash-file)
+           sub-hasher (r/memoize-async node/md5-file)]
+       (try
+         (>! c [:init])
+         (let [{:keys [subtitles basepath] :as info} (<? (subtitle-info path))
+               query (update-in query [:languages] #(take-while (complement subtitles) %))]
+           (>! c [:info info])
+           (>! c [:view-path path])
+           (let [file-hash (<? (file-hasher path))]
+             (doseq [source (filter sm/upload-provider? sources)
+                     lang subtitles
+                     :let [sub-path (subtitle-target-path basepath lang)
+                           sub-hash (<? (sub-hasher sub-path))
+                           cache-key (str/join "-" [file-hash sub-hash (sm/provider-name source)])]]
+               (when-not (sm/cache-exists? cache cache-key)
+                 (>! c [:upload sub-path])
+                 (>! c [:uploaded (<? (sm/upload-subtitle source path sub-path))])
+                 (sm/cache-store! cache cache-key))))
+           (if (seq (:languages query))
+             (do
+               (>! c [:search query])
+               (if-let [{:keys [subtitle] :as result} (<? (find-first query))]
+                 (let [target-path (subtitle-target-path basepath (sm/subtitle-language subtitle))]
+                   (>! c [:download (assoc result :target target-path)])
+                   (<? (node/save-stream-to (sm/download-stream subtitle) target-path))
+                   (>! c [:downloaded]))
+                 (>! c [:not-found])))
+             (>! c [:unchanged])))
+         (catch js/Error e (>! c [:error e]))
+         (finally (close! c))))
      nil)
    c))
