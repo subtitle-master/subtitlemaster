@@ -18,7 +18,7 @@
                  [camel-snake-kebab "0.2.4"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
-            [lein-node-webkit-build "0.1.2-SNAPSHOT"]
+            [lein-node-webkit-build "0.1.2"]
             [jarohen/simple-brepl "0.1.0"]]
 
   :test-paths ["test/cljs"]
