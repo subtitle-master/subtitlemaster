@@ -1,4 +1,4 @@
-(ns sm.core_test
+(ns sm.core-test
   (:require-macros [wilkerdev.util.macros :refer [<? test dochan]]
                    [cljs.core.async.macros :refer [go]])
   (:require [sm.core :as sm]
@@ -36,6 +36,13 @@
                                 :languages ["pb"]}))]
     (assert (= {:subtitle :subtitle
                 :source   (nth sources 1)} sub))))
+
+(test "finding all options"
+  (let [sources [(helper/fake-provider [:one :two]) (helper/fake-provider [:three])]
+        search (sm/find-all {:sources   sources
+                             :path      "test/fixtures/famous.mkv"
+                             :languages ["pb"]})]
+    (assert (= #{[:one :two] [:three]} (<? (async/into #{} search))))))
 
 (test "return new when nothing is found"
   (let [sources [(helper/fake-provider []) (helper/fake-provider [])]

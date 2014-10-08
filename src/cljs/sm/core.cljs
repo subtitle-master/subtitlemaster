@@ -44,6 +44,10 @@
              :source-url (source-url source)}
             (recur (rest sources))))))))
 
+(defn find-all [{:keys [sources path languages]}]
+  (let [searches (map #(sm/search-subtitles % path languages) sources)]
+    (async/merge searches)))
+
 (defn subtitle-target-path [basename lang]
   (if (= lang :plain)
     (str basename ".srt")
