@@ -52,11 +52,12 @@
 (def cache-storage (engine/local-storage-cache))
 
 (defn download-chan [path]
-  (state-download (->> (sm/process {:path      path
-                                    :sources   (sm/default-sources)
-                                    :languages (smgui.settings/languages)
-                                    :cache     cache-storage}
-                                   (chan 1))
+  (state-download (->> (partial sm/process
+                                {:path      path
+                                 :sources   (sm/default-sources)
+                                 :languages (smgui.settings/languages)
+                                 :cache     cache-storage}
+                                (chan 1))
                        (r/pool-enqueue worker-pool))))
 
 (defn status-icon [icon]

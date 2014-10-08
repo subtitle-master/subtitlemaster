@@ -332,12 +332,13 @@
   ([n] (channel-pool n (chan 2048)))
   ([n queue]
    (dotimes [_ n]
-     (dochan [[input output] queue]
-       (<! (dochan [v input] (>! output v)))
+     (dochan [[initializer output] queue]
+       (let [input (initializer)]
+         (<! (dochan [v input] (>! output v))))
        (close! output)))
    queue))
 
-(defn pool-enqueue [pool source]
+(defn pool-enqueue [pool initializer]
   (let [c (chan)]
-    (put! pool [source c])
+    (put! pool [initializer c])
     c))

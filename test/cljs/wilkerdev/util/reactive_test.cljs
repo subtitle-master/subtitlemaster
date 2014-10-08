@@ -25,8 +25,8 @@
   (let [pool (r/channel-pool 1)
         oc1 (chan)
         oc2 (chan)
-        ec1 (r/pool-enqueue pool oc1)
-        ec2 (r/pool-enqueue pool oc2)]
+        ec1 (r/pool-enqueue pool (constantly oc1))
+        ec2 (r/pool-enqueue pool (constantly oc2))]
     (put! oc2 2)
     (put! oc1 1)
     (close! oc1)
