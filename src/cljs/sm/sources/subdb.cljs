@@ -80,6 +80,12 @@
     (download hash language version))
   (subtitle-language [_] language))
 
+(defn process-search-result [languages query-languages hash]
+  (comp (filter #(languages (:language %)))
+        (mapcat (partial expand-result hash))
+        (map #(update-in % [:language] (partial normalize-language query-languages)))
+        (map map->SubDBSubtitle)))
+
 (defrecord SubDBSource []
   INamed
   (-name [_] "SubDB")
@@ -91,13 +97,11 @@
   (search-subtitles [_ path languages]
     (go-catch
       (let [query-languages (mapv (fn [x] (.replace x "pb" "pt")) languages)
-            lang-set (set query-languages)
             hash (<? (hash-file path))
             results (<? (search-languages hash))]
-        (->> (filter #(lang-set (:language %)) results)
-             (mapcat (partial expand-result hash))
-             (map #(update-in % [:language] (partial normalize-language (set languages))))
-             (map map->SubDBSubtitle)))))
+        (sequence (process-search-result (set query-languages)
+                                         (set languages)
+                                         hash) results))))
 
   UploadProvider
   (upload-subtitle [_ path sub-path]
