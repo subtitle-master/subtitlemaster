@@ -332,18 +332,9 @@
   ([n] (channel-pool n (chan 2048)))
   ([n queue]
    (dotimes [_ n]
-     (go
-       (loop []
-         (when-let [[input output] (<! queue)]
-           (<! (go
-                 (loop []
-                   (if-let [v (<! input)]
-                     (do
-                       (>! output v)
-                       (recur))
-                     (close! output)))
-                 nil))
-           (recur)))))
+     (dochan [[input output] queue]
+       (<! (dochan [v input] (>! output v)))
+       (close! output)))
    queue))
 
 (defn pool-enqueue [pool source]
