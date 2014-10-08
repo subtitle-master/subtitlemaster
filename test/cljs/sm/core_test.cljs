@@ -29,20 +29,33 @@
   (assert (= "path.srt" (sm/subtitle-target-path "path" :plain)))
   (assert (= "path.en.srt" (sm/subtitle-target-path "path" "en"))))
 
+(test "source info"
+  (let [s (helper/fake-provider [])]
+    (assert (= {:source      s
+                :source-name "fake"} (sm/source-info s)))))
+
 (test "finding a single item"
   (let [sources [(helper/fake-provider []) (helper/fake-provider [:subtitle]) (helper/failing-provider)]
         sub (<? (sm/find-first {:sources   sources
                                 :path      "test/fixtures/famous.mkv"
                                 :languages ["pb"]}))]
-    (assert (= {:subtitle :subtitle
-                :source   (nth sources 1)} sub))))
+    (assert (= {:subtitle    :subtitle
+                :source      (nth sources 1)
+                :source-name "fake"} sub))))
 
 (test "finding all options"
-  (let [sources [(helper/fake-provider [:one :two]) (helper/fake-provider [:three])]
+  (let [sa (helper/fake-provider [:one :two])
+        sb (helper/fake-provider [:three])
+        sources [sa sb]
         search (sm/find-all {:sources   sources
                              :path      "test/fixtures/famous.mkv"
                              :languages ["pb"]})]
-    (assert (= #{[:one :two] [:three]} (<? (async/into #{} search))))))
+    (assert (= #{{:source      sa
+                  :source-name "fake"
+                  :subtitles   [:one :two]}
+                 {:source      sb
+                  :source-name "fake"
+                  :subtitles   [:three]}} (<? (async/into #{} search))))))
 
 (test "return new when nothing is found"
   (let [sources [(helper/fake-provider []) (helper/fake-provider [])]
@@ -119,6 +132,6 @@
                               :subtitles #{"en" "pt"}}]
                       [:view-path "test/fixtures/famous.mkv"]
                       [:search {:path "test/fixtures/famous.mkv" :languages ["pb"]}]
-                      [:download {:target "test/fixtures/famous.pb.srt"}]
+                      [:download {:source-name "fake" :target "test/fixtures/famous.pb.srt"}]
                       [:downloaded]]))
           (assert (= @called [:stream "test/fixtures/famous.pb.srt"])))))))

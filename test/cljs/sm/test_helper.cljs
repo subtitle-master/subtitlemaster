@@ -8,6 +8,9 @@
 
 (defn fake-provider [res]
   (reify
+    INamed
+    (-name [_] "fake")
+
     sm/SearchProvider
     (search-subtitles [_ path _]
       (assert (= path "test/fixtures/famous.mkv"))

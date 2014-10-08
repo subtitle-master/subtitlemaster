@@ -32,20 +32,28 @@
        :basepath  (node/path-join dirname (node/basename-without-extension path))
        :subtitles (set (keep get-lang files))})))
 
+(defn source-info [source]
+  (let [s {:source source :source-name (name source)}]
+    (if (satisfies? source sm/Linkable)
+      (assoc s :source-url (source-url source))
+      s)))
+
 (defn find-first [{:keys [sources path languages]}]
   (go-catch
     (loop [sources sources]
       (when-let [source (first sources)]
         (let [[res] (<? (sm/search-subtitles source path languages))]
           (if res
-            {:subtitle    res
-             :source      source
-             :source-name (name source)
-             :source-url (source-url source)}
+            (-> (source-info source)
+                (assoc :subtitle res))
             (recur (rest sources))))))))
 
 (defn find-all [{:keys [sources path languages]}]
-  (let [searches (map #(sm/search-subtitles % path languages) sources)]
+  (let [search (fn [source]
+                 (go-catch
+                   (-> (source-info source)
+                       (assoc :subtitles (<? (sm/search-subtitles source path languages))))))
+        searches (map search sources)]
     (async/merge searches)))
 
 (defn subtitle-target-path [basename lang]
