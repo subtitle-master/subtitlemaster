@@ -12,10 +12,12 @@
             [smgui.organize]
             [sm.core :as sm]
             [cljs.core.async :refer [put! chan <! >! close! pipe]]
-            [swannodette.utils.reactive :as r]))
+            [wilkerdev.util.reactive :as r]))
 
 (defn define-status [icon detail]
   { :icon icon :detail detail })
+
+(def worker-pool (r/channel-pool 5))
 
 (defn- status-website-link [status]
   (let [url (-> status :download :source-url)]
@@ -35,14 +37,14 @@
 
 (defn state-download [in]
   (let [out (chan)]
-    (go-loop [state {}]
+    (go-loop [state {:status :init}]
+             (>! out state)
              (if-let [data (<! in)]
                (let [[status info] data
                      new-info (merge state {:status (if (contains? status-map status)
                                                       status
                                                       (:status state))
                                             status info})]
-                 (>! out new-info)
                  (recur new-info))
                (close! out)))
     out))
@@ -50,11 +52,12 @@
 (def cache-storage (engine/local-storage-cache))
 
 (defn download-chan [path]
-  (state-download (sm/process {:path      path
-                               :sources   (sm/default-sources)
-                               :languages (smgui.settings/languages)
-                               :cache     cache-storage}
-                              (chan 1))))
+  (state-download (->> (sm/process {:path      path
+                                    :sources   (sm/default-sources)
+                                    :languages (smgui.settings/languages)
+                                    :cache     cache-storage}
+                                   (chan 1))
+                       (r/pool-enqueue worker-pool))))
 
 (defn status-icon [icon]
   (dom/img #js {:src (str "images/icon-" icon ".svg") :className "status"}))
