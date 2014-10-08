@@ -16,6 +16,14 @@
       (assert (= path "test/fixtures/famous.mkv"))
       (go res))))
 
+(defn fake-linkable-provider []
+  (reify
+    INamed
+    (-name [_] "fake2")
+
+    sm/Linkable
+    (-linkable-url [_] :url)))
+
 (defn failing-provider []
   (reify
     sm/SearchProvider

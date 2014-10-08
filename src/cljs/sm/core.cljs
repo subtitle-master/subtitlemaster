@@ -34,7 +34,7 @@
 
 (defn source-info [source]
   (let [s {:source source :source-name (name source)}]
-    (if (satisfies? source sm/Linkable)
+    (if (sm/linkable? source)
       (assoc s :source-url (source-url source))
       s)))
 

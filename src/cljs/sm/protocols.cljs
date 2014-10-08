@@ -18,3 +18,5 @@
   (cache-store! [_ key]))
 
 (defn upload-provider? [x] (satisfies? UploadProvider x))
+
+(defn linkable? [x] (satisfies? Linkable x))

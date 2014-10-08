@@ -32,7 +32,11 @@
 (test "source info"
   (let [s (helper/fake-provider [])]
     (assert (= {:source      s
-                :source-name "fake"} (sm/source-info s)))))
+                :source-name "fake"} (sm/source-info s))))
+  (let [s (helper/fake-linkable-provider)]
+    (assert (= {:source      s
+                :source-name "fake2"
+                :source-url  :url} (sm/source-info s)))))
 
 (test "finding a single item"
   (let [sources [(helper/fake-provider []) (helper/fake-provider [:subtitle]) (helper/failing-provider)]
