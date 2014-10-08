@@ -1,5 +1,5 @@
 (ns smgui.organize
-  (:require-macros [swannodette.utils.macros :refer [dochan <? go-catch]]
+  (:require-macros [wilkerdev.util.macros :refer [dochan <? go-catch]]
                    [cljs.core.async.macros :refer [go]])
   (:require [om.dom :as dom]
             [om.core :as om]
@@ -8,7 +8,7 @@
             [smgui.fs :as fs]
             [smgui.gui :as gui]
             [cljs.core.async :refer [<! put! chan timeout]]
-            [swannodette.utils.reactive :as r]))
+            [wilkerdev.util.reactive :as r]))
 
 (def nwpath (js/require "path"))
 
@@ -62,7 +62,7 @@
           (r/remove sample?)
           (r/filter has-video-extension?)
           (r/filter fs/is-file?)
-          (r/mapfilter episode-info)
+          (r/keep episode-info)
           (r/map #(update-in % [:name] (partial str-pre-case names))))))
 
 (defn directory-picker [cursor owner]

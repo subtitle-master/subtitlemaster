@@ -4,7 +4,7 @@
             [smgui.util :refer [class-set]]
             [smgui.gui :as gui]
             [cljs.core.async :refer [>! pipe]]
-            [swannodette.utils.reactive :as r]))
+            [wilkerdev.util.reactive :as r]))
 
 (defn pd
   ([]

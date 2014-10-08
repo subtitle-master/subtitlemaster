@@ -1,9 +1,9 @@
 (ns smgui.fs
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]
-                   [swannodette.utils.macros :refer [dochan <? go-catch]])
+                   [wilkerdev.util.macros :refer [dochan <? go-catch]])
   (:require [cljs.core.async :refer [chan <! >! put! close!]]
             [smgui.path :as path]
-            [swannodette.utils.reactive :as r]))
+            [wilkerdev.util.reactive :as r]))
 
 (def fs (js/require "fs"))
 

@@ -1,6 +1,6 @@
 (ns smgui.search
   (:require-macros [cljs.core.async.macros :refer [go-loop go]]
-                   [swannodette.utils.macros :refer [dochan <? go-catch]])
+                   [wilkerdev.util.macros :refer [dochan <? go-catch]])
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
             [smgui.engine :refer [download scan search-alternatives] :as engine]
@@ -136,12 +136,10 @@
     (om/build smgui.components/file-dropper searches {:state {:view view
                                                               :channel c}})))
 
-(defn show-lookup
-  ([path] (show-lookup path []))
-  ([path names]
-     (->> (fs/scandir path)
-          (r/filter smgui.organize/has-video-extension?)
-          (r/filter fs/is-file?))))
+(defn show-lookup [path]
+  (->> (fs/scandir path)
+       (r/filter smgui.organize/has-video-extension?)
+       (r/filter fs/is-file?)))
 
 ; register application handlers
 (defmethod flux-handler :add-search [{source-path :path}]
