@@ -328,22 +328,23 @@
             (<! (:source v))
             (:value (get @mem args))))))))
 
-(defn channel-pool [n]
-  (let [queue (chan 1024)]
-    (dotimes [_ n]
-      (go
-        (loop []
-          (when-let [[input output] (<! queue)]
-            (<! (go
-                  (loop []
-                    (if-let [v (<! input)]
-                      (do
-                        (>! output v)
-                        (recur))
-                      (close! output)))
-                  nil))
-            (recur)))))
-    queue))
+(defn channel-pool
+  ([n] (channel-pool n (chan 2048)))
+  ([n queue]
+   (dotimes [_ n]
+     (go
+       (loop []
+         (when-let [[input output] (<! queue)]
+           (<! (go
+                 (loop []
+                   (if-let [v (<! input)]
+                     (do
+                       (>! output v)
+                       (recur))
+                     (close! output)))
+                 nil))
+           (recur)))))
+   queue))
 
 (defn pool-enqueue [pool source]
   (let [c (chan)]
