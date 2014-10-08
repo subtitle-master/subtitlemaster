@@ -42,7 +42,6 @@
                                                       status
                                                       (:status state))
                                             status info})]
-                 (.log js/console "GOT DATA" (clj->js data))
                  (>! out new-info)
                  (recur new-info))
                (close! out)))

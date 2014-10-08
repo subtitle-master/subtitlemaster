@@ -70,7 +70,6 @@
                        :version %))))
 
 (defn normalize-language [languages lang]
-  (.log js/console "normalize" (clj->js languages) lang)
   (if (and (= lang "pt") (languages "pb"))
     "pb"
     lang))

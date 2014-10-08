@@ -36,9 +36,7 @@
   (go-catch
     (loop [sources sources]
       (when-let [source (first sources)]
-        (.log js/console "searching on" source)
         (let [[res] (<? (sm/search-subtitles source path languages))]
-          (.log js/console "got result" res)
           (if res
             {:subtitle    res
              :source      source
