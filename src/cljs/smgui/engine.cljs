@@ -12,7 +12,7 @@
 (defn promise [value]
   #js {:then (fn [callback] (callback value))})
 
-(defn cache-key [hash] (str "upload-cache-" hash))
+(defn cache-key [hash] (str "share-cache-" hash))
 
 (defn cache-read [hash]
   (aget (-> js/window .-localStorage) (cache-key hash)))
