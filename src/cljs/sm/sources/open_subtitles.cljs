@@ -9,7 +9,7 @@
 (def Long (js/require "long"))
 
 (def ^:dynamic *opensub-endpoint* "api.opensubtitles.org")
-(def ^:dynamic *opensub-ua* "Subtitle Master v2.0.1.dev")
+(def ^:dynamic *opensub-ua* (str "Subtitle Master v" node/package-version))
 
 (defn hash-file-section [fd offset]
   (go-catch

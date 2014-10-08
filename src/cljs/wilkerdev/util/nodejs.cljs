@@ -4,6 +4,8 @@
   (:require [cljs.core.async :refer [chan put! close! <!] :as async]
             [wilkerdev.util.reactive]))
 
+(def package-version (.-version (js/require "./package.json")))
+
 (def fs (js/require "fs"))
 (def node-request (js/require "request"))
 (def node-path (js/require "path"))

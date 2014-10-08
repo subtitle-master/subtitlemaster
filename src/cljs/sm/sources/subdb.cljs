@@ -5,7 +5,7 @@
             [wilkerdev.util :as util]))
 
 (def ^:dynamic *subdb-endpoint* "http://api.thesubdb.com/")
-(def ^:dynamic *subdb-ua* "SubDB/1.0 (Subtitle Master/2.0.1; http://subtitlemaster.com)")
+(def ^:dynamic *subdb-ua* (str "SubDB/1.0 (Subtitle Master/" node/package-version "; http://subtitlemaster.com)"))
 
 (defn hash-file [path]
   (go-catch
