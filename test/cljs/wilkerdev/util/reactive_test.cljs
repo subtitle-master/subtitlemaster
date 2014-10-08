@@ -2,7 +2,7 @@
   (:require-macros [wilkerdev.util.macros :refer [<? test dochan]]
                    [cljs.core.async.macros :refer [go]])
   (:require [wilkerdev.util.reactive :as r]
-            [cljs.core.async :refer [<! timeout]]))
+            [cljs.core.async :refer [<! timeout alts! put! chan]]))
 
 (defn counting [f]
   (let [counter (atom 0)]
@@ -20,3 +20,14 @@
     (assert (= 5 (<! (memoized 5))))
     (assert (= 5 (<! (memoized 5))))
     (assert (= 2 @counter))))
+
+(test "channel pool"
+  (let [pool (r/channel-pool 1)
+        oc1 (chan)
+        oc2 (chan)
+        ec1 (r/pool-enqueue pool oc1)
+        ec2 (r/pool-enqueue pool oc2)]
+    (put! oc2 2)
+    (put! oc1 1)
+    (assert (= 1 (<! ec1)))
+    (assert (= 2 (<! ec2)))))
