@@ -27,6 +27,8 @@
 
 (defn upload-provider [status name]
   (reify
+    INamed
+    (-name [_] name)
+
     sm/UploadProvider
-    (upload-subtitle [_ _ _] (go status))
-    (provider-name [_] name)))
+    (upload-subtitle [_ _ _] (go status))))

@@ -50,6 +50,11 @@
                   {:language "pt" :hash "123" :version 1}]]
     (assert (= (subdb/expand-result "123" result) expected))))
 
+(test "normalize language"
+  (assert (= "pt" (subdb/normalize-language #{"pt" "en"} "pt")))
+  (assert (= "en" (subdb/normalize-language #{"pt" "en"} "en")))
+  (assert (= "pb" (subdb/normalize-language #{"pb" "en"} "pt"))))
+
 (test "subdb integration stack"
   (with-redefs [subdb/hash-file (fn [path]
                                 (assert (= path "sample-path"))
@@ -60,9 +65,12 @@
                                                  {:language "pt" :count 1}]))
                 subdb/download (fn [hash lang version]
                                            (assert (= hash helper/subdb-test-hash))
-                                           (assert (= lang "pt"))
+                                           (assert (= lang "pb"))
                                            (assert (= version 0))
                                            "content")]
     (let [host (subdb/source)
           res (<? (sm/search-subtitles host "sample-path" ["en" "pb"]))]
       (assert (= "content" (sm/download-stream (first res)))))))
+
+(test "getting name"
+  (assert (= (name (subdb/source)) "SubDB")))

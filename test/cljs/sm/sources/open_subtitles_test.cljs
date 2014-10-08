@@ -5,7 +5,7 @@
             [sm.protocols :as sm]
             [cljs.core.async :as async]
             [wilkerdev.util.nodejs :as node]
-            [sm.test_helper :as helper]))
+            [sm.test-helper :as helper]))
 
 (test "open subtitles hash"
   (let [[hash size] (<? (os/hash-file "test/fixtures/breakdance.avi"))]
@@ -45,7 +45,7 @@
                 os/download (fn [info]
                                              (assert (= info {:sub-download-link "download-url"}))
                                              "content")]
-    (let [host (<? (os/source))
+    (let [host (os/source)
           res (<? (sm/search-subtitles host "sample-path" ["en" "pt"]))]
       (assert (= "content" (sm/download-stream (first res)))))))
 

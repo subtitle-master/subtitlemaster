@@ -1,6 +1,6 @@
 (ns sm.sources.subdb
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
-  (:require [sm.protocols :refer [SearchProvider UploadProvider Subtitle]]
+  (:require [sm.protocols :refer [SearchProvider UploadProvider Subtitle Linkable]]
             [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]
             [wilkerdev.util :as util]))
 
@@ -46,7 +46,7 @@
 (defn download
   ([hash language] (download hash language 0))
   ([hash language version]
-   (let [params (query "download" {:hash hash :version version :language language})]
+   (let [params (query "download" {:hash hash :version version :language (.replace language "pb" "pt")})]
      (node/http-stream params))))
 
 (defn upload [hash stream]
@@ -69,6 +69,12 @@
                        :hash hash
                        :version %))))
 
+(defn normalize-language [languages lang]
+  (.log js/console "normalize" (clj->js languages) lang)
+  (if (and (= lang "pt") (languages "pb"))
+    "pb"
+    lang))
+
 (defrecord SubDBSubtitle [hash language version]
   Subtitle
   (download-stream [_]
@@ -76,19 +82,25 @@
   (subtitle-language [_] language))
 
 (defrecord SubDBSource []
+  INamed
+  (-name [_] "SubDB")
+
+  Linkable
+  (-linkable-url [_] "http://www.subdb.net")
+
   SearchProvider
   (search-subtitles [_ path languages]
     (go-catch
-      (let [languages (mapv (fn [x] (.replace x "pb" "pt")) languages)
-            lang-set (set languages)
+      (let [query-languages (mapv (fn [x] (.replace x "pb" "pt")) languages)
+            lang-set (set query-languages)
             hash (<? (hash-file path))
             results (<? (search-languages hash))]
         (->> (filter #(lang-set (:language %)) results)
              (mapcat (partial expand-result hash))
+             (map #(update-in % [:language] (partial normalize-language (set languages))))
              (map map->SubDBSubtitle)))))
 
   UploadProvider
-  (provider-name [_] "SubDB")
   (upload-subtitle [_ path sub-path]
     (go-catch
       (let [hash (<? (hash-file path))

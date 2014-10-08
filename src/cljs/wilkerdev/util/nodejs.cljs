@@ -1,6 +1,7 @@
 (ns wilkerdev.util.nodejs
-  (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
-  (:require [cljs.core.async :refer [chan put! close!] :as async]
+  (:require-macros [wilkerdev.util.macros :refer [<? go-catch]]
+                   [cljs.core.async.macros :refer [go]])
+  (:require [cljs.core.async :refer [chan put! close! <!] :as async]
             [wilkerdev.util.reactive]))
 
 (def fs (js/require "fs"))
@@ -60,8 +61,8 @@
 (defn create-write-stream [path] (.createWriteStream fs path))
 
 (defn http [options]
-  (go-catch
-    (<? (node->chan node-request (clj->js options)))))
+  (go
+    (<! (node->chan node-request (clj->js options)))))
 
 (defn http-stream [options]
   (node-request (clj->js options)))

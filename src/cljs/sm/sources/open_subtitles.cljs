@@ -2,7 +2,7 @@
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
   (:require [wilkerdev.util.nodejs :refer [lstat fopen fread] :as node]
             [wilkerdev.util :as util]
-            [sm.protocols :refer [SearchProvider Subtitle]]
+            [sm.protocols :refer [SearchProvider Subtitle Linkable]]
             [sm.languages :as lang]
             [clojure.string :as str]))
 
@@ -68,19 +68,24 @@
   (subtitle-language [_]
     (lang/iso-iso639-2b->6391 (:sub-language-id info))))
 
-(defrecord OpenSubtitlesSource [client auth]
+(defrecord OpenSubtitlesSource [client auth-atom]
+  INamed
+  (-name [_] "Open Subtitles")
+
+  Linkable
+  (-linkable-url [_] "http://www.opensubtitles.com")
+
   SearchProvider
   (search-subtitles [_ path languages]
     (go-catch
+      (if-not @auth-atom
+        (reset! auth-atom (<? (auth client))))
       (let [[hash size] (<? (hash-file path))
             query [{:sublanguageid (str/join "," (map lang/iso-6391->iso639-2b languages))
                     :moviehash     hash
                     :moviebytesize size}]]
-        (->> (<? (search client auth query))
+        (->> (<? (search client @auth-atom query))
              (map ->OpenSubtitlesSubtitle))))))
 
 (defn source []
-  (go-catch
-    (let [client (client)
-          auth (<? (auth client))]
-      (->OpenSubtitlesSource client auth))))
+  (->OpenSubtitlesSource (client) (atom nil)))

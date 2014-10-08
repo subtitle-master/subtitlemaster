@@ -11,14 +11,14 @@
             [sm.sources.open-subtitles :as os]
             [clojure.string :as str]))
 
-(defn sources []
-  (go-catch
-    [(subdb/source) (<? (os/source))]))
+(defn default-sources [] [(subdb/source) (os/source)])
 
 (defn subtitle-name-pattern [path]
   (let [basename (node/basename-without-extension path)
         quoted (util/quote-regexp basename)]
     (js/RegExp (str "^" quoted "(?:\\.([a-z]{2}))?\\.srt$") "i")))
+
+(defn source-url [x] (sm/-linkable-url x))
 
 (defn subtitle-info [path]
   (go-catch
@@ -28,16 +28,23 @@
           get-lang (fn [p]
                      (if-let [[_ lang] (re-find pattern p)]
                        (or lang :plain)))]
-      {:path path
-       :basepath (node/path-join dirname (node/basename-without-extension path))
+      {:path      path
+       :basepath  (node/path-join dirname (node/basename-without-extension path))
        :subtitles (set (keep get-lang files))})))
 
 (defn find-first [{:keys [sources path languages]}]
   (go-catch
     (loop [sources sources]
-      (if-let [source (first sources)]
+      (when-let [source (first sources)]
+        (.log js/console "searching on" source)
         (let [[res] (<? (sm/search-subtitles source path languages))]
-          (if res {:subtitle res :source source} (recur (rest sources))))))))
+          (.log js/console "got result" res)
+          (if res
+            {:subtitle    res
+             :source      source
+             :source-name (name source)
+             :source-url (source-url source)}
+            (recur (rest sources))))))))
 
 (defn subtitle-target-path [basename lang]
   (if (= lang :plain)
@@ -55,8 +62,8 @@
 (defn process
   ([query] (process query (chan)))
   ([{:keys [path sources cache]
-     :or {cache (in-memory-cache)}
-     :as query} c]
+     :or   {cache (in-memory-cache)}
+     :as   query} c]
    (go
      (let [file-hasher (r/memoize-async subdb/hash-file)
            sub-hasher (r/memoize-async node/md5-file)]
@@ -71,7 +78,7 @@
                      lang subtitles
                      :let [sub-path (subtitle-target-path basepath lang)
                            sub-hash (<? (sub-hasher sub-path))
-                           cache-key (str/join "-" [file-hash sub-hash (sm/provider-name source)])]]
+                           cache-key (str/join "-" [file-hash sub-hash (name source)])]]
                (when-not (sm/cache-exists? cache cache-key)
                  (>! c [:upload sub-path])
                  (>! c [:uploaded (<? (sm/upload-subtitle source path sub-path))])

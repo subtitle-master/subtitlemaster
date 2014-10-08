@@ -1,7 +1,8 @@
 (ns smgui.engine
   (:require-macros [cljs.core.async.macros :refer [go-loop]])
   (:require [cljs.core.async :refer [chan close! put!]]
-            [smgui.track :as track]))
+            [smgui.track :as track]
+            [sm.protocols :refer [CacheStore]]))
 
 (def subtitle-master (js/require "subtitle-master"))
 (def sm-search (.-SearchDownload subtitle-master))
@@ -75,3 +76,14 @@
            #(print "Error on scan" %)
            #(put! c (.-value %)))
     c))
+
+(defn local-storage-get [key] (aget (-> js/window .-localStorage) key))
+(defn local-storage-set! [key value] (aset (-> js/window .-localStorage) key value))
+
+(defn local-storage-cache []
+  (reify
+    CacheStore
+    (cache-exists? [_ hash]
+      (local-storage-get (cache-key hash)))
+    (cache-store! [_ hash]
+      (local-storage-set! (cache-key hash) true))))

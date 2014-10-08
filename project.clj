@@ -27,7 +27,7 @@
                       :name                      "Subtitle Master"
                       :platforms                 #{:osx :win}
                       :osx                       {:icon "resources/subtitle_master.icns"}
-                      :nw-version                "0.10.3"
+                      :nw-version                "0.10.5"
                       :disable-developer-toolbar true
                       :use-lein-project-version  true}
 

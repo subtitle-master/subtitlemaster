@@ -4,8 +4,10 @@
   (search-subtitles [_ path languages]))
 
 (defprotocol UploadProvider
-  (upload-subtitle [_ path subtitle-path])
-  (provider-name [_]))
+  (upload-subtitle [_ path subtitle-path]))
+
+(defprotocol Linkable
+  (-linkable-url [_]))
 
 (defprotocol Subtitle
   (download-stream [_])
