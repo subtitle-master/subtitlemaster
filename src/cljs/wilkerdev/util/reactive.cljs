@@ -3,7 +3,7 @@
   (:require [goog.net.Jsonp]
             [goog.Uri]
             [goog.events :as events]
-            [cljs.core.async :refer [>! <! chan put! close! timeout alts!]])
+            [cljs.core.async :refer [>! <! chan put! close! timeout alts!] :as async])
   (:require-macros [cljs.core.async.macros :refer [go alt!]]
                    [wilkerdev.util.macros :refer [dochan go-catch <? <!expand]])
   (:import goog.events.EventType))
@@ -334,8 +334,14 @@
       (go
         (loop []
           (when-let [[input output] (<! queue)]
-            (>! output (<! input))
-            (close! output)
+            (<! (go
+                  (loop []
+                    (if-let [v (<! input)]
+                      (do
+                        (>! output v)
+                        (recur))
+                      (close! output)))
+                  nil))
             (recur)))))
     queue))
 
