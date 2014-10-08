@@ -50,12 +50,15 @@
         search (sm/find-all {:sources   sources
                              :path      "test/fixtures/famous.mkv"
                              :languages ["pb"]})]
-    (assert (= #{{:source      sa
-                  :source-name "fake"
-                  :subtitles   [:one :two]}
-                 {:source      sb
-                  :source-name "fake"
-                  :subtitles   [:three]}} (<? (async/into #{} search))))))
+    (assert (= #{[{:source      sa
+                   :source-name "fake"
+                   :subtitle    :one}
+                  {:source      sa
+                   :source-name "fake"
+                   :subtitle    :two}]
+                 [{:source      sb
+                   :source-name "fake"
+                   :subtitle   :three}]} (<? (async/into #{} search))))))
 
 (test "return new when nothing is found"
   (let [sources [(helper/fake-provider []) (helper/fake-provider [])]

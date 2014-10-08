@@ -51,8 +51,7 @@
 (defn find-all [{:keys [sources path languages]}]
   (let [search (fn [source]
                  (go-catch
-                   (-> (source-info source)
-                       (assoc :subtitles (<? (sm/search-subtitles source path languages))))))
+                   (map #(assoc (source-info source) :subtitle %) (<? (sm/search-subtitles source path languages)))))
         searches (map search sources)]
     (async/merge searches)))
 
