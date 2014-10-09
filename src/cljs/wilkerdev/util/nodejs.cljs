@@ -9,6 +9,8 @@
 (def fs (js/require "fs"))
 (def node-request (js/require "request"))
 (def node-path (js/require "path"))
+(def node-stream (js/require "stream"))
+(def node-temp (js/require "temp"))
 (def crypto (js/require "crypto"))
 (def xmlrpc (js/require "xmlrpc"))
 (def zlib (js/require "zlib"))
@@ -21,6 +23,7 @@
 (defn basename-without-extension [path] (.basename node-path path (extname path)))
 
 (defn path-join [& paths] (apply (.-join node-path) paths))
+(defn basepath [path] (path-join (dirname path) (basename-without-extension path)))
 
 (defn make-js-error [node-err]
   (.log js/console "node err" node-err)
@@ -61,6 +64,8 @@
 
 (defn create-read-stream [path] (.createReadStream fs path))
 (defn create-write-stream [path] (.createWriteStream fs path))
+
+(def delete-file (node-lift (.-unlink fs)))
 
 (defn http [options]
   (go
@@ -109,10 +114,21 @@
    (.on stream "data" #(put! c %))
    c))
 
-(defn save-stream-to [stream path]
-  (let [target (create-write-stream path)
-        c (stream-complete->chan stream)]
-    (.pipe stream target)
+(defn pipe-stream [source target]
+  (let [c (stream-complete->chan source)]
+    (.pipe source target)
     c))
 
+(defn save-stream-to [stream path]
+  (pipe-stream stream (create-write-stream path)))
+
 (defn stream->str [stream] (async/reduce str "" (stream->chan stream)))
+
+(defn make-stream [s]
+  (let [Readable (.-Readable node-stream)]
+    (doto (Readable.)
+          (.push s)
+          (.push nil))))
+
+(defn temp-stream [suffix]
+  (.createWriteStream node-temp #js {:suffix suffix}))

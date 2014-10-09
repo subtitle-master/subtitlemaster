@@ -2,6 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [chan put! <!]]
             [clojure.string :as string]
+            [wilkerdev.util.nodejs :as node]
             [smgui.settings]))
 
 (declare make-js-map)
@@ -18,7 +19,6 @@
       (request-lib options (fn [& args] (put! c args)))
       c)))
 
-(def app-version (-> (js/require "./package.json") .-version))
 (def platform-name (-> (js/require "os") .platform))
 
 (defn track-info [type data]
@@ -29,7 +29,7 @@
           :aid  "com.subtitlemaster.nwapp"
           :aiid (str "com.nwgui." platform-name)
           :an   "SubtitleMaster"
-          :av   app-version
+          :av   node/package-version
           :cd1  (string/join (smgui.settings/languages) ",")}
 
          data))

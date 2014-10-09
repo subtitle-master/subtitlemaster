@@ -342,3 +342,8 @@
   (let [c (chan)]
     (put! pool [initializer c])
     c))
+
+(defn into-list
+  ([channels] (into-list channels []))
+  ([channels base]
+    (async/into base (async/merge channels))))

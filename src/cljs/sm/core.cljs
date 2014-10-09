@@ -1,5 +1,5 @@
 (ns sm.core
-  (:require-macros [wilkerdev.util.macros :refer [<? go-catch]]
+  (:require-macros [wilkerdev.util.macros :refer [<? go-catch dochan]]
                    [cljs.core.async.macros :refer [go]])
   (:require [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]
             [wilkerdev.util :as util]
@@ -20,7 +20,7 @@
 
 (defn source-url [x] (sm/-linkable-url x))
 
-(defn subtitle-info [path]
+(defn video-subtitle-languages [path]
   (go-catch
     (let [dirname (node/dirname path)
           files (<? (node/read-dir dirname))
@@ -28,9 +28,7 @@
           get-lang (fn [p]
                      (if-let [[_ lang] (re-find pattern p)]
                        (or lang :plain)))]
-      {:path      path
-       :basepath  (node/path-join dirname (node/basename-without-extension path))
-       :subtitles (set (keep get-lang files))})))
+      (set (keep get-lang files)))))
 
 (defn source-info [source]
   (let [s {:source source :source-name (name source)}]
@@ -53,7 +51,7 @@
                  (go-catch
                    (map #(assoc (source-info source) :subtitle %) (<? (sm/search-subtitles source path languages)))))
         searches (map search sources)]
-    (async/merge searches)))
+    (r/mapcat (async/merge searches))))
 
 (defn subtitle-target-path [basename lang]
   (if (= lang :plain)
@@ -68,6 +66,12 @@
      (cache-exists? [_ key] (contains? @cache key))
      (cache-store! [_ key] (swap! cache assoc key true)))))
 
+(defn download-subtitle [{:keys [subtitle] :as result} out-stream]
+  (go-catch
+    (<? (node/pipe-stream (sm/download-stream subtitle) out-stream))
+    (-> result
+        (assoc :downloaded-path (.-path out-stream)))))
+
 (defn process
   ([query] (process query (chan)))
   ([{:keys [path sources cache]
@@ -78,9 +82,10 @@
            sub-hasher (r/memoize-async node/md5-file)]
        (try
          (>! c [:init])
-         (let [{:keys [subtitles basepath] :as info} (<? (subtitle-info path))
+         (let [subtitles (<? (video-subtitle-languages path))
+               basepath (node/basepath path)
                query (update-in query [:languages] #(take-while (complement subtitles) %))]
-           (>! c [:info info])
+           (>! c [:info subtitles])
            (>! c [:view-path path])
            (let [file-hash (<? (file-hasher path))]
              (doseq [source (filter sm/upload-provider? sources)
@@ -98,11 +103,24 @@
                (if-let [{:keys [subtitle] :as result} (<? (find-first query))]
                  (let [target-path (subtitle-target-path basepath (sm/subtitle-language subtitle))]
                    (>! c [:download (assoc result :target target-path)])
-                   (<? (node/save-stream-to (sm/download-stream subtitle) target-path))
-                   (>! c [:downloaded]))
+                   (>! c [:downloaded (<? (download-subtitle result (node/create-write-stream target-path)))]))
                  (>! c [:not-found])))
              (>! c [:unchanged])))
          (catch js/Error e (>! c [:error e]))
          (finally (close! c))))
      nil)
    c))
+
+(defn process-alternatives [subtitles]
+  (r/into-list (map #(download-subtitle % (node/temp-stream ".srt")) subtitles)))
+
+(defn search-alternatives [{:keys [path] :as query}]
+  (let [c (chan 1)
+        basepath (node/basepath path)
+        af (fn [v c]
+             (go
+               (let [{subtitle :subtitle :as result} (<! (download-subtitle v (node/temp-stream ".srt")))]
+                 (>! c (assoc result :save-path (subtitle-target-path basepath (sm/subtitle-language subtitle)))))
+               (close! c)))]
+    (async/pipeline-async 5 c af (find-all query))
+    c))

@@ -43,3 +43,12 @@
 
     sm/UploadProvider
     (upload-subtitle [_ _ _] (go status))))
+
+(defn mock
+  ([] (mock nil))
+  ([returning]
+   (let [calls (atom [])
+         mock-fn (fn [& args]
+                   (swap! calls conj args)
+                   returning)]
+     [mock-fn calls])))

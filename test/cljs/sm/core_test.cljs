@@ -9,18 +9,12 @@
             [sm.test-helper :as helper]))
 
 (test "reading subtitle info"
-  (let [info (<? (sm/subtitle-info "test/fixtures/clip1.mkv"))]
-    (assert (= info {:path      "test/fixtures/clip1.mkv"
-                     :basepath  "test/fixtures/clip1"
-                     :subtitles #{}})))
-  (let [info (<? (sm/subtitle-info "test/fixtures/clip-subtitled.mkv"))]
-    (assert (= info {:path      "test/fixtures/clip-subtitled.mkv"
-                     :basepath  "test/fixtures/clip-subtitled"
-                     :subtitles #{:plain}})))
-  (let [info (<? (sm/subtitle-info "test/fixtures/famous.mkv"))]
-    (assert (= info {:path      "test/fixtures/famous.mkv"
-                     :basepath  "test/fixtures/famous"
-                     :subtitles #{"en" "pt"}}))))
+  (let [info (<? (sm/video-subtitle-languages "test/fixtures/clip1.mkv"))]
+    (assert (= info #{})))
+  (let [info (<? (sm/video-subtitle-languages "test/fixtures/clip-subtitled.mkv"))]
+    (assert (= info #{:plain})))
+  (let [info (<? (sm/video-subtitle-languages "test/fixtures/famous.mkv"))]
+    (assert (= info #{"en" "pt"}))))
 
 (test "simple md5 hash"
   (assert (= (<? (node/md5-file "test/fixtures/dexter.mp4")) "5bb798f7d3ed095492dca31bcf0155fd")))
@@ -54,15 +48,15 @@
         search (sm/find-all {:sources   sources
                              :path      "test/fixtures/famous.mkv"
                              :languages ["pb"]})]
-    (assert (= #{[{:source      sa
-                   :source-name "fake"
-                   :subtitle    :one}
-                  {:source      sa
-                   :source-name "fake"
-                   :subtitle    :two}]
-                 [{:source      sb
-                   :source-name "fake"
-                   :subtitle   :three}]} (<? (async/into #{} search))))))
+    (assert (= #{{:source      sa
+                  :source-name "fake"
+                  :subtitle    :one}
+                 {:source      sa
+                  :source-name "fake"
+                  :subtitle    :two}
+                 {:source      sb
+                  :source-name "fake"
+                  :subtitle    :three}} (<? (async/into #{} search))))))
 
 (test "return new when nothing is found"
   (let [sources [(helper/fake-provider []) (helper/fake-provider [])]
@@ -142,3 +136,25 @@
                       [:download {:source-name "fake" :target "test/fixtures/famous.pb.srt"}]
                       [:downloaded]]))
           (assert (= @called [:stream "test/fixtures/famous.pb.srt"])))))))
+
+(test "downloading subtitle"
+  (let [subtitle {:subtitle (helper/fake-subtitle (node/make-stream "hello") "pb")}
+        {target :target} (<? (sm/download-subtitle subtitle (node/temp-stream ".srt")))]
+    (assert (= "hello" (.toString (<? (node/read-file target)))))))
+
+(test "searching alternatives"
+  (let [query {:sources   [(helper/fake-provider [(helper/fake-subtitle (node/make-stream "hello") "pb")])]
+               :path      "test/fixtures/famous.mkv"
+               :languages ["pb"]}
+        res (<? (async/into [] (sm/search-alternatives query)))]
+    (.log js/console (clj->js res))))
+
+(test "full process check"
+  (<! (node/delete-file "test/fixtures/breakdance.en.srt"))
+  (let [query {:path "test/fixtures/breakdance.avi"
+               :languages ["en"]
+               :sources (sm/default-sources)}
+        res (<? (async/into [] (sm/process query)))
+        target (get-in res [4 1 :target])
+        target-content (<? (node/read-file target))]
+    (assert (= 93905 (.-length target-content)))))
