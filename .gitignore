@@ -9,6 +9,8 @@
 /node_modules
 /public/js
 /public/node_modules/
+/tmp
+/releases
 pom.xml
 *.jar
 *.class
