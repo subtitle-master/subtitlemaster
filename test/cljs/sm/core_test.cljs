@@ -77,11 +77,12 @@
                :languages ["pt"]}]
     (let [res (<? (async/into [] (sm/process query)))
           val (helper/process-last res)]
-      (assert (= val [:unchanged {:path "test/fixtures/famous.mkv"
-                                  :basepath "test/fixtures/famous"
+      (assert (= val [:unchanged {:path                "test/fixtures/famous.mkv"
+                                  :view-path           "test/fixtures/famous.mkv"
+                                  :basepath            "test/fixtures/famous"
                                   :available-subtitles #{"en" "pt"}
-                                  :search-languages []
-                                  :languages ["pt"]}])))))
+                                  :search-languages    []
+                                  :languages           ["pt"]}])))))
 
 (test "process - upload"
   (let [cache (atom {})
@@ -92,12 +93,13 @@
     (let [res (<? (async/into [] (sm/process query)))
           val (helper/process-last res)]
       (assert (= @cache {"559075d64f311fba4abc08a43b1eff7e-711ea91b78058e01151e79f783dc6955-provider" true}))
-      (assert (= val [:unchanged {:path "test/fixtures/breakdance.avi"
-                                  :basepath "test/fixtures/breakdance"
+      (assert (= val [:unchanged {:path                "test/fixtures/breakdance.avi"
+                                  :view-path           "test/fixtures/breakdance.avi"
+                                  :basepath            "test/fixtures/breakdance"
                                   :available-subtitles #{"en"}
-                                  :search-languages []
-                                  :uploads [:uploaded]
-                                  :languages ["en"]}])))))
+                                  :search-languages    []
+                                  :uploads             [:uploaded]
+                                  :languages           ["en"]}])))))
 
 (test "process - not found"
   (let [query {:sources   [(helper/fake-provider [])]
@@ -105,33 +107,35 @@
                :languages ["pb"]}]
     (let [res (<? (async/into [] (sm/process query)))
           val (helper/process-last res)]
-      (assert (= val [:not-found {:path "test/fixtures/famous.mkv"
-                                  :basepath "test/fixtures/famous"
+      (assert (= val [:not-found {:path                "test/fixtures/famous.mkv"
+                                  :view-path           "test/fixtures/famous.mkv"
+                                  :basepath            "test/fixtures/famous"
                                   :available-subtitles #{"en" "pt"}
-                                  :search-languages ["pb"]
-                                  :languages ["pb"]}])))))
+                                  :search-languages    ["pb"]
+                                  :languages           ["pb"]}])))))
 
 (test "process - downloaded"
   (let [called (atom false)]
     (with-redefs [node/create-write-stream (fn [& args] :write-stream)
                   node/pipe-stream (fn [& args]
-                                        (reset! called args)
-                                        (go nil))]
+                                     (reset! called args)
+                                     (go nil))]
       (let [query {:sources   [(helper/fake-provider [(helper/fake-subtitle :stream "pb")])]
                    :path      "test/fixtures/famous.mkv"
                    :languages ["pb"]}
             res (<? (async/into [] (sm/process query)))
             val (-> (helper/process-last res)
                     (update-in [1 :download] dissoc :source :subtitle))]
-        (assert (= val [:downloaded {:path "test/fixtures/famous.mkv"
-                                     :basepath "test/fixtures/famous"
+        (assert (= val [:downloaded {:path                "test/fixtures/famous.mkv"
+                                     :basepath            "test/fixtures/famous"
+                                     :view-path           nil
                                      :available-subtitles #{"en" "pt"}
-                                     :search-languages ["pb"]
-                                     :languages ["pb"]
-                                     :download {:source-name "fake"
-                                                :target "test/fixtures/famous.pb.srt"
-                                                :downloaded-path nil
-                                                :language "pb"}}]))
+                                     :search-languages    ["pb"]
+                                     :languages           ["pb"]
+                                     :download            {:source-name     "fake"
+                                                           :target          "test/fixtures/famous.pb.srt"
+                                                           :downloaded-path nil
+                                                           :language        "pb"}}]))
         (assert (= (first @called) :stream))))))
 
 (test "downloading subtitle"

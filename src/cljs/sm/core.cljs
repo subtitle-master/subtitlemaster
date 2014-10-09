@@ -108,6 +108,13 @@
                        l available-subtitles] [s l])]
     (r/reduce (p-upload-subtitle notify) query (r/spool variants))))
 
+(defn- p-download [{:keys [download] :as query}]
+  (go-catch
+    (let [download (<? (download-subtitle download (node/create-write-stream target-path)))]
+      (-> query
+          (assoc :download download)
+          (assoc :view-path (:downloaded-path download))))))
+
 (defn- p-run-search [{:keys [search-languages basepath] :as query} notify]
   (go-catch
     (if (seq search-languages)
@@ -119,14 +126,14 @@
             (-> query
                 (assoc :download result)
                 (notify :download) <!
-                (assoc :download (<? (download-subtitle result (node/create-write-stream target-path))))
+                (p-download) <?
                 (notify :downloaded) <!))
           (<! (notify query :not-found))))
       (<! (notify query :unchanged)))))
 
 (defn process
   ([query] (process query (chan)))
-  ([query c]
+  ([{:keys [path] :as query} c]
    (go
      (let [notify (fn [q s & [e]] (go (>! c [s q e]) q))]
        (try
@@ -134,7 +141,8 @@
              (update-in [:cache] #(or % (in-memory-cache)))
              (assoc :file-hasher (r/memoize-async subdb/hash-file))
              (assoc :sub-hasher (r/memoize-async node/md5-file))
-             (assoc :basepath (node/basepath (:path query)))
+             (assoc :basepath (node/basepath path))
+             (assoc :view-path path)
              (notify :init) <!
              (p-read-available-subtitles) <?
              (notify :info) <!
