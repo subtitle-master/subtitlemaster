@@ -33,7 +33,7 @@
                   :unchanged  (define-status "check-small" (fn [] ["Você já tem a legenda no seu idioma favorito"]))
                   :uploaded   (define-status "check"       (fn [] ["Suas legendas locais para esse vídeo foram compartilhadas!"]))
                   :share      (define-status "upload"      (fn [] ["Compartilhando as legendas desse vídeo..."]))
-                  :error      (define-status "error"       (fn [{err :error}] ["Erro" err]))})
+                  :error      (define-status "error"       (fn [{err :error}] (.log js/console "Error" (clj->js err)) ["Error: " (.-message err)]))})
 
 (defn state-download [in]
   (let [out (chan)]
