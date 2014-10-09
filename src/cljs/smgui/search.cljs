@@ -3,11 +3,12 @@
                    [wilkerdev.util.macros :refer [dochan <? go-catch]])
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
-            [smgui.engine :refer [download scan search-alternatives] :as engine]
+            [smgui.engine :as engine]
             [smgui.gui :as gui]
             [smgui.core :as app :refer [flux-handler app-state]]
             [smgui.settings :as settings]
             [smgui.util :refer [class-set copy-file]]
+            [smgui.track :as track]
             [smgui.fs :as fs]
             [smgui.organize]
             [sm.core :as sm]
@@ -35,6 +36,8 @@
                   :share      (define-status "upload"      (fn [] ["Compartilhando as legendas desse vídeo..."]))
                   :error      (define-status "error"       (fn [{err :error}] (.log js/console "Error" (clj->js err)) ["Error: " (.-message err)]))})
 
+(def trackable-states #{:init :downloaded :not-found :unchanged :error :uploaded})
+
 (defn state-download [in]
   (let [out (chan)]
     (go-loop [state {:status :init}]
@@ -45,6 +48,7 @@
                                                       status
                                                       (:status state))
                                             status info})]
+                 (if (trackable-states status) (track/search (name status)))
                  (recur new-info))
                (close! out)))
     out))

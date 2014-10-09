@@ -2,6 +2,7 @@
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
             [cljs.reader]
+            [sm.languages :as sm-lang]
             [smgui.util :as util :refer [in?]]))
 
 (def defaults
@@ -41,10 +42,7 @@
    :iso639_2b (.-iso639_2b lang)
    :name (.-name lang)})
 
-(js/require "subtitle-master") ; this ensures CoffeeScript is activated
-(def languages-map (->> (js/require "subtitle-master/lib/languages.coffee")
-                        (array-seq)
-                        (map extract-language)
+(def languages-map (->> sm-lang/languages
                         (sort-by :name)))
 
 (defn- option-from-location [{:keys [iso639_1 name]}]

@@ -48,7 +48,9 @@
     (request "http://www.google-analytics.com/collect" options)))
 
 (defn screen [name]
+  (.log js/console "track screen" name)
   (track-request "screenview" {:cd name}))
 
 (defn search [status]
+  (.log js/console "track search" status)
   (track-request "event" {:ec "search" :ea status}))

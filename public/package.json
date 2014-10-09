@@ -19,7 +19,6 @@
   "license": "MIT",
   "latestJson": "https://raw.githubusercontent.com/subtitle-master/subtitlemaster/latest/package.json",
   "dependencies": {
-    "subtitle-master": "2.0.0-beta2",
     "node-uuid": "~1.4.1",
     "request": "~2.44.0",
     "long": "~2.1.0",
