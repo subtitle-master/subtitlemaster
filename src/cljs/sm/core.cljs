@@ -108,26 +108,25 @@
                        l available-subtitles] [s l])]
     (r/reduce (p-upload-subtitle notify) query (r/spool variants))))
 
-(defn- p-download [{:keys [download] :as query}]
+(defn- p-download [{:keys [download basepath] :as query}]
   (go-catch
-    (let [download (<? (download-subtitle download (node/create-write-stream target-path)))]
+    (let [target-path (subtitle-target-path basepath (sm/subtitle-language (:subtitle download)))
+          download (<? (download-subtitle download (node/create-write-stream target-path)))]
       (-> query
           (assoc :download download)
           (assoc :view-path (:downloaded-path download))))))
 
-(defn- p-run-search [{:keys [search-languages basepath] :as query} notify]
+(defn- p-run-search [{:keys [search-languages] :as query} notify]
   (go-catch
     (if (seq search-languages)
       (do
         (<! (notify query :search))
-        (if-let [{:keys [subtitle] :as result} (<? (find-first query))]
-          (let [target-path (subtitle-target-path basepath (sm/subtitle-language subtitle))
-                result (assoc result :target target-path)]
-            (-> query
-                (assoc :download result)
-                (notify :download) <!
-                (p-download) <?
-                (notify :downloaded) <!))
+        (if-let [result (<? (find-first query))]
+          (-> query
+              (assoc :download result)
+              (notify :download) <!
+              (p-download) <?
+              (notify :downloaded) <!)
           (<! (notify query :not-found))))
       (<! (notify query :unchanged)))))
 
@@ -148,7 +147,7 @@
              (notify :info) <!
              (p-upload-local-subtitles notify) <?
              (p-run-search notify) <?)
-         (catch js/Error e (>! c [:error (.-stack e)]))
+         (catch js/Error e (>! c [:error e]))
          (finally (close! c))))
      nil)
    c))
