@@ -26,7 +26,7 @@
 
 (def status-map { :init       (define-status "time"        (fn [] ["Iniciando a busca..."]))
                   :info       (define-status "time"        (fn [] ["Carregando informações do vídeo..."]))
-                  :upload     (define-status "upload"      (fn [status] ["Enviando " nil " ..."]))
+                  :upload     (define-status "upload"      (fn [status] ["Enviando " (:extra status) " ..."]))
                   :search     (define-status "search"      (fn [status] [(str "Buscando legendas nos idiomas: " (get-in status [:search-languages]))]))
                   :download   (define-status "download"    (fn [status] ["Baixando legenda do servidor: " (-> status :download :source-name) "..."]))
                   :downloaded (define-status "check"       (fn [status] ["Baixado do servidor " (-> status :download :source-name) " (" (status-website-link status) ")"]))
@@ -42,11 +42,12 @@
   (let [out (chan)]
     (go-loop [state {:status :init}]
              (>! out state)
-             (if-let [data (<! in)]
-               (let [[status info] data
-                     new-info (assoc info :status (if (contains? status-map status)
-                                                    status
-                                                    (:status state)))]
+             (if-let [[status info extra] (<! in)]
+               (let [new-info (-> info
+                                  (assoc :status (if (contains? status-map status)
+                                                   status
+                                                   (:status state)))
+                                  (assoc :extra extra))]
                  (if (trackable-states status) (track/search (name status)))
                  (recur new-info))
                (close! out)))
