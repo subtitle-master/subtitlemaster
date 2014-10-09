@@ -11,7 +11,7 @@
             [smgui.fs :as fs]
             [smgui.organize]
             [sm.core :as sm]
-            [cljs.core.async :refer [put! chan <! >! close! pipe]]
+            [cljs.core.async :refer [put! chan <! >! close! pipe] :as async]
             [wilkerdev.util.reactive :as r]))
 
 (defn define-status [icon detail]
@@ -67,25 +67,23 @@
   (-> (js/require "path")
       (.basename path)))
 
-(defn alternative-item-view [{:keys [path language source target-path]} id]
+(defn alternative-item-view [{:keys [downloaded-path language source-name save-path]} id]
   (dom/li #js {:className "flex-row"}
-    (dom/a #js {:href     path
+    (dom/a #js {:href     downloaded-path
                 :download "subtitle"
                 :className "flex"}
-               (str language " - " source))
+               (str language " - " source-name))
     (dom/button #js {:onClick #(do
-                                (copy-file path target-path)
+                                (copy-file downloaded-path save-path)
                                 (app/call :alternatives-close {:id id}))} "Selecionar")))
 
 (defn alternative-loading []
   (dom/div #js {:className "loader10"}))
 
-(defn alternative-response [[type data] id]
-  (case type
-    :ok (if (empty? data)
-          (dom/p nil "Nenhuma legenda alternativa encontrada")
-          (apply dom/ul nil (map #(alternative-item-view % id) data)))
-    :error (dom/div "Erro: " (.-message data))))
+(defn alternative-response [data id]
+  (if (empty? data)
+    (dom/p nil "Nenhuma legenda alternativa encontrada")
+    (apply dom/ul nil (map #(alternative-item-view % id) data))))
 
 (defn alternatives-view [a id]
   (let [classes (class-set {"active" (not (nil? a))})]
@@ -114,7 +112,9 @@
                                     :onClick #(gui/show-file view-path)} (dom/img #js {:src "images/icon-view.svg"}))
                       (dom/div #js {:className "alternatives"
                                     :onClick #(app/call :search-alternatives {:id id
-                                                                              :channel (search-alternatives path (settings/languages))})} (dom/img #js {:src "images/icon-plus.svg"}))))
+                                                                              :channel (sm/search-alternatives {:path path
+                                                                                                                :languages (settings/languages)
+                                                                                                                :sources (sm/default-sources)})})} (dom/img #js {:src "images/icon-plus.svg"}))))
        (alternatives-view alternatives id))))
 
 (defn render-search-blank []
@@ -154,7 +154,7 @@
 
 (defmethod flux-handler :search-alternatives [{:keys [id channel]}]
   (swap! app-state update-in [:searches id] assoc :alternatives :loading)
-  (go (swap! app-state update-in [:searches id] assoc :alternatives (<! channel))))
+  (go (swap! app-state update-in [:searches id] assoc :alternatives (<! (r/log "alternatives" (async/into [] channel))))))
 
 (defmethod flux-handler :alternatives-close [{:keys [id]}]
   (swap! app-state update-in [:searches id] assoc :alternatives nil))

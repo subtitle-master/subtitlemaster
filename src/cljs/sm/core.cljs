@@ -70,7 +70,8 @@
   (go-catch
     (<? (node/pipe-stream (sm/download-stream subtitle) out-stream))
     (-> result
-        (assoc :downloaded-path (.-path out-stream)))))
+        (assoc :downloaded-path (.-path out-stream))
+        (assoc :language (sm/subtitle-language subtitle)))))
 
 (defn process
   ([query] (process query (chan)))
