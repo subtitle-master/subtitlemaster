@@ -127,12 +127,13 @@
           (let [query (-> query
                           (assoc :download result)
                           (notify :download) <!
-                          (p-download) <?
-                          (notify :downloaded) <!)]
+                          (p-download) <?)]
             (sm/cache-store! cache (<? (gen-cache-key query
                                                       (:view-path query)
                                                       (get-in query [:download :source]))))
-            (<! (p-upload-local-subtitles query notify)))
+            (-> query
+                (p-upload-local-subtitles notify) <?
+                (notify :downloaded) <!))
           (<! (notify query :not-found))))
       (<! (notify query :unchanged)))))
 
