@@ -157,8 +157,9 @@
             (recur (<! channel))))))))
 
 (defmethod flux-handler :search-alternatives [{:keys [id channel]}]
+  (track/search "alternatives")
   (swap! app-state update-in [:searches id] assoc :alternatives :loading)
-  (go (swap! app-state update-in [:searches id] assoc :alternatives (<! (r/log "alternatives" (async/into [] channel))))))
+  (go (swap! app-state update-in [:searches id] assoc :alternatives (<! (async/into [] channel)))))
 
 (defmethod flux-handler :alternatives-close [{:keys [id]}]
   (swap! app-state update-in [:searches id] assoc :alternatives nil))
