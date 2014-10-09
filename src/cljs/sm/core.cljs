@@ -73,41 +73,74 @@
         (assoc :downloaded-path (.-path out-stream))
         (assoc :language (sm/subtitle-language subtitle)))))
 
+(defn gen-cache-key [{:keys [path file-hasher sub-hasher]
+                      :or {file-hasher subdb/hash-file
+                           sub-hasher node/md5-file}} sub-path source]
+  (go-catch
+    (let [file-hash (<? (file-hasher path))
+          sub-hash (<? (sub-hasher sub-path))]
+      (str/join "-" [file-hash sub-hash (name source)]))))
+
+(defn- p-read-available-subtitles [{:keys [path languages] :as query}]
+  (go-catch
+    (let [subtitles (<? (video-subtitle-languages path))]
+      (-> query
+          (assoc :available-subtitles subtitles)
+          (assoc :search-languages (take-while (complement subtitles) languages))))))
+
+(defn- p-upload-subtitle [notify]
+  (fn [{:keys [path basepath cache] :as query} [source lang]]
+    (go-catch
+      (let [sub-path (subtitle-target-path basepath lang)
+            cache-key (<? (gen-cache-key query sub-path source))]
+        (if-not (sm/cache-exists? cache cache-key)
+          (do
+            (sm/cache-store! cache cache-key)
+            (-> query
+                (notify :upload sub-path) <!
+                (update-in [:uploads] conj (<? (sm/upload-subtitle source path sub-path)))
+                (notify :uploaded) <!))
+          query)))))
+
+(defn- p-upload-local-subtitles
+  [{:keys [sources available-subtitles] :as query} notify]
+  (let [variants (for [s (filter sm/upload-provider? sources)
+                       l available-subtitles] [s l])]
+    (r/reduce (p-upload-subtitle notify) query (r/spool variants))))
+
+(defn- p-run-search [{:keys [search-languages basepath] :as query} notify]
+  (go-catch
+    (if (seq search-languages)
+      (do
+        (<! (notify query :search))
+        (if-let [{:keys [subtitle] :as result} (<? (find-first query))]
+          (let [target-path (subtitle-target-path basepath (sm/subtitle-language subtitle))
+                result (assoc result :target target-path)]
+            (-> query
+                (assoc :download result)
+                (notify :download) <!
+                (assoc :download (<? (download-subtitle result (node/create-write-stream target-path))))
+                (notify :downloaded) <!))
+          (<! (notify query :not-found))))
+      (<! (notify query :unchanged)))))
+
 (defn process
   ([query] (process query (chan)))
-  ([{:keys [path sources cache]
-     :or   {cache (in-memory-cache)}
-     :as   query} c]
+  ([query c]
    (go
-     (let [file-hasher (r/memoize-async subdb/hash-file)
-           sub-hasher (r/memoize-async node/md5-file)]
+     (let [notify (fn [q s & [e]] (go (>! c [s q e]) q))]
        (try
-         (>! c [:init])
-         (let [subtitles (<? (video-subtitle-languages path))
-               basepath (node/basepath path)
-               query (update-in query [:languages] #(take-while (complement subtitles) %))]
-           (>! c [:info subtitles])
-           (>! c [:view-path path])
-           (let [file-hash (<? (file-hasher path))]
-             (doseq [source (filter sm/upload-provider? sources)
-                     lang subtitles
-                     :let [sub-path (subtitle-target-path basepath lang)
-                           sub-hash (<? (sub-hasher sub-path))
-                           cache-key (str/join "-" [file-hash sub-hash (name source)])]]
-               (when-not (sm/cache-exists? cache cache-key)
-                 (>! c [:upload sub-path])
-                 (>! c [:uploaded (<? (sm/upload-subtitle source path sub-path))])
-                 (sm/cache-store! cache cache-key))))
-           (if (seq (:languages query))
-             (do
-               (>! c [:search query])
-               (if-let [{:keys [subtitle] :as result} (<? (find-first query))]
-                 (let [target-path (subtitle-target-path basepath (sm/subtitle-language subtitle))]
-                   (>! c [:download (assoc result :target target-path)])
-                   (>! c [:downloaded (<? (download-subtitle result (node/create-write-stream target-path)))]))
-                 (>! c [:not-found])))
-             (>! c [:unchanged])))
-         (catch js/Error e (>! c [:error e]))
+         (-> query
+             (update-in [:cache] #(or % (in-memory-cache)))
+             (assoc :file-hasher (r/memoize-async subdb/hash-file))
+             (assoc :sub-hasher (r/memoize-async node/md5-file))
+             (assoc :basepath (node/basepath (:path query)))
+             (notify :init) <!
+             (p-read-available-subtitles) <?
+             (notify :info) <!
+             (p-upload-local-subtitles notify) <?
+             (p-run-search notify) <?)
+         (catch js/Error e (>! c [:error (.-stack e)]))
          (finally (close! c))))
      nil)
    c))

@@ -1,10 +1,10 @@
 (ns wilkerdev.util.reactive
-  (:refer-clojure :exclude [map mapcat filter remove distinct concat take-while drop-while complement keep])
+  (:refer-clojure :exclude [map mapcat filter remove distinct concat take-while drop-while complement keep reduce])
   (:require [goog.net.Jsonp]
             [goog.Uri]
             [goog.events :as events]
             [cljs.core.async :refer [>! <! chan put! close! timeout alts!] :as async])
-  (:require-macros [cljs.core.async.macros :refer [go alt!]]
+  (:require-macros [cljs.core.async.macros :refer [go alt! go-loop]]
                    [wilkerdev.util.macros :refer [dochan go-catch <? <!expand]])
   (:import goog.events.EventType))
 
@@ -337,6 +337,15 @@
          (<! (dochan [v input] (>! output v))))
        (close! output)))
    queue))
+
+(defn reduce
+  [f init ch]
+  (go-catch
+    (loop [ret init]
+      (let [v (<! ch)]
+        (if (nil? v)
+          ret
+          (recur (<? (f ret v))))))))
 
 (defn pool-enqueue [pool initializer]
   (let [c (chan)]

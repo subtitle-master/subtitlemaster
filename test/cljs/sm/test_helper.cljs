@@ -52,3 +52,8 @@
                    (swap! calls conj args)
                    returning)]
      [mock-fn calls])))
+
+(defn process-last [res]
+  (-> (last res)
+      (update-in [1] dissoc :cache :sub-hasher :file-hasher :sources)
+      (subvec 0 2)))

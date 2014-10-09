@@ -32,3 +32,8 @@
     (close! oc1)
     (assert (= 1 (<! ec1)))
     (assert (= 2 (<! ec2)))))
+
+(test "reduce"
+  (let [reduce-fn (fn [x y] (go (+ x y)))
+        res (<! (r/reduce reduce-fn 0 (r/spool [1 2 3 4])))]
+    (assert (= 10 res))))

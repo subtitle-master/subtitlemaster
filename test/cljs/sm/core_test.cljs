@@ -75,13 +75,13 @@
   (let [query {:sources   []
                :path      "test/fixtures/famous.mkv"
                :languages ["pt"]}]
-    (let [res (<? (async/into [] (sm/process query)))]
-      (assert (= res [[:init]
-                      [:info {:path      "test/fixtures/famous.mkv"
-                              :basepath  "test/fixtures/famous"
-                              :subtitles #{"en" "pt"}}]
-                      [:view-path "test/fixtures/famous.mkv"]
-                      [:unchanged]])))))
+    (let [res (<? (async/into [] (sm/process query)))
+          val (helper/process-last res)]
+      (assert (= val [:unchanged {:path "test/fixtures/famous.mkv"
+                                  :basepath "test/fixtures/famous"
+                                  :available-subtitles #{"en" "pt"}
+                                  :search-languages []
+                                  :languages ["pt"]}])))))
 
 (test "process - upload"
   (let [cache (atom {})
@@ -89,57 +89,54 @@
                :path      "test/fixtures/breakdance.avi"
                :languages ["en"]
                :cache     (sm/in-memory-cache cache)}]
-    (let [res (<? (async/into [] (sm/process query)))]
+    (let [res (<? (async/into [] (sm/process query)))
+          val (helper/process-last res)]
       (assert (= @cache {"559075d64f311fba4abc08a43b1eff7e-711ea91b78058e01151e79f783dc6955-provider" true}))
-      (assert (= res [[:init]
-                      [:info {:path      "test/fixtures/breakdance.avi"
-                              :basepath  "test/fixtures/breakdance"
-                              :subtitles #{"en"}}]
-                      [:view-path "test/fixtures/breakdance.avi"]
-                      [:upload "test/fixtures/breakdance.en.srt"]
-                      [:uploaded :uploaded]
-                      [:unchanged]])))))
+      (assert (= val [:unchanged {:path "test/fixtures/breakdance.avi"
+                                  :basepath "test/fixtures/breakdance"
+                                  :available-subtitles #{"en"}
+                                  :search-languages []
+                                  :uploads [:uploaded]
+                                  :languages ["en"]}])))))
 
 (test "process - not found"
   (let [query {:sources   [(helper/fake-provider [])]
                :path      "test/fixtures/famous.mkv"
                :languages ["pb"]}]
-    (let [res (-> (<? (async/into [] (sm/process query)))
-                  (update-in [3 1] dissoc :sources))]
-      (assert (= res
-                 [[:init]
-                  [:info {:path      "test/fixtures/famous.mkv"
-                          :basepath  "test/fixtures/famous"
-                          :subtitles #{"en" "pt"}}]
-                  [:view-path "test/fixtures/famous.mkv"]
-                  [:search {:path "test/fixtures/famous.mkv" :languages ["pb"]}]
-                  [:not-found]])))))
+    (let [res (<? (async/into [] (sm/process query)))
+          val (helper/process-last res)]
+      (assert (= val [:not-found {:path "test/fixtures/famous.mkv"
+                                  :basepath "test/fixtures/famous"
+                                  :available-subtitles #{"en" "pt"}
+                                  :search-languages ["pb"]
+                                  :languages ["pb"]}])))))
 
 (test "process - downloaded"
   (let [called (atom false)]
-    (with-redefs [node/save-stream-to (fn [& args]
+    (with-redefs [node/create-write-stream (fn [& args] :write-stream)
+                  node/pipe-stream (fn [& args]
                                         (reset! called args)
                                         (go nil))]
       (let [query {:sources   [(helper/fake-provider [(helper/fake-subtitle :stream "pb")])]
                    :path      "test/fixtures/famous.mkv"
-                   :languages ["pb"]}]
-        (let [res (-> (<? (async/into [] (sm/process query)))
-                      (update-in [3 1] dissoc :sources)
-                      (update-in [4 1] dissoc :source :subtitle))]
-          (assert (= res
-                     [[:init]
-                      [:info {:path      "test/fixtures/famous.mkv"
-                              :basepath  "test/fixtures/famous"
-                              :subtitles #{"en" "pt"}}]
-                      [:view-path "test/fixtures/famous.mkv"]
-                      [:search {:path "test/fixtures/famous.mkv" :languages ["pb"]}]
-                      [:download {:source-name "fake" :target "test/fixtures/famous.pb.srt"}]
-                      [:downloaded]]))
-          (assert (= @called [:stream "test/fixtures/famous.pb.srt"])))))))
+                   :languages ["pb"]}
+            res (<? (async/into [] (sm/process query)))
+            val (-> (helper/process-last res)
+                    (update-in [1 :download] dissoc :source :subtitle))]
+        (assert (= val [:downloaded {:path "test/fixtures/famous.mkv"
+                                     :basepath "test/fixtures/famous"
+                                     :available-subtitles #{"en" "pt"}
+                                     :search-languages ["pb"]
+                                     :languages ["pb"]
+                                     :download {:source-name "fake"
+                                                :target "test/fixtures/famous.pb.srt"
+                                                :downloaded-path nil
+                                                :language "pb"}}]))
+        (assert (= (first @called) :stream))))))
 
 (test "downloading subtitle"
   (let [subtitle {:subtitle (helper/fake-subtitle (node/make-stream "hello") "pb")}
-        {target :target} (<? (sm/download-subtitle subtitle (node/temp-stream ".srt")))]
+        {target :downloaded-path} (<? (sm/download-subtitle subtitle (node/temp-stream ".srt")))]
     (assert (= "hello" (.toString (<? (node/read-file target)))))))
 
 (test "searching alternatives"
@@ -150,11 +147,13 @@
     (assert (= "test/fixtures/famous.pb.srt" (get-in res [0 :save-path])))))
 
 (test "full process check"
-  (<! (node/delete-file "test/fixtures/breakdance.en.srt"))
-  (let [query {:path "test/fixtures/breakdance.avi"
+  (if (<! (node/file-exists? "test/fixtures/breakdance.en.srt"))
+    (<! (node/delete-file "test/fixtures/breakdance.en.srt")))
+  (let [query {:path      "test/fixtures/breakdance.avi"
                :languages ["en"]
-               :sources (sm/default-sources)}
+               :sources   (sm/default-sources)}
         res (<? (async/into [] (sm/process query)))
-        target (get-in res [4 1 :target])
+        val (helper/process-last res)
+        target (get-in val [1 :download :downloaded-path])
         target-content (<? (node/read-file target))]
     (assert (= 93905 (.-length target-content)))))

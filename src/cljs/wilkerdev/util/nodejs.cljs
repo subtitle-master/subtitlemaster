@@ -132,3 +132,9 @@
 
 (defn temp-stream [suffix]
   (.createWriteStream node-temp #js {:suffix suffix}))
+
+(defn file-exists? [path]
+  (let [out (chan)]
+    (.exists fs path #(do (put! out %)
+                          (close! out)))
+    out))
