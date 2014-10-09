@@ -50,7 +50,9 @@
                                   (assoc :extra extra))]
                  (if (trackable-states status) (track/search (name status)))
                  (recur new-info))
-               (close! out)))
+               (do
+                 ; TODO: record if it's not successful
+                 (close! out))))
     out))
 
 (def cache-storage (engine/local-storage-cache))
