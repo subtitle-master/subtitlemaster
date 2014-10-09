@@ -116,7 +116,7 @@
 
 (test "process - downloaded"
   (let [called (atom false)]
-    (with-redefs [node/create-write-stream (fn [& args] :write-stream)
+    (with-redefs [node/create-write-stream (fn [& _] :write-stream)
                   node/pipe-stream (fn [& args]
                                      (reset! called args)
                                      (go nil))]

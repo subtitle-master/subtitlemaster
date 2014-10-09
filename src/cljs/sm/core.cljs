@@ -74,8 +74,8 @@
         (assoc :language (sm/subtitle-language subtitle)))))
 
 (defn gen-cache-key [{:keys [path file-hasher sub-hasher]
-                      :or {file-hasher subdb/hash-file
-                           sub-hasher node/md5-file}} sub-path source]
+                      :or   {file-hasher subdb/hash-file
+                             sub-hasher  node/md5-file}} sub-path source]
   (go-catch
     (let [file-hash (<? (file-hasher path))
           sub-hash (<? (sub-hasher sub-path))]
@@ -110,23 +110,29 @@
 
 (defn- p-download [{:keys [download basepath] :as query}]
   (go-catch
-    (let [target-path (subtitle-target-path basepath (sm/subtitle-language (:subtitle download)))
+    (let [subtitle (:subtitle download)
+          target-path (subtitle-target-path basepath (sm/subtitle-language subtitle))
           download (<? (download-subtitle download (node/create-write-stream target-path)))]
       (-> query
+          (update-in [:available-subtitles] conj (sm/subtitle-language subtitle))
           (assoc :download download)
           (assoc :view-path (:downloaded-path download))))))
 
-(defn- p-run-search [{:keys [search-languages] :as query} notify]
+(defn- p-run-search [{:keys [search-languages cache] :as query} notify]
   (go-catch
     (if (seq search-languages)
       (do
         (<! (notify query :search))
         (if-let [result (<? (find-first query))]
-          (-> query
-              (assoc :download result)
-              (notify :download) <!
-              (p-download) <?
-              (notify :downloaded) <!)
+          (let [query (-> query
+                          (assoc :download result)
+                          (notify :download) <!
+                          (p-download) <?
+                          (notify :downloaded) <!)]
+            (sm/cache-store! cache (<? (gen-cache-key query
+                                                      (:view-path query)
+                                                      (get-in query [:download :source]))))
+            (<! (p-upload-local-subtitles query notify)))
           (<! (notify query :not-found))))
       (<! (notify query :unchanged)))))
 
