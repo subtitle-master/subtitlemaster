@@ -119,8 +119,13 @@
         basepath (node/basepath path)
         af (fn [v c]
              (go
-               (let [{subtitle :subtitle :as result} (<! (download-subtitle v (node/temp-stream ".srt")))]
-                 (>! c (assoc result :save-path (subtitle-target-path basepath (sm/subtitle-language subtitle)))))
-               (close! c)))]
+               (try
+                 (r/throw-err v)
+                 (let [{subtitle :subtitle :as result} (<? (download-subtitle v (node/temp-stream ".srt")))]
+                   (>! c (assoc result :save-path (subtitle-target-path basepath (sm/subtitle-language subtitle)))))
+                 (catch js/Error e
+                   (.log js/console "Error" e))
+                 (finally
+                   (close! c)))))]
     (async/pipeline-async 5 c af (find-all query))
     c))

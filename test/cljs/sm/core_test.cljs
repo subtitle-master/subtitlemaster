@@ -147,7 +147,7 @@
                :path      "test/fixtures/famous.mkv"
                :languages ["pb"]}
         res (<? (async/into [] (sm/search-alternatives query)))]
-    (.log js/console (clj->js res))))
+    (assert (= "test/fixtures/famous.pb.srt" (get-in res [0 :save-path])))))
 
 (test "full process check"
   (<! (node/delete-file "test/fixtures/breakdance.en.srt"))
