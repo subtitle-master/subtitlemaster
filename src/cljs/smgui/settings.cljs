@@ -2,6 +2,7 @@
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
             [cljs.reader]
+            [wilkerdev.util.nodejs :as node]
             [sm.languages :as sm-lang]
             [smgui.util :as util :refer [in?]]))
 
@@ -148,4 +149,5 @@
 
 (defn render-page [cursor]
   (dom/div #js {:className "flex auto-scroll"}
-           (dom/div #js {:className "white-box auto-scroll"} (om/build language-picker (get-in cursor [:settings :languages])))))
+           (dom/div #js {:className "white-box auto-scroll"} (om/build language-picker (get-in cursor [:settings :languages])))
+           (dom/div #js {:className "white-box"} "Subtitle Master v" node/package-version)))
