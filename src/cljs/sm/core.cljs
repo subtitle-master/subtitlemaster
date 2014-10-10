@@ -36,11 +36,11 @@
       (assoc s :source-url (source-url source))
       s)))
 
-(defn find-first [{:keys [sources path languages]}]
+(defn find-first [{:keys [sources path search-languages]}]
   (go-catch
     (loop [sources sources]
       (when-let [source (first sources)]
-        (let [[res] (<? (sm/search-subtitles source path languages))]
+        (let [[res] (<? (sm/search-subtitles source path search-languages))]
           (if res
             (-> (source-info source)
                 (assoc :subtitle res))
@@ -154,7 +154,8 @@
              (notify :info) <!
              (p-upload-local-subtitles notify) <?
              (p-run-search notify) <?)
-         (catch js/Error e (>! c [:error e]))
+         (catch js/Error e
+           (<! (notify (assoc query :error e) :error)))
          (finally (close! c))))
      nil)
    c))
