@@ -19,7 +19,7 @@
 
 (defn render-page [cursor]
   (case (:page cursor)
-    :search (render-search (-> cursor :searches))
+    :search (render-search (get cursor :searches) (get cursor :retries))
     :organize (render-organize cursor)
     :settings (settings/render-page cursor)
     (render-not-found)))

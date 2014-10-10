@@ -13,7 +13,8 @@
             [smgui.organize]
             [sm.core :as sm]
             [cljs.core.async :refer [put! chan <! >! close! pipe] :as async]
-            [wilkerdev.util.reactive :as r]))
+            [wilkerdev.util.reactive :as r]
+            [wilkerdev.util.nodejs :as node]))
 
 (defn define-status [icon detail]
   { :icon icon :detail detail })
@@ -38,6 +39,16 @@
 
 (def trackable-states #{:init :downloaded :not-found :unchanged :error :uploaded})
 
+(def retry-states #{:not-found :error})
+
+(defn retry-later? [{status :status {lang :language} :download [preferred-lang] :languages :as query}]
+  (if (retry-states status)
+    true
+    (and (= :downloaded status) (not= lang preferred-lang))))
+
+(defn retry-later [{path :path}]
+  )
+
 (defn state-download [in]
   (let [out (chan)]
     (go-loop [state {:status :init}]
@@ -51,7 +62,8 @@
                  (if (trackable-states status) (track/search (name status)))
                  (recur new-info))
                (do
-                 ; TODO: record if it's not successful
+                 (if (retry-later? state)
+                   (put! app/flux-channel {:cmd :retry-later :path (:path state)}))
                  (close! out))))
     out))
 
@@ -123,17 +135,28 @@
                                                                                                                 :sources (sm/default-sources)})})} (dom/img #js {:src "images/icon-plus.svg"}))))
        (alternatives-view alternatives id))))
 
-(defn render-search-blank []
-  (dom/div #js {:className "flex flex-row"}
-           (dom/div #js {:className "center-banner"} "Arraste seus vídeos aqui")))
+(defn render-retry [retries]
+  (let [render (fn [path]
+                 (dom/div nil (node/basename path)))
+        search-all (dom/button #js {:onClick (fn [_]
+                                               (put! app/flux-channel {:cmd :retry-all}))}
+                               "Procurar todos")]
+    (if (seq retries)
+      (apply dom/div #js {:className "white-box"} (conj (mapv render retries) search-all)))))
+
+(defn render-search-blank [retries]
+  (dom/div #js {:className "flex flex-column"}
+    (dom/div #js {:className "flex flex-row"}
+      (dom/div #js {:className "center-banner"} "Arraste seus vídeos aqui"))
+      (render-retry retries)))
 
 (defn render-search-list [searches]
   (apply dom/div #js {:className "flex auto-scroll"} (map search-item searches)))
 
-(defn render-search [searches]
+(defn render-search [searches retries]
   (let [c    (chan)
         view (if (empty? searches)
-               (render-search-blank)
+               (render-search-blank retries)
                (render-search-list (vals searches)))]
     (pipe (r/map (fn [path] {:cmd :add-search
                              :path path})
@@ -168,3 +191,16 @@
 
 (defmethod flux-handler :remove-search [{:keys [id]}]
   (swap! app-state update-in [:searches] dissoc id))
+
+(defmethod flux-handler :retry [{:keys [path]}]
+  (swap! app-state update-in [:retries] disj path)
+  (put! app/flux-channel {:cmd :add-search :path path}))
+
+(defmethod flux-handler :retry-all [_]
+  (let [c (->> (r/spool (get @app-state :retries))
+               (r/map #(hash-map :cmd :retry :path %)))]
+    (pipe c app/flux-channel false)))
+
+(defmethod flux-handler :retry-later [{:keys [path]}]
+  (swap! app-state update-in [:retries] conj path)
+  (engine/local-storage-set! :retries (get @app-state :retries)))

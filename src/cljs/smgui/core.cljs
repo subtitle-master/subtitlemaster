@@ -2,6 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [smgui.settings :as settings]
             [smgui.track :as track]
+            [smgui.engine :as engine]
             [cljs.core.async :refer [chan <! put!]]))
 
 (defn- listen-channel [channel callback]
@@ -14,6 +15,7 @@
 (def app-state
   (atom {:page :search
          :searches {}
+         :retries (or (engine/local-storage-get :retries) #{})
          :organizer {:matched []
                      :searching false}
          :settings (settings/read)}))
