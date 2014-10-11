@@ -2,7 +2,7 @@
   (:require-macros [wilkerdev.util.macros :refer [<? test dochan]]
                    [cljs.core.async.macros :refer [go]])
   (:require [sm.core :as sm]
-            [sm.protocols :as prot]
+            [sm.protocols :as smp]
             [cljs.core.async :refer [<!] :as async]
             [wilkerdev.util.nodejs :as node]
             [wilkerdev.util :as util]
@@ -41,6 +41,22 @@
                 :source      (nth sources 1)
                 :source-name "fake"} sub))))
 
+(test "find a single item - language priority"
+  (let [sources [(helper/fake-provider [(helper/fake-subtitle :stream "en")
+                                        (helper/fake-subtitle :stream "pb")])]
+        sub (<? (sm/find-first {:sources   sources
+                                :path      "test/fixtures/famous.mkv"
+                                :languages ["pb" "en"]}))]
+    (assert (= "pb" (smp/subtitle-language (:subtitle sub))))))
+
+(test "subtitle-language-score"
+  (let [pb (helper/fake-subtitle :stream "pb")
+        en (helper/fake-subtitle :stream "en")
+        es (helper/fake-subtitle :stream "es")]
+    (assert (= 2 (sm/subtitle-language-score pb ["pb" "en"])))
+    (assert (= 1 (sm/subtitle-language-score en ["pb" "en"])))
+    (assert (= 0 (sm/subtitle-language-score es ["pb" "en"])))))
+
 (test "finding all options"
   (let [sa (helper/fake-provider [:one :two])
         sb (helper/fake-provider [:three])
@@ -67,9 +83,9 @@
 
 (test "in memory cache"
   (let [cache (sm/in-memory-cache)]
-    (assert (false? (prot/cache-exists? cache "abc")))
-    (prot/cache-store! cache "abc")
-    (assert (true? (prot/cache-exists? cache "abc")))))
+    (assert (false? (smp/cache-exists? cache "abc")))
+    (smp/cache-store! cache "abc")
+    (assert (true? (smp/cache-exists? cache "abc")))))
 
 (test "process - unchanged"
   (let [query {:sources   []
@@ -135,7 +151,7 @@
                                      :download            {:source-name     "fake"
                                                            :target          "test/fixtures/famous.pb.srt"
                                                            :downloaded-path nil
-                                                           :language        "pb"}}]))
+                                                           :1        "pb"}}]))
         (assert (= (first @called) :stream))))))
 
 (test "downloading subtitle"

@@ -36,11 +36,20 @@
       (assoc s :source-url (source-url source))
       s)))
 
-(defn find-first [{:keys [sources path search-languages]}]
+(defn subtitle-language-score [subtitle languages]
+  (let [lang (sm/subtitle-language subtitle)]
+    (or (->> languages
+             (reverse)
+             (map vector (drop 1 (range)))
+             (filter #(= lang (get % 1)))
+             (ffirst))
+        0)))
+
+(defn find-first [{:keys [sources path search-languages languages]}]
   (go-catch
     (loop [sources sources]
       (when-let [source (first sources)]
-        (let [[res] (<? (sm/search-subtitles source path search-languages))]
+        (let [[res] (sort-by #(* -1 (subtitle-language-score % languages)) (<? (sm/search-subtitles source path search-languages)))]
           (if res
             (-> (source-info source)
                 (assoc :subtitle res))
