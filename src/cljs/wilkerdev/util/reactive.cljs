@@ -12,8 +12,12 @@
   (.apply (.-log js/console) js/console (clj->js params))
     (last params))
 
+(def js-error? (partial instance? js/Error))
+
+(def remove-js-errors (cljs.core/remove js-error?))
+
 (defn throw-err [e]
-  (when (instance? js/Error e) (throw e))
+  (when (js-error? e) (throw e))
   e)
 
 (defn log

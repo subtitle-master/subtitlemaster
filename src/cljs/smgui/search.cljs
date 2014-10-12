@@ -46,9 +46,6 @@
     true
     (and (= :downloaded status) (not= lang preferred-lang))))
 
-(defn retry-later [{path :path}]
-  )
-
 (defn state-download [in]
   (let [out (chan)]
     (go-loop [state {:status :init}]
@@ -137,7 +134,10 @@
 
 (defn render-retry [retries]
   (let [render (fn [path]
-                 (dom/div nil (node/basename path)))
+                 (dom/div nil
+                   (node/basename path)
+                   (dom/button #js {:onClick (fn [_] (put! app/flux-channel {:cmd :retry :path path}))} "Tentar Novamente")
+                   (dom/button #js {:onClick (fn [_] (put! app/flux-channel {:cmd :retry-remove :path path}))} "X")))
         search-all (dom/button #js {:onClick (fn [_]
                                                (put! app/flux-channel {:cmd :retry-all}))}
                                "Procurar todos")]
@@ -194,7 +194,12 @@
 
 (defmethod flux-handler :retry [{:keys [path]}]
   (swap! app-state update-in [:retries] disj path)
+  (engine/local-storage-set! :retries (get @app-state :retries))
   (put! app/flux-channel {:cmd :add-search :path path}))
+
+(defmethod flux-handler :retry-remove [{:keys [path]}]
+  (swap! app-state update-in [:retries] disj path)
+  (engine/local-storage-set! :retries (get @app-state :retries)))
 
 (defmethod flux-handler :retry-all [_]
   (let [c (->> (r/spool (get @app-state :retries))
