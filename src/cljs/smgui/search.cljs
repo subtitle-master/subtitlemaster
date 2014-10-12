@@ -19,7 +19,7 @@
 (defn define-status [icon detail]
   { :icon icon :detail detail })
 
-(def worker-pool (r/channel-pool 5))
+(def worker-pool (r/channel-pool 10))
 
 (defn- status-website-link [status]
   (let [url (-> status :download :source-url)]
