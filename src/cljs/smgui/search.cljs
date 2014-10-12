@@ -144,22 +144,45 @@
                                                (put! app/flux-channel {:cmd :retry-all}))}
                                "Procurar todos")]
     (if (seq retries)
-      (apply dom/div #js {:className "white-box"} (conj (mapv render retries) search-all)))))
+      (apply dom/div #js {:className "white-box overflow-auto"} (conj (mapv render retries) search-all)))))
 
 (defn render-search-blank [retries]
   (dom/div #js {:className "flex flex-column"}
-    (dom/div #js {:className "flex flex-row"}
+    (dom/div #js {:className "flex flex-row mh-250"}
       (dom/div #js {:className "center-banner"} "Arraste seus vídeos aqui"))
       (render-retry retries)))
 
 (defn render-search-list [searches]
   (apply dom/div #js {:className "flex auto-scroll"} (map search-item searches)))
 
+(defn render-search-resume [searches]
+  (let [processing-status #{:info :search :download :upload}
+        reducer (fn [counter {:keys [status uploads]}]
+                  (merge-with + counter {status      1
+                                         :uploads    (count uploads)
+                                         :processing (if (processing-status status) 1 0)}))
+        counter (reduce reducer {} searches)
+        get #(get counter % 0)]
+    (dom/div #js {:className "white-box flex"}
+      (dom/div nil "Total: " (count searches))
+      (dom/div nil "Aguardando: " (get :init))
+      (dom/div nil "Buscando: " (get :search))
+      (dom/div nil "Baixando: " (get :download))
+      (dom/div nil "Enviando: " (get :upload))
+      (dom/div nil "Baixados: " (get :downloaded))
+      (dom/div nil "Enviados: " (get :uploads))
+      (dom/div nil "Processando: " (get :processing))
+      (dom/div nil "Não encontrados: " (get :not-found))
+      (dom/div nil "Não modificados: " (get :unchanged))
+      (dom/div nil "Errors: " (get :error)))))
+
 (defn render-search [searches retries]
   (let [c    (chan)
         view (if (empty? searches)
                (render-search-blank retries)
-               (render-search-list (vals searches)))]
+               (if (> (count searches) 50)
+                 (render-search-resume (vals searches))
+                 (render-search-list (vals searches))))]
     (pipe (r/map (fn [path] {:cmd :add-search
                              :path path})
                  c)
