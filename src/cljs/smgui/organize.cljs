@@ -75,9 +75,9 @@
     (render-state [this {k :path}]
       (dom/div nil
         (dom/div #js {:style #js {:cursor "pointer"}
+                      :className "mh-20"
                       :onClick #(-> owner .-refs .-input .getDOMNode .click)}
-          (or (get cursor k)
-              "Pick a directory"))
+                 (get cursor k "Pick a directory"))
         (dom/input #js {:type "file"
                         :ref "input"
                         :style #js {:display "none"}

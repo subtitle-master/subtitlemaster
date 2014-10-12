@@ -410,6 +410,9 @@ h1 {
 .mh-250 {
   min-height: 250px;
 }
+.mh-20 {
+  min-height: 20px;
+}
 .search {
   -webkit-transition: all 200ms;
   -moz-transition: all 200ms;
