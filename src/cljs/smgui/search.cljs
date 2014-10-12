@@ -25,7 +25,7 @@
   (let [url (-> status :download :source-url)]
     (smgui.components/external-link url url)))
 
-(def status-map { :init       (define-status "time"        (fn [] ["Iniciando a busca..."]))
+(def status-map { :init       (define-status "time"        (fn [] ["Aguardando..."]))
                   :info       (define-status "time"        (fn [] ["Carregando informações do vídeo..."]))
                   :upload     (define-status "upload"      (fn [status] ["Enviando " (:extra status) " ..."]))
                   :search     (define-status "search"      (fn [status] [(str "Buscando legendas nos idiomas: " (get-in status [:search-languages]))]))
