@@ -25,6 +25,10 @@
   (if (not= old-settings new-settings)
     (settings/save new-settings))))
 
+(add-watch app-state :retries (fn [_ _ {old-settings :retries} {new-settings :retries}]
+  (if (not= old-settings new-settings)
+    (engine/local-storage-set! :retries (get @app-state :retries)))))
+
 ; channel for app response flux
 (def flux-channel (chan))
 

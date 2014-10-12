@@ -219,12 +219,10 @@
 
 (defmethod flux-handler :retry [{:keys [path]}]
   (swap! app-state update-in [:retries] disj path)
-  (engine/local-storage-set! :retries (get @app-state :retries))
   (put! app/flux-channel {:cmd :add-search :path path}))
 
 (defmethod flux-handler :retry-remove [{:keys [path]}]
-  (swap! app-state update-in [:retries] disj path)
-  (engine/local-storage-set! :retries (get @app-state :retries)))
+  (swap! app-state update-in [:retries] disj path))
 
 (defmethod flux-handler :retry-all [_]
   (let [c (->> (r/spool (get @app-state :retries))
@@ -232,5 +230,4 @@
     (pipe c app/flux-channel false)))
 
 (defmethod flux-handler :retry-later [{:keys [path]}]
-  (swap! app-state update-in [:retries] conj path)
-  (engine/local-storage-set! :retries (get @app-state :retries)))
+  (swap! app-state update-in [:retries] conj path))
