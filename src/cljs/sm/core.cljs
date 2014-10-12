@@ -1,6 +1,6 @@
 (ns sm.core
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch dochan]]
-                   [cljs.core.async.macros :refer [go]])
+                   [cljs.core.async.macros :refer [go alt!]])
   (:require [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]
             [wilkerdev.util :as util]
             [wilkerdev.util.reactive :as r]
@@ -47,13 +47,26 @@
 
 (defn find-first [{:keys [sources path search-languages languages]}]
   (go-catch
-    (loop [sources sources]
-      (when-let [source (first sources)]
-        (let [[res] (sort-by #(* -1 (subtitle-language-score % languages)) (<? (sm/search-subtitles source path search-languages)))]
-          (if res
-            (-> (source-info source)
-                (assoc :subtitle res))
-            (recur (rest sources))))))))
+    (let [c (chan 1)
+          af (fn [source c]
+               (go
+                 (try
+                   (alt!
+                     (sm/search-subtitles source path search-languages)
+                       ([values]
+                         (r/throw-err values)
+                         (doseq [s (<? (sm/search-subtitles source path search-languages))]
+                           (>! c (assoc (source-info source) :subtitle s))))
+                     (async/timeout 5000) ([_]))
+                   (catch js/Error e
+                     (.log js/console "Error requesting" source (clj->js e)))
+                   (finally
+                     (close! c)))))]
+      (async/pipeline-async 5 c af (r/spool sources))
+
+      (let [sorter #(* -1 (subtitle-language-score (:subtitle %) languages))
+            subtitles (<? (async/into [] c))]
+        (first (sort-by sorter subtitles))))))
 
 (defn find-all [{:keys [sources path languages]}]
   (let [search (fn [source]
