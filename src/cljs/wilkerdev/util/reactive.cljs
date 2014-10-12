@@ -330,7 +330,7 @@
                 res)))
           (go
             (<! (:source v))
-            (:value (get @mem args))))))))
+            (get-in @mem [args :value])))))))
 
 (defn channel-pool
   ([n] (channel-pool n (chan 2048)))

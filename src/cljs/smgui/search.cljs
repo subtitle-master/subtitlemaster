@@ -66,10 +66,12 @@
 
 (def cache-storage (engine/local-storage-cache))
 
+(def cached-sources (sm/default-sources))
+
 (defn download-chan [path]
   (state-download (->> (partial sm/process
                                 {:path      path
-                                 :sources   (sm/default-sources)
+                                 :sources   cached-sources
                                  :languages (smgui.settings/languages)
                                  :cache     cache-storage}
                                 (chan 1))
