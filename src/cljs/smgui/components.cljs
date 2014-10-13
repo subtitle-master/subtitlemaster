@@ -33,8 +33,7 @@
        .-dataTransfer
        .-files
        array-seq
-       (map #(.-path %))
-       vec))
+       (mapv #(.-path %))))
 
 (defn file-dropper [_ owner]
   (reify
@@ -53,3 +52,5 @@
                       :onDragEnd   (pd #(update-over false))
                       :onDrop      (pd #(do (update-over false) (on-files (read-file-paths %))))}
                  view)))))
+
+

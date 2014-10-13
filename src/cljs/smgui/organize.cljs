@@ -81,7 +81,7 @@
       (om/update! cursor [:matched] [])
       (go
         (try
-          (let [names (map node/basename (<? (node/read-dir target)))]
+          (let [names (<? (node/read-dir target))]
             (<! (dochan [info (show-lookup source names)]
                   (om/transact! cursor [:matched] #(conj % (with-target info target))))))
           (catch js/Error e

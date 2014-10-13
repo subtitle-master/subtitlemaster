@@ -179,11 +179,10 @@
   (extensions (-> (extname path)
                   (subs 1))))
 
-(defn read-dir [path]
+(defn read-dir-abs [path]
   (let [fullpath (partial str path sep)]
     (go-catch
-      (->> (<? (node->chan (.-readdir fs) path))
-           array-seq
+      (->> (<? (read-dir path))
            (map fullpath)))))
 
 (defn scan-paths
@@ -196,7 +195,7 @@
            (let [path (peek @paths)]
              (swap! paths next)
              (>! out path)
-             (if (<? (is-dir? path)) (swap! paths into (<? (read-dir path)))))
+             (if (<? (is-dir? path)) (swap! paths into (<? (read-dir-abs path)))))
            (catch js/Error e
              (>! out e))))
        (close! out)))
