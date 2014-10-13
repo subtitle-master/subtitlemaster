@@ -374,7 +374,10 @@
             (recur (dec i))
             e))))))
 
-(defn timeout [c msec]
+(defn timeout
+  "Do an alt! between channel c and a timout with msec milli seconds.
+  In case the timeout is the taken, a timeout error will be returned."
+  [c msec]
   (go
     (alt!
       c ([x] x)
