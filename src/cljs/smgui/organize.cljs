@@ -4,7 +4,6 @@
   (:require [om.dom :as dom]
             [om.core :as om]
             [smgui.core :refer [flux-channel]]
-            [smgui.path :as path]
             [smgui.gui :as gui]
             [cljs.core.async :refer [<! put! chan timeout]]
             [wilkerdev.util.reactive :as r]
@@ -100,7 +99,7 @@
 
 (defn move [{:keys [path target] :as item}]
   (go-catch
-    (let [d (path/dirname target)]
+    (let [d (node/dirname target)]
       (<? (node/mkdir-p d))
       (<? (node/rename path target))
       (>! flux-channel {:cmd :add-search
