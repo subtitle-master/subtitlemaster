@@ -2,6 +2,7 @@
   (:require-macros [wilkerdev.util.macros :refer [<? test dochan]]
                    [cljs.core.async.macros :refer [go]])
   (:require [wilkerdev.util.reactive :as r]
+            [sm.test-helper :refer [alternate-calls]]
             [cljs.core.async :refer [<! timeout alts! put! chan close!]]))
 
 (defn counting [f]
@@ -37,3 +38,12 @@
   (let [reduce-fn (fn [x y] (go (+ x y)))
         res (<! (r/reduce reduce-fn 0 (r/spool [1 2 3 4])))]
     (assert (= 10 res))))
+
+(test "retry"
+  (let [f (fn [] (go :result))]
+    (assert (= :result (<? (r/retry f 5))))))
+
+(test "retry - multi"
+  (let [err (js/Error. "failed")]
+    (assert (= :ok (<? (r/retry (alternate-calls err err :ok) 2))))
+    (assert (= err (<! (r/retry (alternate-calls err :ok) 0))))))

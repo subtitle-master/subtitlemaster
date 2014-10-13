@@ -57,3 +57,12 @@
   (-> (last res)
       (update-in [1] dissoc :cache :sub-hasher :file-hasher :sources)
       (subvec 0 2)))
+
+(defn alternate-calls [& values]
+  (let [vals (atom values)]
+    (fn []
+      (if @vals
+        (let [val (first @vals)]
+          (swap! vals next)
+          (go val))
+        (go nil)))))

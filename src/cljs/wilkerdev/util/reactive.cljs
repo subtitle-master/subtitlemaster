@@ -360,3 +360,16 @@
   ([channels] (into-list channels []))
   ([channels base]
     (async/into base (async/merge channels))))
+
+(defn retry
+  "Call async function f, if it fails, try again n times.
+  Will return the last error in case all tries fails."
+  [f n]
+  (go
+    (loop [i n]
+      (try
+        (<? (f))
+        (catch js/Error e
+          (if (> i 0)
+            (recur (dec i))
+            e))))))
