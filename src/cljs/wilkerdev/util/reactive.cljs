@@ -3,7 +3,7 @@
   (:require [goog.net.Jsonp]
             [goog.Uri]
             [goog.events :as events]
-            [cljs.core.async :refer [>! <! chan put! close! timeout alts!] :as async])
+            [cljs.core.async :refer [>! <! chan put! close! alts!] :as async])
   (:require-macros [cljs.core.async.macros :refer [go alt! go-loop]]
                    [wilkerdev.util.macros :refer [dochan go-catch <? <!expand]])
   (:import goog.events.EventType))
@@ -254,13 +254,13 @@
                    ::init (do (>! out v)
                             (>! out [::throttle v])
                             (recur ::throttling last
-                              (conj cs (timeout msecs))))
+                              (conj cs (async/timeout msecs))))
                    ::throttling (do (>! out v)
                                   (recur state v cs)))
               sync (if last
                      (do (>! out [::throttle last])
                        (recur state nil
-                         (conj (pop cs) (timeout msecs))))
+                         (conj (pop cs) (async/timeout msecs))))
                      (recur ::init last (pop cs)))
               control (recur ::init nil
                         (if (= (count cs) 3)
@@ -292,10 +292,10 @@
                        ::init
                          (do (>! out v)
                            (recur ::debouncing
-                             (conj cs (timeout msecs))))
+                             (conj cs (async/timeout msecs))))
                        ::debouncing
                          (recur state
-                           (conj (pop cs) (timeout msecs))))
+                           (conj (pop cs) (async/timeout msecs))))
               threshold (recur ::init (pop cs)))))))
     out))
 
@@ -373,3 +373,9 @@
           (if (> i 0)
             (recur (dec i))
             e))))))
+
+(defn timeout [c msec]
+  (go
+    (alt!
+      c ([x] x)
+      (async/timeout msec) (js/Error. (str "Timeout " msec "ms")))))

@@ -51,13 +51,9 @@
           af (fn [source c]
                (go
                  (try
-                   (alt!
-                     (sm/search-subtitles source path search-languages)
-                       ([values]
-                         (r/throw-err values)
-                         (doseq [s (<? (sm/search-subtitles source path search-languages))]
-                           (>! c (assoc (source-info source) :subtitle s))))
-                     (async/timeout 5000) ([_]))
+                   (doseq [s (<? (r/timeout (sm/search-subtitles source path search-languages)
+                                            10000))]
+                     (>! c (assoc (source-info source) :subtitle s)))
                    (catch js/Error e
                      (.log js/console "Error requesting" source (clj->js e)))
                    (finally
