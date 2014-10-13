@@ -42,7 +42,7 @@
 
 (defn auth [conn]
   (go-catch
-    (let [res (<? (node/xmlrpc-call conn "LogIn" "" "" "en" *opensub-ua*))
+    (let [res (<? (r/retry #(node/xmlrpc-call conn "LogIn" "" "" "en" *opensub-ua*) 5))
           status (.-status res)]
       (if (= status "200 OK")
         (.-token res)
@@ -50,7 +50,7 @@
 
 (defn search [conn auth query]
   (go-catch
-    (let [res (<? (node/xmlrpc-call conn "SearchSubtitles" auth query))
+    (let [res (<? (r/retry #(node/xmlrpc-call conn "SearchSubtitles" auth query) 5))
           status (.-status res)]
       (if (= status "200 OK")
         (if-let [data (.-data res)]
