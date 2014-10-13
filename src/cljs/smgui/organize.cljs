@@ -5,18 +5,10 @@
             [om.core :as om]
             [smgui.core :refer [flux-channel]]
             [smgui.path :as path]
-            [smgui.fs :as fs]
             [smgui.gui :as gui]
             [cljs.core.async :refer [<! put! chan timeout]]
-            [wilkerdev.util.reactive :as r]))
-
-(def nwpath (js/require "path"))
-
-(defn basename [path]
-  (.basename nwpath path))
-
-(defn basename-without-extension [path]
-  (.basename nwpath path (.extname nwpath path)))
+            [wilkerdev.util.reactive :as r]
+            [wilkerdev.util.nodejs :as node]))
 
 (def video-extensions
   #{"3g2" "3gp" "3gp2" "3gpp" "60d" "ajp" "asf" "asx" "avchd" "avi"
@@ -30,12 +22,12 @@
 
 (defn event->value [e] (-> e .-target .-value))
 
-(defn has-video-extension? [path] (fs/match-extensions? path video-extensions))
+(defn has-video-extension? [path] (node/match-extensions? path video-extensions))
 
 (defn sample? [path] (boolean (re-find #"sample" path)))
 
 (defn normalize [path]
-  (-> (basename-without-extension path)
+  (-> (node/basename-without-extension path)
       (clojure.string/replace #"\." " ")))
 
 (defn episode-info [path]
@@ -51,32 +43,32 @@
    str))
 
 (defn with-target [{:keys [name season path] :as info} target]
-  (let [target-part (str name "/Season " season "/" (basename path))]
+  (let [target-part (str name "/Season " season "/" (node/basename path))]
     (merge info {:target (str target "/" target-part)
                  :target-part target-part})))
 
 (defn show-lookup
   ([path] (show-lookup path []))
   ([path names]
-     (->> (fs/scandir path)
+     (->> (node/scandir path)
           (r/remove sample?)
           (r/filter has-video-extension?)
-          (r/filter fs/is-file?)
+          (r/filter node/is-file?)
           (r/keep episode-info)
           (r/map #(update-in % [:name] (partial str-pre-case names))))))
 
 (defn directory-picker [cursor owner]
   (reify
     om/IDidMount
-    (did-mount [this]
-      (-> owner .-refs .-input .getDOMNode (.setAttribute "nwdirectory" "nwdirectory")))
+    (did-mount [_]
+      (-> owner .-renode .-input .getDOMNode (.setAttribute "nwdirectory" "nwdirectory")))
 
     om/IRenderState
-    (render-state [this {k :path}]
+    (render-state [_ {k :path}]
       (dom/div nil
         (dom/div #js {:style #js {:cursor "pointer"}
                       :className "mh-20"
-                      :onClick #(-> owner .-refs .-input .getDOMNode .click)}
+                      :onClick #(-> owner .-renode .-input .getDOMNode .click)}
                  (get cursor k "Pick a directory"))
         (dom/input #js {:type "file"
                         :ref "input"
@@ -90,14 +82,14 @@
       (om/update! cursor [:matched] [])
       (go
         (try
-          (let [names (map basename (<? (fs/read-dir target)))]
+          (let [names (map node/basename (<? (node/read-dir target)))]
             (<! (dochan [info (show-lookup source names)]
                   (om/transact! cursor [:matched] #(conj % (with-target info target))))))
           (catch js/Error e
             (.log js/console "Error" e)))
         (om/update! cursor [:searching] false)))))
 
-(defn scan-result [{:keys [path name season target target-part]}]
+(defn scan-result [{:keys [path target target-part]}]
   (dom/div nil
     (dom/div nil target-part)
     (dom/div nil target)
@@ -109,8 +101,8 @@
 (defn move [{:keys [path target] :as item}]
   (go-catch
     (let [d (path/dirname target)]
-      (<? (fs/mkdir-p d))
-      (<? (fs/rename path target))
+      (<? (node/mkdir-p d))
+      (<? (node/rename path target))
       (>! flux-channel {:cmd :add-search
                         :path target})
       :done)))

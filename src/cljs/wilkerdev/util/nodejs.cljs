@@ -2,7 +2,8 @@
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]]
                    [cljs.core.async.macros :refer [go]])
   (:require [cljs.core.async :refer [chan put! close! <!] :as async]
-            [wilkerdev.util.reactive]))
+            [wilkerdev.util.reactive :as r]
+            [clojure.string :as str]))
 
 (def package-version (.-version (js/require "./package.json")))
 
@@ -138,3 +139,69 @@
     (.exists fs path #(do (put! out %)
                           (close! out)))
     out))
+
+(defn exists? [path]
+  (let [out (chan)]
+    (.exists fs path #(do (put! out %)
+                          (close! out)))
+    out))
+
+(defn is-dir? [path]
+  (go-catch
+    (let [stat (<? (lstat path))]
+      (.isDirectory stat))))
+
+(defn is-file? [path]
+  (go-catch
+    (let [stat (<? (lstat path))]
+      (.isFile stat))))
+
+(defn path-iterator
+  ([path] (path-iterator "" (remove str/blank? (str/split path sep))))
+  ([current left]
+   (if left
+     (let [cur (str current sep (first left))]
+       (cons cur (lazy-seq (path-iterator cur (next left)))))
+     nil)))
+
+(defn mkdir-p [path]
+  (let [c (->> (path-iterator path)
+               (r/spool)
+               (r/drop-while exists?))]
+    (go-catch
+      (loop []
+        (when-let [v (<! c)]
+          (<? (mkdir v))
+          (recur)))
+      :done)))
+
+(defn match-extensions? [path extensions]
+  (extensions (-> (extname path)
+                  (subs 1))))
+
+(defn read-dir [path]
+  (let [fullpath (partial str path sep)]
+    (go-catch
+      (->> (<? (node->chan (.-readdir fs) path))
+           array-seq
+           (map fullpath)))))
+
+(defn scan-paths
+  ([paths] (scan-paths paths (chan)))
+  ([input-paths out]
+   (go
+     (let [paths (atom (vec input-paths))]
+       (while @paths
+         (try
+           (let [path (peek @paths)]
+             (swap! paths next)
+             (>! out path)
+             (if (<? (is-dir? path)) (swap! paths into (<? (read-dir path)))))
+           (catch js/Error e
+             (>! out e))))
+       (close! out)))
+   out))
+
+(defn scandir
+  ([path] (scandir path (chan)))
+  ([path out] (scan-paths [path] out)))

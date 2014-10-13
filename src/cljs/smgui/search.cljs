@@ -9,7 +9,6 @@
             [smgui.settings :as settings]
             [smgui.util :refer [class-set copy-file]]
             [smgui.track :as track]
-            [smgui.fs :as fs]
             [smgui.organize]
             [sm.core :as sm]
             [cljs.core.async :refer [put! chan <! >! close! pipe] :as async]
@@ -191,9 +190,9 @@
                                                               :channel c}})))
 
 (defn show-lookup [path]
-  (->> (fs/scandir path)
+  (->> (node/scandir path)
        (r/filter smgui.organize/has-video-extension?)
-       (r/filter fs/is-file?)))
+       (r/filter node/is-file?)))
 
 ; register application handlers
 (defmethod flux-handler :add-search [{source-path :path}]
