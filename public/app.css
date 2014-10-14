@@ -6,22 +6,22 @@
 .ptx,
 .pvx,
 .pax {
-  padding-top: $space-x-small !important;
+  padding-top: 5px !important;
 }
 .pts,
 .pvs,
 .pas {
-  padding-top: $space-small !important;
+  padding-top: 10px !important;
 }
 .ptm,
 .pvm,
 .pam {
-  padding-top: $space-medium !important;
+  padding-top: 15px !important;
 }
 .ptl,
 .pvl,
 .pal {
-  padding-top: $space-large !important;
+  padding-top: 20px !important;
 }
 .prn,
 .phn,
@@ -31,22 +31,22 @@
 .prx,
 .phx,
 .pax {
-  padding-right: $space-x-small !important;
+  padding-right: 5px !important;
 }
 .prs,
 .phs,
 .pas {
-  padding-right: $space-small !important;
+  padding-right: 10px !important;
 }
 .prm,
 .phm,
 .pam {
-  padding-right: $space-medium !important;
+  padding-right: 15px !important;
 }
 .prl,
 .phl,
 .pal {
-  padding-right: $space-large !important;
+  padding-right: 20px !important;
 }
 .pbn,
 .pvn,
@@ -56,22 +56,22 @@
 .pbx,
 .pvx,
 .pax {
-  padding-bottom: $space-x-small !important;
+  padding-bottom: 5px !important;
 }
 .pbs,
 .pvs,
 .pas {
-  padding-bottom: $space-small !important;
+  padding-bottom: 10px !important;
 }
 .pbm,
 .pvm,
 .pam {
-  padding-bottom: $space-medium !important;
+  padding-bottom: 15px !important;
 }
 .pbl,
 .pvl,
 .pal {
-  padding-bottom: $space-large !important;
+  padding-bottom: 20px !important;
 }
 .pln,
 .phn,
@@ -81,22 +81,22 @@
 .plx,
 .phx,
 .pax {
-  padding-left: $space-x-small !important;
+  padding-left: 5px !important;
 }
 .pls,
 .phs,
 .pas {
-  padding-left: $space-small !important;
+  padding-left: 10px !important;
 }
 .plm,
 .phm,
 .pam {
-  padding-left: $space-medium !important;
+  padding-left: 15px !important;
 }
 .pll,
 .phl,
 .pal {
-  padding-left: $space-large !important;
+  padding-left: 20px !important;
 }
 .mtn,
 .mvn,
@@ -106,22 +106,22 @@
 .mtx,
 .mvx,
 .max {
-  margin-top: $space-x-small !important;
+  margin-top: 5px !important;
 }
 .mts,
 .mvs,
 .mas {
-  margin-top: $space-small !important;
+  margin-top: 10px !important;
 }
 .mtm,
 .mvm,
 .mam {
-  margin-top: $space-medium !important;
+  margin-top: 15px !important;
 }
 .mtl,
 .mvl,
 .mal {
-  margin-top: $space-large !important;
+  margin-top: 20px !important;
 }
 .mrn,
 .mhn,
@@ -131,22 +131,22 @@
 .mrx,
 .mhx,
 .max {
-  margin-right: $space-x-small !important;
+  margin-right: 5px !important;
 }
 .mrs,
 .mhs,
 .mas {
-  margin-right: $space-small !important;
+  margin-right: 10px !important;
 }
 .mrm,
 .mhm,
 .mam {
-  margin-right: $space-medium !important;
+  margin-right: 15px !important;
 }
 .mrl,
 .mhl,
 .mal {
-  margin-right: $space-large !important;
+  margin-right: 20px !important;
 }
 .mbn,
 .mvn,
@@ -156,22 +156,22 @@
 .mbx,
 .mvx,
 .max {
-  margin-bottom: $space-x-small !important;
+  margin-bottom: 5px !important;
 }
 .mbs,
 .mvs,
 .mas {
-  margin-bottom: $space-small !important;
+  margin-bottom: 10px !important;
 }
 .mbm,
 .mvm,
 .mam {
-  margin-bottom: $space-medium !important;
+  margin-bottom: 15px !important;
 }
 .mbl,
 .mvl,
 .mal {
-  margin-bottom: $space-large !important;
+  margin-bottom: 20px !important;
 }
 .mln,
 .mhn,
@@ -181,22 +181,22 @@
 .mlx,
 .mhx,
 .max {
-  margin-left: $space-x-small !important;
+  margin-left: 5px !important;
 }
 .mls,
 .mhs,
 .mas {
-  margin-left: $space-small !important;
+  margin-left: 10px !important;
 }
 .mlm,
 .mhm,
 .mam {
-  margin-left: $space-medium !important;
+  margin-left: 15px !important;
 }
 .mll,
 .mhl,
 .mal {
-  margin-left: $space-large !important;
+  margin-left: 20px !important;
 }
 .flex-row {
   display: -webkit-box;
@@ -260,6 +260,14 @@
   -ms-flex-pack: justify;
   -webkit-justify-content: space-between;
   justify-content: space-between;
+}
+.flex-justify-center {
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  -o-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
 }
 .flex-grid {
   display: -webkit-box;
@@ -344,6 +352,28 @@ h1 {
   text-shadow: #000 1px 3px 15px;
   text-align: center;
 }
+.bt-action {
+  margin: 2px 5px;
+}
+.bt-action,
+.bt-action * {
+  cursor: pointer;
+}
+.pointer,
+.pointer * {
+  cursor: pointer;
+}
+.center {
+  text-align: center;
+}
+.header-2 {
+  font-family: 'Roboto', sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+}
+.margin-auto {
+  margin: 0 auto;
+}
 .auto-scroll {
   overflow: auto;
 }
@@ -399,6 +429,16 @@ h1 {
   -webkit-box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.5);
   box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.5);
   padding: 20px;
+}
+.wb-faded {
+  background: rgba(255,255,255,0.9);
+}
+.wb-top-detail {
+  border-top: 5px solid #4f4f4f;
+  padding: 15px 20px 20px;
+}
+.wb-smaller {
+  margin: 20px 120px;
 }
 .text-right {
   text-align: right;

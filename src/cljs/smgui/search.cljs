@@ -135,15 +135,23 @@
 
 (defn render-retry [retries]
   (let [render (fn [path]
-                 (dom/div nil
-                   (node/basename path)
-                   (dom/button #js {:onClick (fn [_] (put! app/flux-channel {:cmd :retry :path path}))} "Tentar Novamente")
-                   (dom/button #js {:onClick (fn [_] (put! app/flux-channel {:cmd :retry-remove :path path}))} "X")))
-        search-all (dom/button #js {:onClick (fn [_]
-                                               (put! app/flux-channel {:cmd :retry-all}))}
-                               "Procurar todos")]
+                 (dom/div #js {:className "flex-row"}
+                   (dom/div #js {:className "flex"} (node/basename path))
+                   (dom/div #js {:className "bt-action"
+                                 :onClick (fn [_] (put! app/flux-channel {:cmd :retry :path path}))}
+                            (dom/img #js {:src "images/icons/icon-retry-one.png"}))
+                   (dom/div #js {:className "bt-action"
+                                 :onClick (fn [_] (put! app/flux-channel {:cmd :retry-remove :path path}))}
+                            (dom/img #js {:src "images/icons/icon-retry-remove.png"}))))
+        search-all (dom/div #js {:className "flex-row flex-center pointer mtm flex-justify-center"
+                                 :onClick (fn [_] (put! app/flux-channel {:cmd :retry-all}))}
+                     (dom/img #js {:src "images/icons/icon-retry-all.png"})
+                     (dom/div #js {:className "mlm"} "Buscar Todos"))]
     (if (seq retries)
-      (apply dom/div #js {:className "white-box overflow-auto"} (conj (mapv render retries) search-all)))))
+      (dom/div #js {:className "white-box wb-faded wb-top-detail wb-smaller pts flex-column"}
+        (dom/div #js {:className "header-2 center mbm"} "Buscas Recentes")
+        (apply dom/div #js {:className "flex overflow-auto"} (mapv render retries))
+        search-all))))
 
 (defn render-search-blank [retries]
   (dom/div #js {:className "flex flex-column"}

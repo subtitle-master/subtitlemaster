@@ -121,7 +121,7 @@
         {:keys [searching matched] :as organizer} (-> cursor :organizer)
         run-scan #(scan (-> @cursor :settings :organizer) organizer)]
     (dom/div #js {:className "flex auto-scroll"}
-      (dom/div #js {:className "white-box"}
+      (dom/div #js {:className "white-box wb-top-detail"}
         "Video Organizer"
         (dom/div nil (dom/strong nil "Source"))
         (om/build directory-picker settings {:state {:path :source}})

@@ -1,3 +1,8 @@
+$space-x-small = 5px
+$space-small = 10px
+$space-medium = 15px
+$space-large = 20px
+
 @import 'nib';
 @import './include/spaces.styl';
 @import './include/flex.styl';
@@ -29,6 +34,27 @@ h1
   font-size: 48px
   text-shadow: rgb(0, 0, 0) 1px 3px 15px
   text-align: center
+
+.bt-action
+  margin: 2px 5px
+
+  &, & *
+    cursor: pointer
+
+.pointer
+  &, & *
+    cursor: pointer
+
+.center
+  text-align: center
+
+.header-2
+  font-family: 'Roboto', sans-serif
+  font-size: 20px
+  font-weight: bold
+
+.margin-auto
+  margin: 0 auto;
 
 .auto-scroll
   overflow: auto
@@ -73,6 +99,16 @@ h1
   margin: 20px 40px
   box-shadow: 0px 2px 4px 0px rgba(#000, 0.5)
   padding: 20px
+
+.wb-faded
+  background: rgba(#fff, 0.9)
+
+.wb-top-detail
+  border-top: 5px solid #4F4F4F
+  padding: 15px 20px 20px
+
+.wb-smaller
+  margin: 20px 120px
 
 .text-right
   text-align: right

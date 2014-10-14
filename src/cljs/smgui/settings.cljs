@@ -149,6 +149,6 @@
 
 (defn render-page [cursor]
   (dom/div #js {:className "flex auto-scroll"}
-           (dom/div #js {:className "white-box auto-scroll"} (om/build language-picker (get-in cursor [:settings :languages])))
-           (dom/div #js {:className "white-box"}
+           (dom/div #js {:className "white-box wb-top-detail auto-scroll"} (om/build language-picker (get-in cursor [:settings :languages])))
+           (dom/div #js {:className "white-box wb-top-detail"}
              (dom/div nil "Subtitle Master v" node/package-version))))
