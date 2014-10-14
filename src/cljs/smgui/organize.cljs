@@ -60,14 +60,14 @@
   (reify
     om/IDidMount
     (did-mount [_]
-      (-> owner .-renode .-input .getDOMNode (.setAttribute "nwdirectory" "nwdirectory")))
+      (-> owner .-refs .-input .getDOMNode (.setAttribute "nwdirectory" "nwdirectory")))
 
     om/IRenderState
     (render-state [_ {k :path}]
       (dom/div nil
         (dom/div #js {:style #js {:cursor "pointer"}
                       :className "mh-20"
-                      :onClick #(-> owner .-renode .-input .getDOMNode .click)}
+                      :onClick #(-> owner .-refs .-input .getDOMNode .click)}
                  (get cursor k "Pick a directory"))
         (dom/input #js {:type "file"
                         :ref "input"
