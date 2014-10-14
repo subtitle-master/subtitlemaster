@@ -565,11 +565,11 @@ h1 {
   flex: none;
 }
 .search.downloaded .view,
-.search.notfound .view,
+.search.not-found .view,
 .search.uploaded .view,
 .search.error .view,
 .search.downloaded .alternatives,
-.search.notfound .alternatives,
+.search.not-found .alternatives,
 .search.uploaded .alternatives,
 .search.error .alternatives {
   display: -webkit-box;
