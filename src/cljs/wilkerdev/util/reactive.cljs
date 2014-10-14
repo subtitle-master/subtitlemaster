@@ -155,19 +155,6 @@
             (close! out))))
     out))
 
-(defn fan-in
-  ([ins] (fan-in ins (chan)))
-  ([ins out]
-    (go (loop [ins (vec ins)]
-          (when (> (count ins) 0)
-            (let [[x in] (alts! ins)]
-              (when x
-                (>! out x)
-                (recur ins))
-              (recur (vec (disj (set ins) in))))))
-        (close! out))
-    out))
-
 (defn take-until
   ([pred-sentinel in] (take-until pred-sentinel in (chan)))
   ([pred-sentinel in out]
@@ -198,36 +185,20 @@
              (close! out))))
      out))
 
-(defn siphon
-  ([in] (siphon in []))
-  ([in coll]
-    (go (loop [coll coll]
-          (if-let [v (<! in)]
-            (recur (conj coll v))
-            coll)))))
-
-(defn always [v c]
-  (let [out (chan)]
-    (go (loop []
-          (if-let [e (<! c)]
-            (do (>! out v)
-              (recur))
-            (close! out))))
-    out))
-
 (defn toggle [in]
   (let [out (chan)
         control (chan)]
     (go (loop [on true]
           (recur
             (alt!
-              in ([x] (when on (>! out x)) on)
+              in ([x] (if on (>! out x)) on)
               control ([x] x)))))
     {:chan out
      :control control}))
 
 (defn barrier [cs]
-  (go (loop [cs (seq cs) result []]
+  (go (loop [cs (seq cs)
+             result []]
         (if cs
           (recur (next cs) (conj result (<! (first cs))))
           result))))
