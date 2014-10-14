@@ -307,7 +307,6 @@
   -webkit-justify-content: space-between;
   justify-content: space-between;
 }
-@import './include/loader.css';
 * {
   -webkit-user-select: none;
   -moz-user-select: none;
