@@ -40,9 +40,12 @@
 
 (defn client [] (node/xmlrpc-client {:host *opensub-endpoint* :path "/xml-rpc"}))
 
+(defn call [& args]
+  (r/retry #(apply node/xmlrpc-call args) 5))
+
 (defn auth [conn]
   (go-catch
-    (let [res (<? (r/retry #(node/xmlrpc-call conn "LogIn" "" "" "en" *opensub-ua*) 5))
+    (let [res (<? (call conn "LogIn" "" "" "en" *opensub-ua*))
           status (.-status res)]
       (if (= status "200 OK")
         (.-token res)
@@ -50,7 +53,7 @@
 
 (defn search [conn auth query]
   (go-catch
-    (let [res (<? (r/retry #(node/xmlrpc-call conn "SearchSubtitles" auth query) 5))
+    (let [res (<? (call conn "SearchSubtitles" auth query))
           status (.-status res)]
       (if (= status "200 OK")
         (if-let [data (.-data res)]
@@ -61,6 +64,38 @@
   (let [url (:sub-download-link entry)]
     (-> (node/http-stream {:uri url})
         (.pipe (.createGunzip node/zlib)))))
+
+(defn upload-data [{:keys [path sub-path]}]
+  (go-catch
+    (let [[moviehash moviebytesize] (<? (hash-file path))]
+      {:cd1 {:subhash       (<? (node/md5-file sub-path))
+             :subfilename   (node/basename sub-path)
+             :moviehash     moviehash
+             :moviebytesize moviebytesize
+             :moviefilename (node/basename path)}})))
+
+(defn- path->gzip64 [path]
+  (go-catch
+    (let [reader (node/create-read-stream path)
+          gzip (node/create-gzip-raw)]
+      (.pipe reader gzip)
+      (-> (node/stream->buffer gzip) <?
+          (.toString "base64")))))
+
+(defn upload [{:keys [conn auth sub-path] :as query}]
+  (go-catch
+    (let [upload-info (<? (upload-data query))
+          try-result (<? (call conn "TryUploadSubtitles" auth upload-info))
+          pristine? (= (.-alreadyindb try-result) 0)
+          data (util/js->map (aget (.-data try-result) 0))]
+      (if pristine?
+        (let [upload-info (-> upload-info
+                              (assoc :baseinfo {:idmovieimdb (:id-movie-imdb data)})
+                              (assoc-in [:cd1 :subcontent] (<? (path->gzip64 sub-path))))
+              response (<? (call conn "UploadSubtitles" auth upload-info))]
+          (.log js/console (clj->js upload-info))
+          response)
+        :duplicated))))
 
 (defrecord OpenSubtitlesSubtitle [info]
   Subtitle

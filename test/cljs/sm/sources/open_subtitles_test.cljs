@@ -29,22 +29,22 @@
 
 (test "open subtitles integration stack"
   (with-redefs [os/hash-file (fn [path]
-                                  (assert (= path "sample-path"))
-                                  (go ["abc" 123]))
+                               (assert (= path "sample-path"))
+                               (go ["abc" 123]))
                 os/client (constantly :client)
                 os/auth (fn [client]
-                                  (assert (= :client client))
-                                  (go :auth))
+                          (assert (= :client client))
+                          (go :auth))
                 os/search (fn [client auth query]
-                                    (assert (= client :client))
-                                    (assert (= auth :auth))
-                                    (assert (= query [{:sublanguageid "eng,por"
-                                                       :moviehash     "abc"
-                                                       :moviebytesize 123}]))
-                                    (go [{:sub-download-link "download-url"}]))
+                            (assert (= client :client))
+                            (assert (= auth :auth))
+                            (assert (= query [{:sublanguageid "eng,por"
+                                               :moviehash     "abc"
+                                               :moviebytesize 123}]))
+                            (go [{:sub-download-link "download-url"}]))
                 os/download (fn [info]
-                                             (assert (= info {:sub-download-link "download-url"}))
-                                             "content")]
+                              (assert (= info {:sub-download-link "download-url"}))
+                              "content")]
     (let [host (os/source)
           res (<? (sm/search-subtitles host "sample-path" ["en" "pt"]))]
       (assert (= "content" (sm/download-stream (first res)))))))
@@ -52,3 +52,12 @@
 (test "open subtitles subtitle language"
   (let [subtitle (os/->OpenSubtitlesSubtitle {:sub-language-id "eng"})]
     (assert (= "en" (sm/subtitle-language subtitle)))))
+
+(test "upload"
+  (let [conn (os/client)
+        token (<? (os/auth conn))
+        query {:conn     conn
+               :auth     token
+               :path     "test/fixtures/breakdance.avi"
+               :sub-path "test/fixtures/breakdance.en.srt"}]
+    (.log js/console (clj->js (<? (os/upload query))))))

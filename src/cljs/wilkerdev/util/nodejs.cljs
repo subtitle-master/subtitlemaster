@@ -204,3 +204,17 @@
 (defn scandir
   ([path] (scandir path (chan)))
   ([path out] (scan-paths [path] out)))
+
+(defn stream->buffer [stream]
+  (let [c (chan)
+        buffers (array)]
+    (doto stream
+          (.on "data" #(.push buffers %))
+          (.on "error" #(do (put! c (make-js-error %)) (close! c)))
+          (.on "end" (fn []
+                       (put! c (.concat js/Buffer buffers))
+                       (close! c))))
+    c))
+
+(defn create-gzip [] (.createGzip zlib))
+(defn create-gzip-raw [] (.DeflateRaw zlib))
