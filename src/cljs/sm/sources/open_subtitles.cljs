@@ -3,6 +3,7 @@
   (:require [wilkerdev.util.nodejs :refer [lstat fopen fread] :as node]
             [wilkerdev.util :as util]
             [wilkerdev.util.reactive :as r]
+            [sm.util :as sm-util]
             [sm.protocols :refer [SearchProvider Subtitle Linkable]]
             [sm.languages :as lang]
             [clojure.string :as str]))
@@ -38,6 +39,22 @@
                   (.add (Long. size)))]
       [(.toString sum 16) size])))
 
+(defn build-query [path languages]
+  (go-catch
+    (let [lang (str/join "," (map lang/iso-6391->iso639-2b languages))
+          [hash size] (<? (hash-file path))
+          hash-query {:sublanguageid lang
+                      :moviehash     hash
+                      :moviebytesize size}
+          tag-query {:sublanguageid lang
+                     :tag           (node/basename path)}
+          text-query (if-let [{:keys [name season episode]} (sm-util/episode-info path)]
+                       {:sublanguageid lang
+                        :query         name
+                        :season        (js/parseInt season)
+                        :episode       (js/parseInt episode)})]
+      (filter identity [hash-query text-query tag-query]))))
+
 (defn client [] (node/xmlrpc-client {:host *opensub-endpoint* :path "/xml-rpc"}))
 
 (defn call [& args]
@@ -59,6 +76,9 @@
         (if-let [data (.-data res)]
           (->> (array-seq data)
                (map util/js->map)))))))
+
+; TODO: implement auto-search when it's working
+(defn auto-search [conn auth query])
 
 (defn download [entry]
   (let [url (:sub-download-link entry)]
@@ -115,10 +135,7 @@
   (search-subtitles [_ path languages]
     (go-catch
       (let [auth-token (<? (m-auth client))
-            [hash size] (<? (hash-file path))
-            query [{:sublanguageid (str/join "," (map lang/iso-6391->iso639-2b languages))
-                    :moviehash     hash
-                    :moviebytesize size}]]
+            query (<? (build-query path languages))]
         (->> (<? (search client auth-token query))
              (map ->OpenSubtitlesSubtitle))))))
 

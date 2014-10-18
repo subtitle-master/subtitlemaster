@@ -19,7 +19,28 @@
                 :moviehash     "cf2490e0d1ecddb6"
                 :moviebytesize 833134592}]
         res (<? (os/search conn token query))]
+    (.log js/console (clj->js res))
     (assert (> (count res) 0))))
+
+(test "build query search"
+  (assert (= (<? (os/build-query "test/fixtures/breakdance.avi" ["pb"]))
+             [{:moviebytesize 12909756
+               :sublanguageid "pob"
+               :moviehash     "8e245d9679d31e12"}
+              {:sublanguageid "pob"
+               :tag           "breakdance.avi"}])))
+
+(test "build tv show query"
+  (assert (= (<? (os/build-query "test/fixtures/Some.Show.Name.S01E03.720p.HDTV.mkv" ["pb"]))
+             [{:moviebytesize 93905
+               :sublanguageid "pob"
+               :moviehash     "39e0e54a3a1cffc9"}
+              {:sublanguageid "pob"
+               :season        1
+               :episode       3
+               :query         "Some Show Name"}
+              {:sublanguageid "pob"
+               :tag           "Some.Show.Name.S01E03.720p.HDTV.mkv"}])))
 
 (test "open subtitles download"
   (let [entry {:sub-download-link "http://dl.opensubtitles.org/en/download/filead/1118.gz"}
