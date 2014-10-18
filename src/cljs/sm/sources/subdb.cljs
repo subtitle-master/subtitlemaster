@@ -108,13 +108,6 @@
     (go-catch
       (let [hash (<? (hash-file path))
             read-stream (node/create-read-stream sub-path)]
-        (<? (upload hash read-stream)))))
-
-  Ranker
-  (notify-preferred [_ path sub-path]
-    (go-catch
-      (let [hash (<? (hash-file path))
-            read-stream (node/create-read-stream sub-path)]
         (<? (upload hash read-stream))))))
 
 (defn source [] (->SubDBSource))

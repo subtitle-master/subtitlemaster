@@ -79,6 +79,6 @@
         token (<? (os/auth conn))
         query {:conn     conn
                :auth     token
-               :path     "test/fixtures/breakdance.avi"
-               :sub-path "test/fixtures/breakdance.en.srt"}]
-    (.log js/console (clj->js (<? (os/upload query))))))
+               :path     "/Volumes/WilkerWD/Videos/TV Shows/Cosmos A Space Time Odyssey/Cosmos.A.Space.Time.Odyssey.S01E01.720p.HDTV.X264-DIMENSION.mkv"
+               :sub-path "/Volumes/WilkerWD/Videos/TV Shows/Cosmos A Space Time Odyssey/Cosmos.A.Space.Time.Odyssey.S01E01.720p.HDTV.X264-DIMENSION.pb.srt"}]
+    (assert (= :uploaded (<? (os/upload query))))))

@@ -4,7 +4,7 @@
             [wilkerdev.util :as util]
             [wilkerdev.util.reactive :as r]
             [sm.util :as sm-util]
-            [sm.protocols :refer [SearchProvider Subtitle Linkable]]
+            [sm.protocols :refer [SearchProvider UploadProvider Subtitle Linkable]]
             [sm.languages :as lang]
             [clojure.string :as str]))
 
@@ -94,12 +94,10 @@
              :moviebytesize moviebytesize
              :moviefilename (node/basename path)}})))
 
-(defn- path->gzip64 [path]
+(defn- path->base64 [path]
   (go-catch
-    (let [reader (node/create-read-stream path)
-          gzip (node/create-deflate-raw)]
-      (.pipe reader gzip)
-      (-> (node/stream->buffer gzip) <?
+    (let [reader (node/create-read-stream path)]
+      (-> (node/stream->buffer reader) <?
           (.toString "base64")))))
 
 (defn upload [{:keys [conn auth sub-path] :as query}]
@@ -111,10 +109,11 @@
       (if pristine?
         (let [upload-info (-> upload-info
                               (assoc :baseinfo {:idmovieimdb (:id-movie-imdb data)})
-                              (assoc-in [:cd1 :subcontent] (<? (path->gzip64 sub-path))))
+                              (assoc-in [:cd1 :subcontent] (<? (path->base64 sub-path))))
               response (<? (call conn "UploadSubtitles" auth upload-info))]
-          (.log js/console (clj->js upload-info))
-          response)
+          (if (= "200 OK" (.-status response))
+            :uploaded
+            :unknown))
         :duplicated))))
 
 (defrecord OpenSubtitlesSubtitle [info]
@@ -137,7 +136,18 @@
       (let [auth-token (<? (m-auth client))
             query (<? (build-query path languages))]
         (->> (<? (search client auth-token query))
-             (map ->OpenSubtitlesSubtitle))))))
+             (map ->OpenSubtitlesSubtitle)))))
+
+  UploadProvider
+  (upload-subtitle [_ path sub-path]
+    (.log js/console "Uploading to OpenSubtitles" path sub-path)
+    (go-catch
+      (let [res (<? (upload {:conn     client
+                             :auth     (<? (m-auth client))
+                             :path     path
+                             :sub-path sub-path}))]
+        (.log js/console "Upload response" (clj->js res))
+        res))))
 
 (defn source []
   (->OpenSubtitlesSource (client) (r/memoize-async auth)))

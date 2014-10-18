@@ -98,12 +98,12 @@
                                       af (fn [source c]
                                            (go
                                              (try
-                                               (<? (smp/notify-preferred source path downloaded-path))
+                                               (<? (smp/upload-subtitle source path downloaded-path))
                                                (catch js/Error e
                                                  (.log js/console "Failed to upload" e))
                                                (finally
                                                  (close! c)))))]
-                                  (async/pipeline-async 5 c af (r/spool (filter smp/ranker? cached-sources))))
+                                  (async/pipeline-async 5 c af (r/spool (filter smp/upload-provider? cached-sources))))
                                 (app/call :alternatives-close {:id id}))} "Selecionar")))
 
 (defn alternative-loading []

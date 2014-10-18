@@ -6,9 +6,6 @@
 (defprotocol UploadProvider
   (upload-subtitle [_ path subtitle-path]))
 
-(defprotocol Ranker
-  (notify-preferred [_ path subtitle-path]))
-
 (defprotocol Linkable
   (-linkable-url [_]))
 
@@ -22,4 +19,3 @@
 
 (defn upload-provider? [x] (satisfies? UploadProvider x))
 (defn linkable? [x] (satisfies? Linkable x))
-(defn ranker? [x] (satisfies? Ranker x))
