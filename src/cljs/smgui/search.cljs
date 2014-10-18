@@ -3,6 +3,7 @@
                    [wilkerdev.util.macros :refer [dochan <? go-catch]])
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
+            [sm.languages :as lang]
             [smgui.engine :as engine]
             [smgui.gui :as gui]
             [smgui.core :as app :refer [flux-handler app-state]]
@@ -29,7 +30,7 @@
                   :upload     (define-status "upload"      (fn [status] ["Enviando " (:extra status) " ..."]))
                   :search     (define-status "search"      (fn [status] [(str "Buscando legendas nos idiomas: " (get-in status [:search-languages]))]))
                   :download   (define-status "download"    (fn [status] ["Baixando legenda do servidor: " (-> status :download :source-name) "..."]))
-                  :downloaded (define-status "check"       (fn [status] ["Baixado do servidor " (-> status :download :source-name) " (" (status-website-link status) ")"]))
+                  :downloaded (define-status "check"       (fn [status] ["Baixado em " (-> status :download :language lang/iso-6391->name-br .toLowerCase) " do servidor " (-> status :download :source-name) " (" (status-website-link status) ")"]))
                   :not-found  (define-status "error"       (fn [] ["Nenhuma legenda encontrada, tente novamente mais tarde"]))
                   :unchanged  (define-status "check-small" (fn [] ["Você já tem a legenda no seu idioma favorito"]))
                   :uploaded   (define-status "check"       (fn [] ["Suas legendas locais para esse vídeo foram compartilhadas!"]))
@@ -40,7 +41,7 @@
 
 (def retry-states #{:not-found :error})
 
-(defn retry-later? [{status :status {lang :language} :download [preferred-lang] :languages :as query}]
+(defn retry-later? [{status :status {lang :language} :download [preferred-lang] :languages}]
   (if (retry-states status)
     true
     (and (= :downloaded status) (not= lang preferred-lang))))
@@ -55,6 +56,7 @@
                                                    status
                                                    (:status state)))
                                   (assoc :extra extra))]
+                 #_ (.log js/console (clj->js new-info))
                  (if (trackable-states status) (track/search (name status)))
                  (recur new-info))
                (do
