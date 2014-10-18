@@ -77,7 +77,7 @@
 (defn- path->gzip64 [path]
   (go-catch
     (let [reader (node/create-read-stream path)
-          gzip (node/create-gzip-raw)]
+          gzip (node/create-deflate-raw)]
       (.pipe reader gzip)
       (-> (node/stream->buffer gzip) <?
           (.toString "base64")))))

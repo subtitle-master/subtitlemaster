@@ -217,4 +217,4 @@
     c))
 
 (defn create-gzip [] (.createGzip zlib))
-(defn create-gzip-raw [] (.DeflateRaw zlib))
+(defn create-deflate-raw [] (.DeflateRaw zlib))
