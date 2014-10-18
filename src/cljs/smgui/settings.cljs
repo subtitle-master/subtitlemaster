@@ -37,17 +37,11 @@
 (defn languages [] (-> (read) :languages))
 (defn uuid [] (-> (read) :uuid))
 
-(defn- extract-language [lang]
-  {:locale (.-locale lang)
-   :iso639_1 (.-iso639_1 lang)
-   :iso639_2b (.-iso639_2b lang)
-   :name (.-name lang)})
-
 (def languages-map (->> sm-lang/languages
-                        (sort-by :name)))
+                        (sort-by :name-br)))
 
-(defn- option-from-location [{:keys [iso639_1 name]}]
-  (dom/option #js {:value iso639_1 :key iso639_1} name))
+(defn- option-from-location [{:keys [iso639_1 name-br]}]
+  (dom/option #js {:value iso639_1 :key iso639_1} name-br))
 
 (defn language-from-iso639_1 [iso639_1]
   (first (filter #(= iso639_1 (:iso639_1 %)) languages-map)))

@@ -20,7 +20,7 @@
     {:iso639_1 "et" :iso639_2b "est" :locale "et" :name "Estonian" :name-br "Estonian"}
     {:iso639_1 "fi" :iso639_2b "fin" :locale "fi" :name "Finnish" :name-br "Finlandês"}
     {:iso639_1 "fr" :iso639_2b "fre" :locale "fr" :name "French" :name-br "Francês"}
-    {:iso639_1 "gl" :iso639_2b "glg" :locale "gl" :name "Galician" :name-br "galego"}
+    {:iso639_1 "gl" :iso639_2b "glg" :locale "gl" :name "Galician" :name-br "Galego"}
     {:iso639_1 "ka" :iso639_2b "geo" :locale "ka" :name "Georgian" :name-br "Georgian"}
     {:iso639_1 "de" :iso639_2b "ger" :locale "de" :name "German" :name-br "Alemão"}
     {:iso639_1 "el" :iso639_2b "ell" :locale "el" :name "Greek" :name-br "Grego"}
@@ -38,7 +38,7 @@
     {:iso639_1 "no" :iso639_2b "nor" :locale "no" :name "Norwegian" :name-br "Norwegian"}
     {:iso639_1 "fa" :iso639_2b "per" :locale "fa" :name "Persian" :name-br "Persa"}
     {:iso639_1 "pl" :iso639_2b "pol" :locale "pl" :name "Polish" :name-br "Polonês"}
-    {:iso639_1 "pb" :iso639_2b "pob" :locale "pt_BR" :name "Portuguese (Brazilian)" :name-br "Português"}
+    {:iso639_1 "pb" :iso639_2b "pob" :locale "pt_BR" :name "Portuguese (Brazilian)" :name-br "Português (Brasil)"}
     {:iso639_1 "pt" :iso639_2b "por" :locale "pt_PT" :name "Portuguese" :name-br "Português (Portugual)"}
     {:iso639_1 "ro" :iso639_2b "rum" :locale "ro" :name "Romanian" :name-br "Romeno"}
     {:iso639_1 "ru" :iso639_2b "rus" :locale "ru" :name "Russian" :name-br "Russo"}
