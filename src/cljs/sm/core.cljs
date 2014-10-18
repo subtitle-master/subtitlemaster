@@ -189,7 +189,9 @@
                (try
                  (r/throw-err v)
                  (let [{subtitle :subtitle :as result} (<? (download-subtitle v (node/temp-stream ".srt")))]
-                   (>! c (assoc result :save-path (subtitle-target-path basepath (sm/subtitle-language subtitle)))))
+                   (>! c (-> result
+                             (assoc :path path)
+                             (assoc :save-path (subtitle-target-path basepath (sm/subtitle-language subtitle))))))
                  (catch js/Error e
                    (.log js/console "Error" e))
                  (finally

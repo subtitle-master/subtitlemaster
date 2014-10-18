@@ -1,6 +1,6 @@
 (ns sm.sources.subdb
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
-  (:require [sm.protocols :refer [SearchProvider UploadProvider Subtitle Linkable]]
+  (:require [sm.protocols :refer [SearchProvider UploadProvider Subtitle Linkable Ranker]]
             [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]
             [wilkerdev.util :as util]))
 
@@ -105,6 +105,13 @@
 
   UploadProvider
   (upload-subtitle [_ path sub-path]
+    (go-catch
+      (let [hash (<? (hash-file path))
+            read-stream (node/create-read-stream sub-path)]
+        (<? (upload hash read-stream)))))
+
+  Ranker
+  (notify-preferred [_ path sub-path]
     (go-catch
       (let [hash (<? (hash-file path))
             read-stream (node/create-read-stream sub-path)]

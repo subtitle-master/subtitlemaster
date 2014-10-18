@@ -99,7 +99,7 @@
 (defn language-picker [cursor owner]
   (reify
     om/IRender
-    (render [this]
+    (render [_]
       (dom/table #js {:className "multiselect"}
         (dom/tbody nil
           (dom/tr nil

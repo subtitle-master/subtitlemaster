@@ -3,7 +3,9 @@
                    [wilkerdev.util.macros :refer [dochan <? go-catch]])
   (:require [om.dom :as dom :include-macros true]
             [om.core :as om :include-macros true]
+            [sm.core :as sm]
             [sm.languages :as lang]
+            [sm.protocols :as smp]
             [smgui.engine :as engine]
             [smgui.gui :as gui]
             [smgui.core :as app :refer [flux-handler app-state]]
@@ -11,7 +13,6 @@
             [smgui.util :refer [class-set copy-file]]
             [smgui.track :as track]
             [smgui.organize]
-            [sm.core :as sm]
             [cljs.core.async :refer [put! chan <! >! close! pipe] :as async]
             [wilkerdev.util.reactive :as r]
             [wilkerdev.util.nodejs :as node]))
@@ -85,14 +86,24 @@
   (-> (js/require "path")
       (.basename path)))
 
-(defn alternative-item-view [{:keys [downloaded-path language source-name save-path]} id]
+(defn alternative-item-view [{:keys [downloaded-path language source-name save-path path] :as download} id]
   (dom/li #js {:className "flex-row"}
     (dom/a #js {:href     downloaded-path
                 :download "subtitle"
                 :className "flex"}
                (str language " - " source-name))
     (dom/button #js {:onClick #(do
-                                (copy-file downloaded-path save-path)
+                                (node/copy-file downloaded-path save-path)
+                                (let [c (chan)
+                                      af (fn [source c]
+                                           (go
+                                             (try
+                                               (<? (smp/notify-preferred source path downloaded-path))
+                                               (catch js/Error e
+                                                 (.log js/console "Failed to upload" e))
+                                               (finally
+                                                 (close! c)))))]
+                                  (async/pipeline-async 5 c af (r/spool (filter smp/ranker? cached-sources))))
                                 (app/call :alternatives-close {:id id}))} "Selecionar")))
 
 (defn alternative-loading []

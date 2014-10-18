@@ -218,3 +218,8 @@
 
 (defn create-gzip [] (.createGzip zlib))
 (defn create-deflate-raw [] (.DeflateRaw zlib))
+
+(defn copy-file [source target]
+  (let [input (create-read-stream source)
+        output (create-write-stream target)]
+    (.pipe input output)))
