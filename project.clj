@@ -1,4 +1,4 @@
-(defproject smgui "2.0.0-beta2"
+(defproject smgui "2.0.1-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License - v 1.0"
@@ -14,8 +14,9 @@
   :dependencies [[org.clojure/clojure "1.7.0-alpha2"]
                  [org.clojure/clojurescript "0.0-2342"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [om "0.7.3"]
-                 [camel-snake-kebab "0.2.4"]]
+                 [om "0.8.0-alpha1"]
+                 [camel-snake-kebab "0.2.4"]
+                 [com.facebook/react "0.11.2"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
             [lein-node-webkit-build "0.1.5"]
@@ -34,4 +35,13 @@
   :cljsbuild  { :builds { :dev { :source-paths ["src/cljs"]
                                  :compiler { :output-to "public/js/smgui.js"
                                              :optimizations :whitespace
-                                             :pretty-print true}}}})
+                                             :preamble ["react/react.min.js"]
+                                             :pretty-print true}}
+                          :release { :source-paths ["src/cljs"]
+                                     :compiler { :output-to "public/js/smgui.js"
+                                                 :output-dir "public/js"
+                                                 :optimizations :advanced
+                                                 :pretty-print false
+                                                 :preamble ["react/react.min.js"]
+                                                 :externs ["react/externs/react.js" "externs/nodejs.js"]
+                                                 :source-map "public/js/smgui.js.map"}}}})
