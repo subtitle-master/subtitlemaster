@@ -18,11 +18,10 @@
   (dom/a #js {:href "#" :className "button" :onClick (pd #(gui/open-external url))} view))
 
 (defn input-value-seq [input]
-  (-> (.$ js/window input)
-      .val
-      (or [])
-      array-seq
-      (or [])))
+  (->> (.querySelectorAll input "option")
+       array-seq
+       (filter #(.-selected %))
+       (map #(.-value %))))
 
 ; global cancel default drop behavior
 (set! (.-ondragover js/window) #(.preventDefault %))
