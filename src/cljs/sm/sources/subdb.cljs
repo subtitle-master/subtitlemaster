@@ -1,6 +1,6 @@
 (ns sm.sources.subdb
   (:require-macros [wilkerdev.util.macros :refer [<? go-catch]])
-  (:require [sm.protocols :refer [SearchProvider UploadProvider Subtitle Linkable Ranker]]
+  (:require [sm.protocols :refer [SearchProvider UploadProvider Subtitle Linkable]]
             [wilkerdev.util.nodejs :refer [lstat fopen fread http] :as node]
             [wilkerdev.util :as util]))
 
