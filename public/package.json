@@ -9,6 +9,8 @@
     "toolbar": true,
     "frame": true,
     "position": "mouse",
+    "width": 950,
+    "height": 750,
     "min_width": 622,
     "min_height": 200
   },
