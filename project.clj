@@ -16,11 +16,33 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [om "0.8.0-alpha1"]
                  [camel-snake-kebab "0.2.4"]
-                 [com.facebook/react "0.11.2"]]
+                 [com.facebook/react "0.11.2"]
+                 [commons-io "2.4"]
+                 [clj-http "1.0.0"]
+                 [org.clojure/data.json "0.2.5"]
+                 [me.raynes/fs "1.4.4"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
-            [lein-node-webkit-build "0.1.5"]
+            [lein-node-webkit-build "0.1.6"]
             [jarohen/simple-brepl "0.1.0"]]
+
+  :eval-in-leiningen true
+
+  :release-tasks [                                          ;["vcs" "assert-committed"]
+                  ;["change" "version" "leiningen.release/bump-version" "release"]
+                  ;["vcs" "commit"]
+                  ;["vcs" "tag"]
+                  ;["node-webkit-build"]
+                  ["app-release" "github-release"]
+                  ;["app-release" "update-package-json"]
+                  ;["app-release" "update-website"]
+                  ;["app-release" "share"]
+                  ;["change" "version" "leiningen.release/bump-version"]
+                  ;["vcs" "commit"]
+                  ;["vcs" "push"]
+
+
+                  ]
 
   :test-paths ["test/cljs"]
 

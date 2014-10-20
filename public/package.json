@@ -14,17 +14,18 @@
     "min_width": 622,
     "min_height": 200
   },
+  "manifestUrl": "https://raw.githubusercontent.com/subtitle-master/subtitlemaster/master/release-info/stable.json",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Wilker Lucio <wilkerlucio@gmail.com>",
   "license": "MIT",
-  "latestJson": "https://raw.githubusercontent.com/subtitle-master/subtitlemaster/latest/package.json",
   "dependencies": {
     "node-uuid": "~1.4.1",
     "request": "~2.44.0",
     "long": "~2.1.0",
     "xmlrpc": "~1.2.0",
-    "temp": "~0.8.1"
+    "temp": "~0.8.1",
+    "node-webkit-updater": "~0.2.3"
   }
 }
