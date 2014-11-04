@@ -36,7 +36,7 @@
                   :unchanged  (define-status "check-small" (fn [] ["Você já tem a legenda no seu idioma favorito"]))
                   :uploaded   (define-status "check"       (fn [] ["Suas legendas locais para esse vídeo foram compartilhadas!"]))
                   :share      (define-status "upload"      (fn [] ["Compartilhando as legendas desse vídeo..."]))
-                  :error      (define-status "error"       (fn [{err :error}] (.log js/console "Error" (clj->js err)) ["Error: " (.-message err)]))})
+                  :error      (define-status "error"       (fn [{err :error}] (.log js/console "Error" (.-stack err)) ["Error: " (.-message err)]))})
 
 (def trackable-states #{:init :downloaded :not-found :unchanged :error :uploaded})
 

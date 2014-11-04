@@ -132,6 +132,7 @@
 
   SearchProvider
   (search-subtitles [_ path languages]
+    (.log js/console "Searching to OpenSubtitles" path (clj->js languages))
     (go-catch
       (let [auth-token (<? (m-auth client))
             query (<? (build-query path languages))]

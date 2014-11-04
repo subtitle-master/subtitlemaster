@@ -98,6 +98,7 @@
     (go-catch
       (let [query-languages (mapv (fn [x] (.replace x "pb" "pt")) languages)
             hash (<? (hash-file path))
+            _ (.log js/console "Searching on SubDB" hash "-" path)
             results (<? (search-languages hash))]
         (sequence (process-search-result (set query-languages)
                                          (set languages)
@@ -107,6 +108,7 @@
   (upload-subtitle [_ path sub-path]
     (go-catch
       (let [hash (<? (hash-file path))
+            _ (.log js/console "Uploading on SubDB" hash "-" path)
             read-stream (node/create-read-stream sub-path)]
         (<? (upload hash read-stream))))))
 

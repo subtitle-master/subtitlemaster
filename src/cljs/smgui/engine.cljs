@@ -21,4 +21,5 @@
     (cache-exists? [_ hash]
       (local-storage-get (cache-key hash)))
     (cache-store! [_ hash]
+      (.log js/console "Storing cache hash" hash)
       (local-storage-set! (cache-key hash) true))))
