@@ -20,7 +20,8 @@
                  [commons-io "2.4"]
                  [clj-http "1.0.0"]
                  [org.clojure/data.json "0.2.5"]
-                 [me.raynes/fs "1.4.4"]]
+                 [me.raynes/fs "1.4.4"]
+                 [intervox/clj-progress "0.1.5"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
             [lein-node-webkit-build "0.1.6"]
@@ -56,9 +57,11 @@
 
   :cljsbuild  { :builds { :dev { :source-paths ["src/cljs"]
                                  :compiler { :output-to "public/js/smgui.js"
+                                             :output-dir "public/js/dev"
                                              :optimizations :whitespace
                                              :preamble ["react/react.min.js"]
-                                             :pretty-print true}}
+                                             :pretty-print true
+                                             :source-map "public/js/smgui.js.map"}}
                           :release { :source-paths ["src/cljs"]
                                      :compiler { :output-to "public/js/smgui.js"
                                                  :output-dir "public/js"

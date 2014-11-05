@@ -1,10 +1,17 @@
 (ns leiningen.app-release
+  (:import (java.io File))
   (:require [leiningen.core.main :as main]
             [leiningen.cljsbuild :refer [cljsbuild]]
             [releaser.core :as releaser]))
 
 (defn github-release [project]
-  (releaser/github-release project))
+  (let [build-info (-> (slurp "tmp/nw-build/build-info.edn")
+                       read-string)
+        auth nil
+        uploads (releaser/github-release auth build-info)
+        info-path "tmp/github-release-info.edn"]
+    (spit (File. info-path) (pr-str uploads))
+    (println "Release done, info saved at:" info-path)))
 
 (defn update-package-json [project]
   (println "project version" (:version project)))

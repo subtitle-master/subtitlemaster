@@ -4,71 +4,83 @@
             [clojure.string :as str]
             [clojure.java.io :as io]
             [me.raynes.fs :as fs]
-            [clojure.core.async :as async])
+            [clojure.core.async :as async]
+            [clj-progress.core :as progress])
   (:import (org.apache.commons.io.input CountingInputStream)))
+
+(defn upload-with-progress* [url path options]
+  (let [c (async/chan 1)
+        stream (CountingInputStream. (io/input-stream path))
+        size (fs/size path)]
+    (progress/init (str "Uploading " (fs/base-name path)) size)
+    (async/thread
+      (let [options (merge {:body stream :length size} options)
+            result (http/post url options)]
+        (async/>!! c result)
+        (async/close! c)))
+    (async/go
+      (loop []
+        (let [sent (.getByteCount stream)]
+          (if (< sent size)
+            (do
+              (if (> sent 0) (progress/tick-to sent))
+              (async/>! c {:total size :sent sent :progress true})
+              (async/<! (async/timeout 1000))
+              (recur))
+            (do
+              (progress/tick-to size)
+              (progress/done))))))
+    c))
+
+(defn upload-with-progress [url path options]
+  (let [ch (upload-with-progress* url path options)]
+    (loop []
+      (when-let [{:keys [progress] :as res} (async/<!! ch)]
+        (if progress
+          (recur)
+          res)))))
+
+(defn handle-gh-response [res] (update-in res [:body] #(json/read-str % :key-fn keyword)))
 
 (defn gh-post [{:keys [auth url params]}]
   (let [res (http/post (str "https://api.github.com/" url)
                        {:form-params  params
                         :basic-auth   auth
                         :content-type :json
+                        :insecure?    true
                         :headers      {"Accept" "application/vnd.github.v3+json"}})]
-    (update-in res [:body] #(json/read-str % :key-fn keyword))))
-
-(defn gh-upload [{:keys [url name path auth]}]
-  (let [c (async/chan 1)
-        url (clojure.string/replace url "{?name}" "")
-        stream (CountingInputStream. (io/input-stream path))
-        size (fs/size path)]
-    (async/thread
-      (let [result (http/post url
-                              {:basic-auth   auth
-                               :query-params {"name" name}
-                               :body         stream
-                               :headers      {"Accept"         "application/vnd.github.v3+json"
-                                              "Content-Type"   "application/zip"}
-                               :length       size
-                               :debug        true})]
-        (async/>!! c result)
-        (async/close! c)))
-    (async/go
-      (loop []
-        (let [sent (.getByteCount stream)]
-          (when (< sent size)
-            (async/>! c {:total size :sent sent :progress true})
-            (async/<! (async/timeout 1000))
-            (recur)))))
-    c))
+    (handle-gh-response res)))
 
 (defn gh-create-release [auth options]
+  (println "Creating release" (:name options))
   (gh-post {:auth   auth
             :url    "repos/subtitle-master/subtitlemaster/releases"
             :params options}))
 
-(defn github-release [project]
-  (let [auth nil
-        upload-url (-> (gh-create-release auth
-                                          {:tag_name "2.0.1"
-                                           :name     "Subtitle Master v2.0.1"
-                                           :draft    true})
-                       (get-in [:body :upload_url]))
-        releases (->> (slurp "tmp/nw-build/build-info.edn")
-                      read-string
-                      :builds
-                      (map (fn [[k v]] [k (:compressed-path v)])))]
-    (doseq [[os path] (take 1 releases)]
-      (let [ch (gh-upload {:url  upload-url
-                           :name (fs/base-name path)
-                           :path path
-                           :auth auth})]
-        (println "Uploading" os path)
-        #_ (loop []
-          (when-let [{:keys [total sent progress] :as res} (async/<!! ch)]
-            (if progress
-              (do
-                (println "Total " total)
-                (println "Loaded" sent)
-                (recur))
-              (do
-                (println "Done")
-                (clojure.pprint/pprint res)))))))))
+(defn gh-upload-release-with-progress [{:keys [auth release path]}]
+  (let [upload-url (-> (get-in release [:body :upload_url])
+                       (clojure.string/replace "{?name}" ""))
+        name (fs/base-name path)
+        options {:basic-auth   auth
+                 :query-params {"name" name}
+                 :insecure?    true
+                 :headers      {"Accept"       "application/vnd.github.v3+json"
+                                "Content-Type" "application/zip"}}]
+    (handle-gh-response (upload-with-progress upload-url path options))))
+
+(defn github-release [auth lein-build-info]
+  (let [version  (get-in lein-build-info [:package :version])
+        name     (get-in lein-build-info [:package :name])
+        releases (map (fn [[k v]] [k (:compressed-path v)])
+                      (:builds lein-build-info))
+        release  (gh-create-release auth
+                                   {:tag_name (str "v" version)
+                                    :name     (str name " v" version)
+                                    :draft    true})
+        uploads  (for [[os path] releases
+                       :let [upload (gh-upload-release-with-progress {:auth    auth
+                                                                      :release release
+                                                                      :path    path})]]
+                   [os upload])]
+    {:release release
+     :uploads (into {} uploads)}))
