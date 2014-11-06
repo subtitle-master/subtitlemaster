@@ -14,7 +14,11 @@
     (println "Release done, info saved at:" info-path)))
 
 (defn update-package-json [project]
-  (println "project version" (:version project)))
+  (let [build-info (slurp "tmp/nw-build/build-info.edn")
+        release-info (slurp "tmp/github-release-info.edn")
+        json-data (releaser/generate-latest-info build-info release-info)]
+    (spit "latest.json" (generate-string json-data {:pretty true}))
+    (println "project version" (:version project))))
 
 (defn release-app [project]
   (let [auth [(System/getenv "GH_UN") (System/getenv "GH_PW")]
@@ -23,10 +27,13 @@
         update-info (releaser/generate-latest-info build-info release-info)]
     ))
 
+(defn share [project]
+  (println "Sharing"))
+
 (defn- not-found [subtask]
   (partial #'main/task-not-found (str "app-release " subtask)))
 
-(defn ^{:subtasks [#'update-package-json #'github-release]} app-release [project subtask & args]
+(defn ^{:subtasks [#'update-package-json #'github-release #'share]} app-release [project subtask & args]
   (let [subtasks (:subtasks (meta #'app-release) {})
         [subtask-var] (filter #(= subtask (name (:name (meta %)))) subtasks)]
     (apply (or subtask-var (not-found subtask)) project args)))

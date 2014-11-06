@@ -110,5 +110,4 @@
               :manifestUrl "https://raw.githubusercontent.com/subtitle-master/subtitlemaster/master/latest.json"
               :packages    {:mac (get-in release-info [:uploads :osx :body :browser_download_url])
                             :win (get-in release-info [:uploads :win :body :browser_download_url])}}]
-    (spit "latest.json" (generate-string data {:pretty true}))
     data))
