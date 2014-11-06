@@ -7,8 +7,6 @@
 
   :min-lein-version "2.3.4"
 
-  ;; We need to add src/cljs too, because cljsbuild does not add its
-  ;; source-paths to the project source-paths
   :source-paths ["src/clj" "src/cljs"]
 
   :dependencies [[org.clojure/clojure "1.7.0-alpha2"]
@@ -20,8 +18,10 @@
                  [commons-io "2.4"]
                  [clj-http "1.0.0"]
                  [org.clojure/data.json "0.2.5"]
+                 [cheshire "5.3.1"]
                  [me.raynes/fs "1.4.4"]
-                 [intervox/clj-progress "0.1.5"]]
+                 [intervox/clj-progress "0.1.5"]
+                 [lein-node-webkit-build "0.1.6"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
             [lein-node-webkit-build "0.1.6"]
@@ -29,27 +29,24 @@
 
   :eval-in-leiningen true
 
-  :release-tasks [                                          ;["vcs" "assert-committed"]
+  :release-tasks [;["vcs" "assert-committed"]
                   ;["change" "version" "leiningen.release/bump-version" "release"]
                   ;["vcs" "commit"]
                   ;["vcs" "tag"]
-                  ;["node-webkit-build"]
                   ["app-release" "github-release"]
                   ;["app-release" "update-package-json"]
                   ;["app-release" "update-website"]
                   ;["app-release" "share"]
-                  ;["change" "version" "leiningen.release/bump-version"]
+                  ["change" "version" "leiningen.release/bump-version"]
                   ;["vcs" "commit"]
                   ;["vcs" "push"]
-
-
                   ]
 
-  :test-paths ["test/cljs"]
+  :test-paths ["test/cljs" "test/clj"]
 
   :node-webkit-build {:root                      "public"
                       :name                      "Subtitle Master"
-                      :platforms                 #{:osx :win}
+                      :platforms                 #{:win}
                       :osx                       {:icon "resources/subtitle_master.icns"}
                       :nw-version                "0.10.5"
                       :disable-developer-toolbar true
