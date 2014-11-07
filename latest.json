@@ -4,7 +4,7 @@
   "manifestUrl" : "https://raw.githubusercontent.com/subtitle-master/subtitlemaster/master/latest.json",
   "packages" : {
     "mac": {
-      "url": "https://github.com/subtitle-master/subtitlemaster/releases/download/untagged-f0ada68a23edc67227a0/Subtitle.Master-osx-v2.0.1-SNAPSHOT.zip"
+      "url": "https://github.com/subtitle-master/subtitlemaster/releases/download/2.0.0-beta1/subtitle-master-2.0.0-beta1-mac.zip"
     },
     "win": {
       "url": "https://github.com/subtitle-master/subtitlemaster/releases/download/untagged-f0ada68a23edc67227a0/Subtitle.Master-win-v2.0.1-SNAPSHOT.zip"
