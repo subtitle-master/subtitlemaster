@@ -3,7 +3,11 @@
   "version" : "2.0.2",
   "manifestUrl" : "https://raw.githubusercontent.com/subtitle-master/subtitlemaster/master/latest.json",
   "packages" : {
-    "mac" : "https://github.com/subtitle-master/subtitlemaster/releases/download/untagged-f0ada68a23edc67227a0/Subtitle.Master-osx-v2.0.1-SNAPSHOT.zip",
-    "win" : "https://github.com/subtitle-master/subtitlemaster/releases/download/untagged-f0ada68a23edc67227a0/Subtitle.Master-win-v2.0.1-SNAPSHOT.zip"
+    "mac": {
+      "url": "https://github.com/subtitle-master/subtitlemaster/releases/download/untagged-f0ada68a23edc67227a0/Subtitle.Master-osx-v2.0.1-SNAPSHOT.zip"
+    },
+    "win": {
+      "url": "https://github.com/subtitle-master/subtitlemaster/releases/download/untagged-f0ada68a23edc67227a0/Subtitle.Master-win-v2.0.1-SNAPSHOT.zip"
+    }
   }
 }
