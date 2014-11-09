@@ -3,7 +3,8 @@
   (:require [leiningen.core.main :as main]
             [leiningen.cljsbuild :refer [cljsbuild]]
             [leiningen.node-webkit-build :refer [node-webkit-build]]
-            [releaser.core :as releaser]))
+            [releaser.core :as releaser]
+            [cheshire.core :refer [generate-string]]))
 
 (defn github-release [project]
   (let [build-info (node-webkit-build project)
@@ -14,11 +15,11 @@
     (println "Release done, info saved at:" info-path)))
 
 (defn update-package-json [project]
-  (let [build-info (slurp "tmp/nw-build/build-info.edn")
-        release-info (slurp "tmp/github-release-info.edn")
+  (let [build-info (-> (slurp "tmp/nw-build/build-info.edn") read-string)
+        release-info (-> (slurp "tmp/github-release-info.edn") read-string)
         json-data (releaser/generate-latest-info build-info release-info)]
-    (spit "latest.json" (generate-string json-data {:pretty true}))
-    (println "project version" (:version project))))
+    (println "Saving latest.json")
+    (spit "latest.json" (generate-string json-data {:pretty true}))))
 
 (defn release-app [project]
   (let [auth [(System/getenv "GH_UN") (System/getenv "GH_PW")]

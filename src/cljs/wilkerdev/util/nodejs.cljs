@@ -35,7 +35,7 @@
 (defn node-callback [c]
   (fn [err res]
     (if-not err
-      (put! c (or res :done))
+      (if res (put! c res))
       (put! c (make-js-error err)))
     (close! c)))
 

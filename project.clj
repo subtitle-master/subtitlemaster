@@ -9,7 +9,7 @@
 
   :source-paths ["src/clj" "src/cljs"]
 
-  :dependencies [[org.clojure/clojure "1.7.0-alpha2"]
+  :dependencies [[org.clojure/clojure "1.7.0-alpha3"]
                  [org.clojure/clojurescript "0.0-2342"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [om "0.8.0-alpha1"]
@@ -34,7 +34,7 @@
                   ;["vcs" "commit"]
                   ;["vcs" "tag"]
                   ["app-release" "github-release"]
-                  ;["app-release" "update-package-json"]
+                  ["app-release" "update-package-json"]
                   ;["app-release" "update-website"]
                   ["app-release" "share"]
                   ;["change" "version" "leiningen.release/bump-version"]
@@ -46,7 +46,7 @@
 
   :node-webkit-build {:root                      "public"
                       :name                      "Subtitle Master"
-                      :platforms                 #{:win}
+                      :platforms                 #{:osx :win}
                       :osx                       {:icon "resources/subtitle_master.icns"}
                       :nw-version                "0.10.5"
                       :disable-developer-toolbar true
@@ -57,8 +57,7 @@
                                              :output-dir "public/js/dev"
                                              :optimizations :whitespace
                                              :preamble ["react/react.min.js"]
-                                             :pretty-print true
-                                             :source-map "public/js/smgui.js.map"}}
+                                             :pretty-print true}}
                           :release { :source-paths ["src/cljs"]
                                      :compiler { :output-to "public/js/smgui.js"
                                                  :output-dir "public/js"

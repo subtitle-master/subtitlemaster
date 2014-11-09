@@ -5,8 +5,7 @@
             [clojure.java.io :as io]
             [me.raynes.fs :as fs]
             [clojure.core.async :as async]
-            [clj-progress.core :as progress]
-            [cheshire.core :refer [generate-string]])
+            [clj-progress.core :as progress])
   (:import (org.apache.commons.io.input CountingInputStream)
            (java.io File)))
 
@@ -106,8 +105,8 @@
 
 (defn generate-latest-info [build-info release-info]
   (let [data {:name        (get-in build-info [:package :name])
-              :version     (str "v" (get-in build-info [:package :version]))
+              :version     (get-in build-info [:package :version])
               :manifestUrl "https://raw.githubusercontent.com/subtitle-master/subtitlemaster/master/latest.json"
-              :packages    {:mac (get-in release-info [:uploads :osx :body :browser_download_url])
-                            :win (get-in release-info [:uploads :win :body :browser_download_url])}}]
+              :packages    {:mac {:url (get-in release-info [:uploads :osx :body :browser_download_url])}
+                            :win {:url (get-in release-info [:uploads :win :body :browser_download_url])}}}]
     data))

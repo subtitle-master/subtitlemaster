@@ -9,6 +9,7 @@
             [smgui.gui :as gui]
             [smgui.track :as track]
             [smgui.core :refer [app-state flux-channel]]
+            [smgui.updater :refer [updater-main]]
             [cljs.core.async :refer [put! chan <! >! timeout close!]]
             [clojure.data :as data]
             [clojure.string :as string]
@@ -60,6 +61,7 @@
 (defn init []
   (ws-repl/connect "ws://localhost:9001")
   (enable-console-print!)
+  (updater-main)
   (gui/listen-open #(do (put! flux-channel {:cmd :add-search :path %})
                         (put! flux-channel {:cmd :change-page :page :search})))
   (om/root main-view app-state {:target (.-body js/document)})

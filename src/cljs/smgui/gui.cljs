@@ -29,4 +29,6 @@
 (defn show-file [path]
   (-> nwgui .-Shell (.showItemInFolder path)))
 
-(def app-args (-> nwgui .-App .-argv array-seq))
+(def app-args (array-seq (.. nwgui -App -argv)))
+
+(defn quit [] (.. nwgui -App quit))
