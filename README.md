@@ -3,6 +3,11 @@ Subtitle Master
 
 This contains the code for the Subtitle Master application UI.
 
+Downloading
+-----------
+
+If you just wanna use the new Subtitle Master go to the [releases](https://github.com/subtitle-master/subtitlemaster/releases) and download a build from there.
+
 Dependencies
 ------------
 
