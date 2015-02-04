@@ -291,8 +291,8 @@
 (defn memoize-async [f]
   (let [mem (atom {})]
     (fn [& args]
-      (let [v (get @mem args :undefined)]
-        (if (= v :undefined)
+      (let [v (get @mem args ::undefined)]
+        (if (= v ::undefined)
           (let [c (apply f args)]
             (swap! mem assoc args {:source c})
             (go
@@ -302,6 +302,17 @@
           (go
             (<! (:source v))
             (get-in @mem [args :value])))))))
+
+(defn memoize-timeout [f ms]
+  (let [memoized (memoize-async f)
+        cache (::cache (meta memoized))
+        comm (chan 1024)]
+    (dochan [clean-args (debounce comm ms)]
+      (swap! cache dissoc clean-args))
+    (fn [& args]
+      (let [result (apply memoized args)]
+        (put! comm args)
+        result))))
 
 (defn channel-pool
   ([n] (channel-pool n (chan 2048)))

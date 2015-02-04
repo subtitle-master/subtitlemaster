@@ -150,5 +150,7 @@
         (.log js/console "Upload response" (clj->js res))
         res))))
 
+(def AUTH-TIMEOUT (* 3 60 1000))
+
 (defn source []
-  (->OpenSubtitlesSource (client) (r/memoize-async auth)))
+  (->OpenSubtitlesSource (client) (r/memoize-timeout auth AUTH-TIMEOUT)))
