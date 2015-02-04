@@ -30,6 +30,11 @@
   (-> (nw-updater. manifest)
       (lift-instance :checkNewVersion :download :unpack :install)))
 
+(defn updater-unpack [updater filename manifest]
+  (let [c (chan)]
+    (.unpack updater filename (node/node-callback c) manifest)
+    c))
+
 (defn call-async [instance method & args]
   (let [c (chan)
         args (conj (vec args) (node/node-callback c))
@@ -56,7 +61,7 @@
               (let [_ (.log js/console "Found update, downloading")
                     filename (<? (.download updater))
                     _ (.log js/console "Downloaded, unpacking" filename)
-                    new-app-path (<? (.unpack updater filename))
+                    new-app-path (<? (updater-unpack updater filename manifest))
                     _ (.log js/console "Unpacked, running updater")]
                 (.runInstaller updater
                                new-app-path
