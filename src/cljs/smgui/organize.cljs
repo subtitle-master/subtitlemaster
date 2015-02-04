@@ -3,6 +3,7 @@
                    [cljs.core.async.macros :refer [go]])
   (:require [om.dom :as dom]
             [om.core :as om]
+            [sm.util :refer [episode-info]]
             [smgui.core :refer [flux-channel]]
             [smgui.gui :as gui]
             [cljs.core.async :refer [<! put! chan timeout]]
@@ -24,17 +25,6 @@
 (defn has-video-extension? [path] (node/match-extensions? path video-extensions))
 
 (defn sample? [path] (boolean (re-find #"sample" path)))
-
-(defn normalize [path]
-  (-> (node/basename-without-extension path)
-      (clojure.string/replace #"\." " ")))
-
-(defn episode-info [path]
-  (if-let [[_ name season episode] (re-find #"(?i)(.+)\sS(\d+)E(\d+)" (normalize path))]
-    {:path path
-     :name name
-     :season season
-     :episode episode}))
 
 (defn str-pre-case [s str]
   (or
