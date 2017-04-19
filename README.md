@@ -78,3 +78,11 @@ Building releases
 -----------------
 
 The process of building releases still in development, I'll add more info here once it's on track.
+
+Service Providers
+-----------------
+
+Subtitle Master is only possible thanks to some central servers that provides those subtitles, here are the list of currently used providers in Subtitle Master:
+
+- Subdb: http://thesubdb.com/
+- Open Subtitles: https://www.opensubtitles.org
