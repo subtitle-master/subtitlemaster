@@ -22,7 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "node-uuid": "~1.4.1",
-    "request": "~2.44.0",
+    "request": "~2.88.0",
     "long": "~2.1.0",
     "xmlrpc": "~1.2.0",
     "temp": "~0.8.1",
